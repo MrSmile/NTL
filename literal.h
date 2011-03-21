@@ -10,9 +10,9 @@
 template<typename C> class Character;
 template<typename C> class StringBase;
 template<typename C> class LiteralBase;
-template<typename C, class S1, class S2> class Concatenation;
+template<class S1, class S2, typename C> class Concatenation;
 
-template<typename C, class S> class StringLike
+template<class S, typename C> struct StringLike
 {
     // must be defined: 
     // bool S::valid() const;
@@ -20,7 +20,6 @@ template<typename C, class S> class StringLike
     // void S::fill(C *&buf) const;
     // void S::fill(C *&buf, size_t &max, size_t &start) const;
 
-public:
     bool valid() const
     {
         return static_cast<const S *>(this)->valid();
@@ -41,12 +40,12 @@ public:
         return static_cast<const S *>(this)->fill(buf, max, start);
     }
 
-    template<typename S1> Concatenation<C, const S &, const S1 &> operator + (const StringLike<C, S1> &str) const;
-    Concatenation<C, const S &, LiteralBase<C> > operator + (const C *str) const;
-    Concatenation<C, const S &, Character<C> > operator + (C ch) const;
+    template<typename S1> Concatenation<const S &, const S1 &, C> operator + (const StringLike<S1, C> &str) const;
+    Concatenation<const S &, LiteralBase<C>, C> operator + (const C *str) const;
+    Concatenation<const S &, Character<C>, C> operator + (C ch) const;
 };
 
-template<typename C, typename S1, typename S2> class Concatenation : public StringLike<C, Concatenation<C, S1, S2> >
+template<typename S1, typename S2, typename C> class Concatenation : public StringLike<Concatenation<S1, S2, C>, C>
 {
     S1 op1_;
     S2 op2_;
@@ -77,38 +76,38 @@ public:
     }
 };
 
-template<typename C, typename S> template<typename S1> inline Concatenation<C, const S &, const S1 &>
-    StringLike<C, S>::operator + (const StringLike<C, S1> &str) const
+template<typename S, typename C> template<typename S1> inline Concatenation<const S &, const S1 &, C>
+    StringLike<S, C>::operator + (const StringLike<S1, C> &str) const
 {
-    return Concatenation<C, const S &, const S1 &>(*static_cast<const S *>(this), static_cast<const S1 &>(str));
+    return Concatenation<const S &, const S1 &, C>(*static_cast<const S *>(this), static_cast<const S1 &>(str));
 }
 
-template<typename C, typename S> inline Concatenation<C, const S &, LiteralBase<C> >
-    StringLike<C, S>::operator + (const C *str) const
+template<typename S, typename C> inline Concatenation<const S &, LiteralBase<C>, C>
+    StringLike<S, C>::operator + (const C *str) const
 {
-    return Concatenation<C, const S &, LiteralBase<C> >(*static_cast<const S *>(this), str);
+    return Concatenation<const S &, LiteralBase<C>, C>(*static_cast<const S *>(this), str);
 }
 
-template<typename C, typename S> inline Concatenation<C, LiteralBase<C>, const S &>
-    operator + (const C *str1, const StringLike<C, S> &str2)
+template<typename S, typename C> inline Concatenation<LiteralBase<C>, const S &, C>
+    operator + (const C *str1, const StringLike<S, C> &str2)
 {
-    return Concatenation<C, LiteralBase<C>, const S &>(str1, static_cast<const S &>(str2));
+    return Concatenation<LiteralBase<C>, const S &, C>(str1, static_cast<const S &>(str2));
 }
 
-template<typename C, typename S> inline Concatenation<C, const S &, Character<C> >
-    StringLike<C, S>::operator + (C ch) const
+template<typename S, typename C> inline Concatenation<const S &, Character<C>, C>
+    StringLike<S, C>::operator + (C ch) const
 {
-    return Concatenation<C, const S &, Character<C> >(*static_cast<const S *>(this), ch);
+    return Concatenation<const S &, Character<C>, C>(*static_cast<const S *>(this), ch);
 }
 
-template<typename C, typename S> inline Concatenation<C, Character<C>, const S &>
-    operator + (C ch1, const StringLike<C, S> &str2)
+template<typename S, typename C> inline Concatenation<Character<C>, const S &, C>
+    operator + (C ch1, const StringLike<S, C> &str2)
 {
-    return Concatenation<C, Character<C>, const S &>(ch1, static_cast<const S &>(str2));
+    return Concatenation<Character<C>, const S &, C>(ch1, static_cast<const S &>(str2));
 }
 
 
-template<typename C> class Character : public StringLike<C, Character<C> >
+template<typename C> class Character : public StringLike<Character<C>, C>
 {
     C ch_;
 
@@ -153,7 +152,7 @@ public:
 };
 
 
-template<typename C> class LiteralBase : public StringLike<C, LiteralBase<C> >, public Comparable<LiteralBase<C> >
+template<typename C> class LiteralBase : public StringLike<LiteralBase<C>, C>, public Comparable<LiteralBase<C> >
 {
     const C *ptr_;
     size_t len_;
@@ -295,7 +294,7 @@ template<> inline int LiteralBase<char>::cmp(const LiteralBase &str) const
 typedef LiteralBase<char> Literal;
 
 
-template<typename C> class StringBase : public StringLike<C, StringBase<C> >, public Comparable<StringBase<C> >
+template<typename C> class StringBase : public StringLike<StringBase<C>, C>, public Comparable<StringBase<C> >
 {
     size_t *volatile ptr_;  // refcount, length, data
 
@@ -373,7 +372,7 @@ public:
         ptr_ = copy_(str, LiteralBase<C>(str).length());
     }
 
-    template<class S> StringBase(const StringLike<C, S> &str)
+    template<class S> StringBase(const StringLike<S, C> &str)
     {
         if(!str.valid())
         {
@@ -413,7 +412,7 @@ public:
         return *this = LiteralBase<C>(str);
     }
 
-    template<class S> StringBase &operator = (const StringLike<C, S> &str)
+    template<class S> StringBase &operator = (const StringLike<S, C> &str)
     {
         if(!str.valid())
         {

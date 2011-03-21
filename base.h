@@ -107,12 +107,11 @@ public:
 };
 
 
-template<typename T> class Comparable
+template<typename T> struct Comparable
 {
     // must be defined: 
     // int T::cmp(const T &obj) const;
 
-public:
     int cmp(const Comparable<T> &obj) const
     {
         return static_cast<const T *>(this)->cmp(static_cast<const T &>(obj));
