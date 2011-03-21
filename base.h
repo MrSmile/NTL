@@ -29,14 +29,14 @@ inline void assert(bool test)
 
 inline void assert(bool test)
 {
-	if(!test)__asm int 3;
+    if(!test)__asm int 3;
 }
 
 #elif defined __GNUC__
 
 inline void assert(bool test)
 {
-	if(!test)asm("int $3");
+    if(!test)asm("int $3");
 }
 
 #else
@@ -45,7 +45,7 @@ inline void assert(bool test)
 
 inline void assert(bool test)
 {
-	return std::assert(test);
+    return std::assert(test);
 }
 
 #endif
@@ -59,36 +59,92 @@ inline void assert(bool test)
 
 inline size_t sync_inc(volatile size_t &n)
 {
-	return size_t(_InterlockedExchangeAdd(reinterpret_cast<volatile long *>(&n), 1));
+    return size_t(_InterlockedExchangeAdd(reinterpret_cast<volatile long *>(&n), 1));
 }
 
 inline size_t sync_dec(volatile size_t &n)
 {
-	return size_t(_InterlockedExchangeAdd(reinterpret_cast<volatile long *>(&n), -1));
+    return size_t(_InterlockedExchangeAdd(reinterpret_cast<volatile long *>(&n), -1));
 }
 
 #elif defined __GNUC__
 
 inline size_t sync_inc(volatile size_t &n)
 {
-	return __sync_fetch_and_add(&n, size_t(1));
+    return __sync_fetch_and_add(&n, size_t(1));
 }
 
 inline size_t sync_dec(volatile size_t &n)
 {
-	return __sync_fetch_and_sub(&n, size_t(1));
+    return __sync_fetch_and_sub(&n, size_t(1));
 }
 
 #else  // Not thread safe!!!
 
 inline size_t sync_inc(volatile size_t &n)
 {
-	n++;
+    n++;
 }
 
 inline size_t sync_dec(volatile size_t &n)
 {
-	n--;
+    n--;
 }
 
 #endif
+
+
+
+class Heavy  // Non copyable
+{
+    Heavy(Heavy &);
+    Heavy &operator = (Heavy &);
+
+public:
+    Heavy()
+    {
+    }
+};
+
+
+template<typename T> class Comparable
+{
+    // must be defined: 
+    // int T::cmp(const T &obj) const;
+
+public:
+    int cmp(const Comparable<T> &obj) const
+    {
+        return static_cast<const T *>(this)->cmp(static_cast<const T &>(obj));
+    }
+
+    friend bool operator == (const T &obj1, const T &obj2)
+    {
+        return obj1.cmp(obj2) == 0;
+    }
+
+    friend bool operator != (const T &obj1, const T &obj2)
+    {
+        return obj1.cmp(obj2) != 0;
+    }
+
+    friend bool operator > (const T &obj1, const T &obj2)
+    {
+        return obj1.cmp(obj2) > 0;
+    }
+
+    friend bool operator < (const T &obj1, const T &obj2)
+    {
+        return obj1.cmp(obj2) < 0;
+    }
+
+    friend bool operator >= (const T &obj1, const T &obj2)
+    {
+        return obj1.cmp(obj2) >= 0;
+    }
+
+    friend bool operator <= (const T &obj1, const T &obj2)
+    {
+        return obj1.cmp(obj2) <= 0;
+    }
+};
