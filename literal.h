@@ -14,7 +14,7 @@ template<class S1, class S2, typename C> class Concatenation;
 
 template<class S, typename C> struct StringLike
 {
-    // must be defined: 
+    // must be defined:
     // bool S::valid() const;
     // size_t S::length() const;
     // void S::fill(C *&buf) const;
@@ -270,7 +270,7 @@ public:
         {
             memcpy(buf, ptr_ + start, len * sizeof(C));  max -= len;
         }
-        else 
+        else
         {
             memcpy(buf, ptr_ + start, max * sizeof(C));  max = 0;
         }
@@ -503,7 +503,7 @@ public:
         {
             memcpy(buf, buffer() + start, len * sizeof(C));  max -= len;
         }
-        else 
+        else
         {
             memcpy(buf, buffer() + start, max * sizeof(C));  max = 0;
         }

@@ -19,7 +19,7 @@ using std::memcpy;
 using std::memset;
 
 
-#if !defined _DEBUG && !defined DEBUG
+#if defined NDEBUG || !defined _DEBUG && !defined DEBUG
 
 inline void assert(bool test)
 {
@@ -95,6 +95,11 @@ inline size_t sync_dec(volatile size_t &n)
 
 
 
+class Invalid  // Non instantable
+{
+    Invalid();
+};
+
 class Heavy  // Non copyable
 {
     Heavy(Heavy &);
@@ -109,7 +114,7 @@ public:
 
 template<typename T, typename T1 = T> struct Comparable
 {
-    // must be defined: 
+    // must be defined:
     // int T::cmp(const T1 &obj) const;
 
     int cmp(const T1 &obj) const
