@@ -11,5 +11,12 @@ int main()
     str += '\n';
 
     std::cout << str.data();
+
+    String str1 = "333";
+    if(str1 > "444")std::cout << ">>>\n";
+    else std::cout << "<<<\n";
+    swap(str1, str);
+
+    std::cout << str.data();
     return 0;
 }

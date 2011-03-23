@@ -1,3 +1,3 @@
 
 all: base.h literal.h test.cpp
-	g++ -pedantic -fno-exceptions -O2 test.cpp -o test
+	g++ -pedantic -fno-exceptions -g test.cpp -o test

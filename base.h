@@ -107,14 +107,82 @@ public:
 };
 
 
-template<typename T> struct Comparable
+template<typename T, typename T1 = T> struct Comparable
 {
     // must be defined: 
-    // int T::cmp(const T &obj) const;
+    // int T::cmp(const T1 &obj) const;
 
-    int cmp(const Comparable<T> &obj) const
+    int cmp(const T1 &obj) const
     {
-        return static_cast<const T *>(this)->cmp(static_cast<const T &>(obj));
+        return static_cast<const T *>(this)->cmp(obj);
+    }
+
+    friend bool operator == (const T &obj1, const T1 &obj2)
+    {
+        return obj1.cmp(obj2) == 0;
+    }
+
+    friend bool operator != (const T &obj1, const T1 &obj2)
+    {
+        return obj1.cmp(obj2) != 0;
+    }
+
+    friend bool operator >= (const T &obj1, const T1 &obj2)
+    {
+        return obj1.cmp(obj2) >= 0;
+    }
+
+    friend bool operator <= (const T &obj1, const T1 &obj2)
+    {
+        return obj1.cmp(obj2) <= 0;
+    }
+
+    friend bool operator > (const T &obj1, const T1 &obj2)
+    {
+        return obj1.cmp(obj2) > 0;
+    }
+
+    friend bool operator < (const T &obj1, const T1 &obj2)
+    {
+        return obj1.cmp(obj2) < 0;
+    }
+
+    friend bool operator == (const T1 &obj1, const T &obj2)
+    {
+        return 0 == obj2.cmp(obj1);
+    }
+
+    friend bool operator != (const T1 &obj1, const T &obj2)
+    {
+        return 0 != obj2.cmp(obj1);
+    }
+
+    friend bool operator >= (const T1 &obj1, const T &obj2)
+    {
+        return 0 >= obj2.cmp(obj1);
+    }
+
+    friend bool operator <= (const T1 &obj1, const T &obj2)
+    {
+        return 0 <= obj2.cmp(obj1);
+    }
+
+    friend bool operator > (const T1 &obj1, const T &obj2)
+    {
+        return 0 > obj2.cmp(obj1);
+    }
+
+    friend bool operator < (const T1 &obj1, const T &obj2)
+    {
+        return 0 < obj2.cmp(obj1);
+    }
+};
+
+template<typename T> struct Comparable<T, T>
+{
+    int cmp(const T &obj) const
+    {
+        return static_cast<const T *>(this)->cmp(obj);
     }
 
     friend bool operator == (const T &obj1, const T &obj2)

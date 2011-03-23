@@ -294,7 +294,7 @@ template<> inline int LiteralBase<char>::cmp(const LiteralBase &str) const
 typedef LiteralBase<char> Literal;
 
 
-template<typename C> class StringBase : public StringLike<StringBase<C>, C>, public Comparable<StringBase<C> >
+template<typename C> class StringBase : public StringLike<StringBase<C>, C>, public Comparable<StringBase<C>, LiteralBase<C> >
 {
     size_t *volatile ptr_;  // refcount, length, data
 
@@ -392,9 +392,9 @@ public:
         free_();  ptr_ = 0;
     }
 
-    void swap(StringBase &str)
+    friend void swap(StringBase<C> &str1, StringBase<C> &str2)
     {
-        size_t *tmp = ptr_;  ptr_ = str.ptr_;  str.ptr_ = tmp;
+        size_t *tmp = str1.ptr_;  str1.ptr_ = str2.ptr_;  str2.ptr_ = tmp;
     }
 
     StringBase &operator = (const StringBase &str)
