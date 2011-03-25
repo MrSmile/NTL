@@ -302,7 +302,7 @@ template<typename T, typename A = EmptyAllocator<T> > class Tree : private A, pu
 
     TreeNode<T> *copy_node_(TreeNode<T> *parent, TreeNode<T> *old)
     {
-        TreeNode<T> *node = create(*static_cast<T *>(old));
+        TreeNode<T> *node = create(*static_cast<T *>(old));  if(!node)return 0;
         node->parent_ = parent;  node->left_ = node->right_ = 0;
         node->type_ = old->type_;  return node;
     }
@@ -443,23 +443,24 @@ public:
     template<typename A1> bool copy(const Tree<T, A1> &tree)
     {
         assert(root_ == 0);  if(!tree.root_)return true;
+        TreeNode<T> *node = copy_node_(reinterpret_cast<TreeNode<T> *>(&root_), tree.root_);
+        if(!node)return false;  root_ = node;
 
-        TreeNode<T> *node = root_ =
-            copy_node_(reinterpret_cast<TreeNode<T> *>(&root_), tree.root_);
         for(TreeNode<T> *old = tree.root_;;)
             if(!node->left_ && old->left_)
             {
-                if(!(node = node->left_ = copy_node_(node, old = old->left_)))return false;
+                if(!(node = copy_node_(node, old = old->left_)))break;  node = node->left_;
             }
             else if(!node->right_ && old->right_)
             {
-                if(!(node = node->right_ = copy_node_(node, old = old->right_)))return false;
+                if(!(node = copy_node_(node, old = old->right_)))break;  node = node->right_;
             }
             else
             {
                 if(old->type_ == TreeNode<T>::t_root)return true;
                 old = old->parent_;  node = node->parent_;
             }
+        clear();  return false;
     }
 
     friend void swap(Tree<T, A> &tree1, Tree<T, A> &tree2)
