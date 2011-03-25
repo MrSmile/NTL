@@ -13,7 +13,11 @@ template<typename T> class Pointer : public Heavy
 
 
 public:
-    Pointer(T *ptr = 0) : target_(ptr)
+    Pointer() : target_(0)
+    {
+    }
+
+    explicit Pointer(T *ptr) : target_(ptr)
     {
     }
 
@@ -87,7 +91,11 @@ template<typename T> class Array : public Heavy
 
 
 public:
-    Array(T *ptr = 0) : target_(ptr)
+    Array() : target_(0)
+    {
+    }
+
+    explicit Array(T *ptr) : target_(ptr)
     {
     }
 
