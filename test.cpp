@@ -5,6 +5,16 @@
 using namespace std;
 
 
+void test_string()
+{
+    String str = "~~~";
+    str = "Zzz: " + str + '\n';
+    str += Literal("Next line") + '\n';
+    str += "0 " + Literal("1 ") + "2 " + "3 " + "3 " + "5 " + "6 " + "7 " + "8 " + "9 " + "10 " + '\n';
+    str += '\n';  cout << str.data();
+}
+
+
 struct Node : public TreeNode<Node>, public SimpleKey<int>
 {
     static int count;
@@ -27,15 +37,8 @@ struct Node : public TreeNode<Node>, public SimpleKey<int>
 
 int Node::count = 0;
 
-
-int main()
+void test_tree()
 {
-    String str = "~~~";
-    str = "Zzz: " + str + '\n';
-    str += Literal("Next line") + '\n';
-    str += "0 " + Literal("1 ") + "2 " + "3 " + "3 " + "5 " + "6 " + "7 " + "8 " + "9 " + "10 " + '\n';
-    str += '\n';  cout << str.data();
-
     OwningTree<Node> tree;
     for(int i = 0; i < 10; i++)tree.get(i);
     {
@@ -44,5 +47,12 @@ int main()
         delete copy.find(1005)->next();
         swap(tree, copy);
     }
+}
+
+
+int main()
+{
+    test_string();
+    test_tree();
     return 0;
 }
