@@ -285,9 +285,8 @@ public:
 };
 
 
-template<typename T, typename A = EmptyAllocator<T> > class Tree : public Heavy
+template<typename T, typename A = EmptyAllocator<T> > class Tree : private A, public Heavy
 {
-    A alloc_;
     TreeNode<T> *root_;
 
 
@@ -303,7 +302,7 @@ template<typename T, typename A = EmptyAllocator<T> > class Tree : public Heavy
 
     TreeNode<T> *copy_node_(TreeNode<T> *parent, TreeNode<T> *old)
     {
-        TreeNode<T> *node = alloc_.create(*static_cast<T *>(old));
+        TreeNode<T> *node = create(*static_cast<T *>(old));
         node->parent_ = parent;  node->left_ = node->right_ = 0;
         node->type_ = old->type_;  return node;
     }
@@ -412,7 +411,7 @@ public:
     {
     }
 
-    explicit Tree(const A &alloc) : alloc_(alloc), root_(0)
+    explicit Tree(const A &alloc) : A(alloc), root_(0)
     {
     }
 
@@ -456,9 +455,9 @@ public:
                 else if(ptr->type_ == TreeNode<T>::t_right)node->right_ = 0;
                 else
                 {
-                    ptr->parent_ = 0;  alloc_.remove(static_cast<T *>(ptr));  root_ = 0;  return;
+                    ptr->parent_ = 0;  remove(static_cast<T *>(ptr));  root_ = 0;  return;
                 }
-                ptr->parent_ = 0;  alloc_.remove(static_cast<T *>(ptr));
+                ptr->parent_ = 0;  remove(static_cast<T *>(ptr));
             }
         }
     }
@@ -544,7 +543,7 @@ public:
     {
         PlaceBase_ place = find_place_(key);
         if(!place.dir)return const_cast<T *>(static_cast<const T *>(place.node));
-        T *node = alloc_.create(key);  if(node)insert(node, place);  return node;
+        T *node = create(key);  if(node)insert(node, place);  return node;
     }
 
     friend void swap(Tree<T, A> &tree1, Tree<T, A> &tree2)
