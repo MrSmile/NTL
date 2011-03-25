@@ -449,11 +449,11 @@ public:
         for(TreeNode<T> *old = tree.root_;;)
             if(!node->left_ && old->left_)
             {
-                if(!(node = copy_node_(node, old = old->left_)))break;  node = node->left_;
+                if(!(node = node->left_ = copy_node_(node, old = old->left_)))break;
             }
             else if(!node->right_ && old->right_)
             {
-                if(!(node = copy_node_(node, old = old->right_)))break;  node = node->right_;
+                if(!(node = node->right_ = copy_node_(node, old = old->right_)))break;
             }
             else
             {

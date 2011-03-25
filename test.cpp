@@ -36,6 +36,12 @@ struct Node : public TreeNode<Node>, public SimpleKey<int>
     {
         cout << "Deleted " << id() << ", left " << --count << endl;
     }
+
+    void *operator new(size_t size, const std::nothrow_t &) throw()
+    {
+        const int max = 100;
+        if(count >= max)return 0;  return new_nt char[size];
+    }
 };
 
 int Node::count = 0;
@@ -48,8 +54,8 @@ void test_tree()
     for(int i = 0; i < 10; i++)tree.get(i);
     {
         OwningTree<Node> copy;
-        copy.copy(tree);
-        delete copy.find(1005)->next();
+        if(!copy.copy(tree))cout << "Copy failed!\n";
+        else delete copy.find(1005)->next();
         swap(tree, copy);
     }
 }
