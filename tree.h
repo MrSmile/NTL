@@ -401,12 +401,6 @@ public:
     };
 
 
-    void check_()  // DEBUG
-    {
-        if(!root_)return;  assert(root_->type_ == TreeNode<T>::t_root);  root_->check_();
-    }
-
-
     Tree() : root_(0)
     {
     }
@@ -421,26 +415,10 @@ public:
     }
 
 
-    const T *first() const
+    void check_()  // DEBUG
     {
-        return root_ ? static_cast<const T *>(root_->first_()) : 0;
+        if(!root_)return;  assert(root_->type_ == TreeNode<T>::t_root);  root_->check_();
     }
-
-    T *first()
-    {
-        return root_ ? const_cast<T *>(static_cast<const T *>(root_->first_())) : 0;
-    }
-
-    const T *last() const
-    {
-        return root_ ? static_cast<const T *>(root_->last_()) : 0;
-    }
-
-    T *last()
-    {
-        return root_ ? const_cast<T *>(static_cast<const T *>(root_->last_())) : 0;
-    }
-
 
     void clear()
     {
@@ -482,6 +460,27 @@ public:
                 if(old->type_ == TreeNode<T>::t_root)return true;
                 old = old->parent_;  node = node->parent_;
             }
+    }
+
+
+    const T *first() const
+    {
+        return root_ ? static_cast<const T *>(root_->first_()) : 0;
+    }
+
+    T *first()
+    {
+        return root_ ? const_cast<T *>(static_cast<const T *>(root_->first_())) : 0;
+    }
+
+    const T *last() const
+    {
+        return root_ ? static_cast<const T *>(root_->last_()) : 0;
+    }
+
+    T *last()
+    {
+        return root_ ? const_cast<T *>(static_cast<const T *>(root_->last_())) : 0;
     }
 
 
