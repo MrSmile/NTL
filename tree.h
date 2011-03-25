@@ -462,6 +462,11 @@ public:
             }
     }
 
+    friend void swap(Tree<T, A> &tree1, Tree<T, A> &tree2)
+    {
+        tree1.swap_(tree2);
+    }
+
 
     const T *first() const
     {
@@ -526,6 +531,29 @@ public:
         return const_cast<T *>(const_cast<const Tree<T, A> *>(this)->find_next(key));
     }
 
+
+    template<typename K> T *take(const K &key)
+    {
+        PlaceBase_ place = find_place_(key);  if(!place.dir)return 0;
+        TreeNode<T> *node = const_cast<TreeNode<T> *>(place.node);
+        node->remove();  return static_cast<T *>(node);
+    }
+
+    template<typename K> T *take_prev(const K &key)
+    {
+        PlaceBase_ place = find_place_(key);  if(!place.node)return 0;
+        TreeNode<T> *node = const_cast<TreeNode<T> *>(place.dir >= 0 ? place.node : place.node->prev());
+        if(node)node->remove();  return static_cast<T *>(node);
+    }
+
+    template<typename K> T *take_next(const K &key)
+    {
+        PlaceBase_ place = find_place_(key);  if(!place.node)return 0;
+        TreeNode<T> *node = const_cast<TreeNode<T> *>(place.dir <= 0 ? place.node : place.node->next());
+        if(node)node->remove();  return static_cast<T *>(node);
+    }
+
+
     void insert(T *node, const PlaceBase_ &place)
     {
         assert(place.dir != 0);
@@ -545,11 +573,6 @@ public:
         T *node = create(key);  if(node)insert(node, place);  return node;
     }
 
-    friend void swap(Tree<T, A> &tree1, Tree<T, A> &tree2)
-    {
-        tree1.swap_(tree2);
-    }
-
 
     bool operator ! () const
     {
@@ -566,6 +589,7 @@ public:
         return root_ != 0;
     }
 };
+
 
 template<typename T> class OwningTree : public Tree<T, DefaultAllocator<T> >  // template typedef workaround
 {
