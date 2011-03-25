@@ -1,4 +1,4 @@
-// pointer.h -- smart pointers
+// pointer.h -- exclusive owning smart pointers
 //
 
 #pragma once
