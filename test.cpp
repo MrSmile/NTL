@@ -70,6 +70,10 @@ void test_tree()
         else delete copy.find(1005)->next();
         swap(tree, copy);
     }
+    for(Node1 *node = tree.first(); node; node = node->next())
+        cout << node->id() << ' ';  cout << endl;
+    for(Node1 *node = tree.last(); node; node = node->prev())
+        cout << node->id() << ' ';  cout << endl;
 }
 
 
@@ -126,7 +130,8 @@ void test_list()
         for(int i = 0; i < 10; i++)list.prepend(new_nt Node2(i));
         list.first()->next()->next()->insert_next(new_nt Node2(777));
         delete list.first()->next()->take_next();
-        OwningStack<Node2> move, copy;  copy.copy(list);
+        OwningStack<Node2> move, copy;
+        if(!copy.copy(list))cout << "Copy failed!\n";
         for(;;)
         {
             Node2 *node = list.take_first();  if(!node)break;
@@ -142,14 +147,16 @@ void test_list()
         for(int i = 0; i < 10; i++)list.append(new_nt Node3(i));
         list.insert(new_nt Node3(777), list.first()->next()->next());
         delete list.take(list.first());  list.prepend(new_nt Node3(666));
-        OwningSimpleList<Node3> move, copy;  copy.copy(list);
+        OwningSimpleList<Node3> move, copy;
+        if(!copy.copy(list))cout << "Copy failed!\n";
         for(;;)
         {
             Node3 *node = list.take_first();  if(!node)break;
             cout << node->id() << ' ';  move.prepend(node);
         }
         cout << endl;  swap(list, move);
-        list.prepend_copy(copy);  list.append(copy);
+        if(!list.prepend_copy(copy))cout << "Merge copy failed!\n";
+        list.append(copy);
         for(Node3 *node = list.first(); node; node = node->next())
             cout << node->id() << ' ';  cout << endl;
     }
@@ -160,7 +167,8 @@ void test_list()
         list.first()->next()->next()->insert_next(new_nt Node4(777));
         list.first()->next()->next()->insert_prev(new_nt Node4(666));
         delete list.first()->next();
-        OwningList<Node4> move, copy;  copy.copy(list);
+        OwningList<Node4> move, copy;
+        if(!copy.copy(list))cout << "Copy failed!\n";
         for(;;)
         {
             Node4 *node = list.take_first();  if(!node)break;

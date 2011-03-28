@@ -152,11 +152,11 @@ template<typename T> class TreeNode : public Heavy
         assert(parent_ && !node->parent_);  node->parent_ = this;  node->left_ = node->right_ = 0;
         if(after)
         {
-            assert(right_ == 0);  right_ = node;  node->type_ = t_right;
+            assert(!right_);  right_ = node;  node->type_ = t_right;
         }
         else
         {
-            assert(left_ == 0);  left_ = node;  node->type_ = t_left;
+            assert(!left_);  left_ = node;  node->type_ = t_left;
         }
         do node = node->make_red_();
         while(node);
@@ -230,7 +230,7 @@ public:
 
     const T *prev() const
     {
-        assert(parent_ != 0);  const TreeNode<T> *node = this;
+        assert(parent_);  const TreeNode<T> *node = this;
         if(!left_)
         {
             while(node->type_ > t_right)node = node->parent_;
@@ -247,7 +247,7 @@ public:
 
     const T *next() const
     {
-        assert(parent_ != 0);  const TreeNode<T> *node = this;
+        assert(parent_);  const TreeNode<T> *node = this;
         if(!right_)
         {
             while(node->type_ == t_right)node = node->parent_;
@@ -265,7 +265,7 @@ public:
 
     void remove()
     {
-        assert(parent_ != 0);
+        assert(parent_);
         while(left_)swap_(const_cast<TreeNode<T> *>(left_->last_()));
 
         TreeNode<T> *node = this;
@@ -295,7 +295,7 @@ template<typename T, typename A = EmptyAllocator<T> > class Tree : private A, pu
 
     void set_root_(TreeNode<T> *node)
     {
-        assert(root_ == 0);
+        assert(!root_);
         root_ = node;  node->parent_ = reinterpret_cast<TreeNode<T> *>(&root_);
         node->left_ = node->right_ = 0;  node->type_ = TreeNode<T>::t_root;
     }
@@ -442,7 +442,7 @@ public:
 
     template<typename A1> bool copy(const Tree<T, A1> &tree)
     {
-        assert(root_ == 0);  if(!tree.root_)return true;
+        assert(!root_);  if(!tree.root_)return true;
         TreeNode<T> *node = copy_node_(reinterpret_cast<TreeNode<T> *>(&root_), tree.root_);
         if(!node)return false;  root_ = node;
 
@@ -557,7 +557,7 @@ public:
 
     void insert(T *node, const PlaceBase_ &place)
     {
-        assert(place.dir != 0);
+        assert(place.dir);
         if(place.node)const_cast<TreeNode<T> *>(place.node)->insert_(node, place.dir > 0);
         else set_root_(node);
     }
