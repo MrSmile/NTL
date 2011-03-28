@@ -11,6 +11,23 @@
 
 
 
+#if defined _DEBUG || defined DEBUG
+
+#define NTL_DEBUG
+
+struct invalid_ptr_t
+{
+    template<typename T> operator T * () const
+    {
+        return reinterpret_cast<T *>(0x12345678);
+    }
+};
+
+static invalid_ptr_t invalid_ptr;
+
+#endif
+
+
 #define new_nt new(std::nothrow)
 
 
@@ -19,7 +36,7 @@ using std::memcpy;
 using std::memset;
 
 
-#if defined NDEBUG || !defined _DEBUG && !defined DEBUG
+#if !defined NTL_DEBUG
 
 inline void assert(bool test)
 {

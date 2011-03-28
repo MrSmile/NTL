@@ -2,6 +2,7 @@
 #include "literal.h"
 #include "pointer.h"
 #include "tree.h"
+#include "list.h"
 
 using namespace std;
 
@@ -18,7 +19,7 @@ void test_string()
 }
 
 
-struct Node : public TreeNode<Node>, public SimpleKey<int>
+struct Node : public SimpleKey<int>
 {
     static int count;
 
@@ -46,14 +47,25 @@ struct Node : public TreeNode<Node>, public SimpleKey<int>
 
 int Node::count = 0;
 
+struct Node1 : public TreeNode<Node1>, public Node
+{
+    Node1(int n) : Node(n)
+    {
+    }
+
+    Node1(const Node &node) : Node(node)
+    {
+    }
+};
+
 void test_tree()
 {
     cout << "\n=== Testing Trees ===\n";
 
-    OwningTree<Node> tree;
+    OwningTree<Node1> tree;
     for(int i = 0; i < 10; i++)tree.get(i);
     {
-        OwningTree<Node> copy;
+        OwningTree<Node1> copy;
         if(!copy.copy(tree))cout << "Copy failed!\n";
         else delete copy.find(1005)->next();
         swap(tree, copy);
@@ -73,10 +85,99 @@ Node *test_pointer()
 }
 
 
+struct Node2 : public StackNode<Node2>, public Node
+{
+    Node2(int n) : Node(n)
+    {
+    }
+
+    Node2(const Node &node) : Node(node)
+    {
+    }
+};
+
+struct Node3 : public SimpleListNode<Node3>, public Node
+{
+    Node3(int n) : Node(n)
+    {
+    }
+
+    Node3(const Node &node) : Node(node)
+    {
+    }
+};
+
+struct Node4 : public ListNode<Node4>, public Node
+{
+    Node4(int n) : Node(n)
+    {
+    }
+
+    Node4(const Node &node) : Node(node)
+    {
+    }
+};
+
+void test_list()
+{
+    cout << "\n=== Testing Lists, Stage 1 ===\n";
+    {
+        OwningStack<Node2> list;
+        for(int i = 0; i < 10; i++)list.prepend(new_nt Node2(i));
+        list.first()->next()->next()->insert_next(new_nt Node2(777));
+        delete list.first()->next()->take_next();
+        OwningStack<Node2> move, copy;  copy.copy(list);
+        for(;;)
+        {
+            Node2 *node = list.take_first();  if(!node)break;
+            cout << node->id() << ' ';  move.prepend(node);
+        }
+        cout << endl;  swap(list, move);
+        for(Node2 *node = list.first(); node; node = node->next())
+            cout << node->id() << ' ';  cout << endl;
+    }
+    cout << "\n=== Testing Lists, Stage 2 ===\n";
+    {
+        OwningSimpleList<Node3> list;
+        for(int i = 0; i < 10; i++)list.append(new_nt Node3(i));
+        list.insert(new_nt Node3(777), list.first()->next()->next());
+        delete list.take(list.first());  list.prepend(new_nt Node3(666));
+        OwningSimpleList<Node3> move, copy;  copy.copy(list);
+        for(;;)
+        {
+            Node3 *node = list.take_first();  if(!node)break;
+            cout << node->id() << ' ';  move.prepend(node);
+        }
+        cout << endl;  swap(list, move);
+        list.prepend_copy(copy);  list.append(copy);
+        for(Node3 *node = list.first(); node; node = node->next())
+            cout << node->id() << ' ';  cout << endl;
+    }
+    cout << "\n=== Testing Lists, Stage 3 ===\n";
+    {
+        OwningList<Node4> list;
+        for(int i = 0; i < 10; i++)list.prepend(new_nt Node4(i));
+        list.first()->next()->next()->insert_next(new_nt Node4(777));
+        list.first()->next()->next()->insert_prev(new_nt Node4(666));
+        delete list.first()->next();
+        OwningList<Node4> move, copy;  copy.copy(list);
+        for(;;)
+        {
+            Node4 *node = list.take_first();  if(!node)break;
+            cout << node->id() << ' ';  move.prepend(node);
+        }
+        cout << endl;  swap(list, move);
+        for(Node4 *node = list.first(); node; node = node->next())
+            cout << node->id() << ' ';  cout << endl;
+    }
+}
+
+
 int main()
 {
     test_string();
     test_tree();
     delete test_pointer();
+    test_list();
     return 0;
 }
