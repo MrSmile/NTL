@@ -14,6 +14,7 @@
 #if defined _DEBUG || defined DEBUG
 
 #define NTL_DEBUG
+#undef NDEBUG
 
 struct invalid_ptr_t
 {
@@ -24,6 +25,10 @@ struct invalid_ptr_t
 };
 
 static invalid_ptr_t invalid_ptr;
+
+#else
+
+#define NDEBUG
 
 #endif
 
@@ -36,34 +41,46 @@ using std::memcpy;
 using std::memset;
 
 
-#if !defined NTL_DEBUG
+#ifdef NTL_DEBUG
 
-inline void assert(bool test)
+#include <iostream>
+
+#if defined _MSC_VER
+
+inline void ntl_assert_(bool test, const char *msg)
 {
-}
-
-#elif defined _MSC_VER
-
-inline void assert(bool test)
-{
-    if(!test)__asm int 3;
+    if(test)return;  std::cout << msg;  __asm int 3;
 }
 
 #elif defined __GNUC__
 
-inline void assert(bool test)
+inline void ntl_assert_(bool test, const char *msg)
 {
-    if(!test)asm("int $3");
+    if(test)return;  std::cout << msg;  asm("int $3");
 }
 
 #else
 
-#include <cassert>
+#include <cstdlib>
 
-inline void assert(bool test)
+inline void ntl_assert_(bool test, const char *msg)
 {
-    return std::assert(test);
+    if(test)return;  std::cout << msg;  abort();
 }
+
+#endif
+
+#define NTL_STRING(str) #str
+#define NTL_ASSERT(expr, file, line) ntl_assert_(expr, "Assert failed: " #expr "; file " file "; line " NTL_STRING(line) ".\n")
+#define assert(expr) NTL_ASSERT(expr, __FILE__, __LINE__)
+
+#else
+
+inline void ntl_assert_()
+{
+}
+
+#define assert(expr) ntl_assert_()
 
 #endif
 
