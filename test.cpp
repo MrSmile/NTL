@@ -181,8 +181,13 @@ void test_list()
 }
 
 
+void time_tree();
+
 int main()
 {
+    /*time_tree();
+    return 0;*/
+
     test_string();
     test_tree();
     delete test_pointer();

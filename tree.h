@@ -47,7 +47,7 @@ template<typename T> class TreeNode : public Heavy
     void rotate_left_()
     {
         TreeNode<T> *next = right_;  next->set_parent_(parent_, type_);
-        if(right_ = next->left_)
+        if((right_ = next->left_))
         {
             right_->parent_ = this;  right_->type_ = t_right;
         }
@@ -57,7 +57,7 @@ template<typename T> class TreeNode : public Heavy
     void rotate_right_()
     {
         TreeNode<T> *next = left_;  next->set_parent_(parent_, type_);
-        if(left_ = next->right_)
+        if((left_ = next->right_))
         {
             left_->parent_ = this;  left_->type_ = t_left;
         }
@@ -127,17 +127,10 @@ template<typename T> class TreeNode : public Heavy
         TreeNode<T> *l = left_, *r = right_, *p = parent_;  NodeType_ t = type_;
         if(node->parent_ == this)
         {
+            assert(node->type_ == t_left || node->type_ == t_left_red);
             parent_ = node;  type_ = node->type_;  node->set_parent_(p, t);
-            if(type_ == t_right)
-            {
-                if(left_ = node->left_)left_->parent_ = this;  if(node->left_ = l)l->parent_ = node;
-                if(right_ = node->right_)right_->parent_ = this;  node->right_ = this;
-            }
-            else
-            {
-                if(left_ = node->left_)left_->parent_ = this;  node->left_ = this;
-                if(right_ = node->right_)right_->parent_ = this;  if(node->right_ = r)r->parent_ = node;
-            }
+            if(left_ = node->left_)left_->parent_ = this;  node->left_ = this;
+            if(right_ = node->right_)right_->parent_ = this;  if(node->right_ = r)r->parent_ = node;
         }
         else
         {
@@ -189,7 +182,7 @@ template<typename T> class TreeNode : public Heavy
         {
         }
 
-        void set(const TreeNode<T> *ptr, int d)
+        Place_(const TreeNode<T> *ptr, int d)
         {
             if(d > 0)
                 if(ptr->right_)
@@ -312,7 +305,8 @@ template<typename T, typename A = EmptyAllocator<T> > class Tree : private A, pu
         PlaceBase_ res;
         for(TreeNode<T> *node = root_; node;)
         {
-            int dir = -static_cast<T *>(node)->cmp(key);  res.set(node, dir);
+            int dir = -static_cast<T *>(node)->cmp(key);
+            res.node = node;  res.dir = dir;
             if(dir > 0)node = node->right_;
             else if(dir < 0)node = node->left_;
             else return res;
@@ -340,7 +334,7 @@ public:
         {
         }
 
-        Place(T *node, bool after) : PlaceBase_(node, after)
+        Place(T *node, bool after) : PlaceBase_(node, after ? 1 : -1)
         {
         }
 
@@ -375,7 +369,7 @@ public:
         {
         }
 
-        ConstPlace(const T *node, bool after) : PlaceBase_(node, after)
+        ConstPlace(const T *node, bool after) : PlaceBase_(node, after ? 1 : -1)
         {
         }
 
