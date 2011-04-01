@@ -41,34 +41,40 @@ using std::memcpy;
 using std::memset;
 
 
-#ifdef NTL_DEBUG
+#ifdef _MSC_VER
 
-#include <iostream>
-
-#if defined _MSC_VER
-
-inline void ntl_assert_(bool test, const char *msg)
+inline void debug_break()
 {
-    if(test)return;  std::cout << msg;  __asm int 3;
+    __asm int 3;
 }
 
 #elif defined __GNUC__
 
-inline void ntl_assert_(bool test, const char *msg)
+inline void debug_break()
 {
-    if(test)return;  std::cout << msg;  asm("int $3");
+    asm("int $3");
 }
 
 #else
 
 #include <cstdlib>
 
-inline void ntl_assert_(bool test, const char *msg)
+inline void debug_break()
 {
-    if(test)return;  std::cout << msg;  abort();
+    abort();
 }
 
 #endif
+
+
+#ifdef NTL_DEBUG
+
+#include <iostream>
+
+inline void ntl_assert_(bool test, const char *msg)
+{
+    if(test)return;  std::cout << msg;  debug_break();
+}
 
 #define NTL_STRING(str) #str
 #define NTL_ASSERT(expr, file, line) ntl_assert_(expr, "Assert failed: " #expr "; file " file "; line " NTL_STRING(line) ".\n")
