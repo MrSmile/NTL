@@ -23,7 +23,9 @@ void time_tree()
 {
     const int N = 1000000;
 
-    time_t tm0 = time(0);
+    cout << "Tree benchmark: " << flush;
+
+    clock_t tm0 = clock();
 
     srand(12345);
     OwningTree<TestNode> tree1;
@@ -33,7 +35,7 @@ void time_tree()
         delete tree1.find_next(rand());
     }
 
-    time_t tm1 = time(0);
+    clock_t tm1 = clock();
 
     srand(12345);
     map<int, Data> tree2;
@@ -44,12 +46,12 @@ void time_tree()
         if(ptr != tree2.end())tree2.erase(ptr);
     }
 
-    time_t tm2 = time(0);
+    clock_t tm2 = clock();
 
     tree1.check_();  map<int, Data>::iterator ptr = tree2.begin();
     for(TestNode *node = tree1.first(); node; node = node->next(), ++ptr)
         if(ptr == tree2.end() || ptr->first != node->id())debug_break();
     if(ptr != tree2.end())debug_break();
 
-    cout << "Tree benchmark: OwningTree<TestNode> = " << tm1 - tm0 << "; map<int, Data> = " << tm2 - tm1 << ";\n";
+    cout << "OwningTree<TestNode> = " << tm1 - tm0 << "; map<int, Data> = " << tm2 - tm1 << ";\n";
 }

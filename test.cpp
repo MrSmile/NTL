@@ -183,14 +183,20 @@ void test_list()
 
 void time_tree();
 
-int main()
+int main(int n, char **arg)
 {
-    /*time_tree();
-    return 0;*/
+    if(n == 1)
+    {
+        test_string();
+        test_tree();
+        delete test_pointer();
+        test_list();
+        return 0;
+    }
 
-    test_string();
-    test_tree();
-    delete test_pointer();
-    test_list();
+    for(int i = 1; i < n; i++)
+        if(arg[i] == Literal("tree"))time_tree();
+
     return 0;
+
 }
