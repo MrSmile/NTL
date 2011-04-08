@@ -10,11 +10,20 @@
 #include <cstddef>
 
 
+namespace NTL_Internal_ {
+
+
+#define new_nt new(std::nothrow)
+
+
+using std::swap;
+using std::memcpy;
+using std::memset;
+
 
 #if defined _DEBUG || defined DEBUG
 
 #define NTL_DEBUG
-#undef NDEBUG
 
 struct invalid_ptr_t
 {
@@ -26,19 +35,7 @@ struct invalid_ptr_t
 
 static invalid_ptr_t invalid_ptr;
 
-#else
-
-#define NDEBUG
-
 #endif
-
-
-#define new_nt new(std::nothrow)
-
-
-using std::swap;
-using std::memcpy;
-using std::memset;
 
 
 #ifdef _MSC_VER
@@ -71,22 +68,23 @@ inline void debug_break()
 
 #include <iostream>
 
-inline void ntl_assert_(bool test, const char *msg)
+inline void ntl_assert(bool test, const char *msg)
 {
     if(test)return;  std::cout << msg;  debug_break();
 }
 
 #define NTL_STRING(str) #str
-#define NTL_ASSERT(expr, file, line) ntl_assert_(expr, "Assert failed: " #expr "; file " file "; line " NTL_STRING(line) ".\n")
+#define NTL_ASSERT(expr, file, line) \
+    NTL_Internal_::ntl_assert(expr, "Assert failed: " #expr "; file " file "; line " NTL_STRING(line) ".\n")
 #define assert(expr) NTL_ASSERT(expr, __FILE__, __LINE__)
 
 #else
 
-inline void ntl_assert_()
+inline void ntl_assert()
 {
 }
 
-#define assert(expr) ntl_assert_()
+#define assert(expr) NTL_Internal_::ntl_assert()
 
 #endif
 
@@ -260,3 +258,27 @@ template<typename T> struct Comparable<T, T>
         return obj1.cmp(obj2) <= 0;
     }
 };
+
+
+}  // end namespace NTL_Internal_
+
+
+namespace NTL
+{
+    using std::swap;
+    using std::memcpy;
+    using std::memset;
+
+#ifdef NTL_DEBUG
+    using NTL_Internal_::invalid_ptr;
+#endif
+    using NTL_Internal_::debug_break;
+
+    using NTL_Internal_::sync_inc;
+    using NTL_Internal_::sync_dec;
+
+    using NTL_Internal_::Invalid;
+    using NTL_Internal_::Heavy;
+
+    using NTL_Internal_::Comparable;
+}

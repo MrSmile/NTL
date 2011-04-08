@@ -6,6 +6,8 @@
 #include "base.h"
 
 
+namespace NTL_Internal_ {
+
 
 template<typename C> class Character;
 template<typename C> class StringBase;
@@ -512,3 +514,16 @@ public:
 };
 
 typedef StringBase<char> String;
+
+
+}  // end namespace NTL_Internal_
+
+
+namespace NTL
+{
+    using NTL_Internal_::StringLike;
+    using NTL_Internal_::LiteralBase;
+    using NTL_Internal_::Literal;
+    using NTL_Internal_::StringBase;
+    using NTL_Internal_::String;
+}

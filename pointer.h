@@ -6,6 +6,8 @@
 #include "base.h"
 
 
+namespace NTL_Internal_ {
+
 
 template<typename T> class Pointer : public Heavy
 {
@@ -54,7 +56,7 @@ public:
 
     friend void swap(Pointer<T> &ptr1, Pointer<T> &ptr2)
     {
-        ::swap(ptr1.target_, ptr2.target_);
+        NTL::swap(ptr1.target_, ptr2.target_);
     }
 
 
@@ -136,7 +138,7 @@ public:
 
     friend void swap(Array<T> &ptr1, Array<T> &ptr2)
     {
-        ::swap(ptr1.target_, ptr2.target_);
+        NTL::swap(ptr1.target_, ptr2.target_);
     }
 
 
@@ -157,3 +159,11 @@ public:
 };
 
 
+}  // end namespace NTL_Internal_
+
+
+namespace NTL
+{
+    using NTL_Internal_::Pointer;
+    using NTL_Internal_::Array;
+}

@@ -6,6 +6,8 @@
 #include "base.h"
 
 
+namespace NTL_Internal_ {
+
 
 template<typename A, typename T> struct Allocator
 {
@@ -151,3 +153,14 @@ template<typename T> struct DefaultAllocator : public Allocator<DefaultAllocator
         delete ptr;
     }
 };
+
+
+}  // end namespace NTL_Internal_
+
+
+namespace NTL
+{
+    using NTL_Internal_::Allocator;
+    using NTL_Internal_::EmptyAllocator;
+    using NTL_Internal_::DefaultAllocator;
+}

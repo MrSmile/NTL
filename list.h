@@ -6,6 +6,8 @@
 #include "allocator.h"
 
 
+namespace NTL_Internal_ {
+
 
 template<typename T> class StackNode : public Heavy
 {
@@ -107,7 +109,7 @@ public:
 
     friend void swap(Stack<T, A> &stack1, Stack<T, A> &stack2)
     {
-        ::swap(stack1.first_, stack2.first_);
+        NTL::swap(stack1.first_, stack2.first_);
     }
 
 
@@ -275,7 +277,7 @@ public:
 
     friend void swap(SimpleList<T, A> &list1, SimpleList<T, A> &list2)
     {
-        ::swap(list1.first_, list2.first_);  ::swap(list1.last_, list2.last_);
+        NTL::swap(list1.first_, list2.first_);  NTL::swap(list1.last_, list2.last_);
         if(!list1.first_)list1.last_ = &list1.first_;
         if(!list2.first_)list2.last_ = &list2.first_;
     }
@@ -446,7 +448,7 @@ template<typename T, typename A = EmptyAllocator<T> > class List : private A, pu
 
     void swap_(List<T, A> &list)
     {
-        ::swap(list.first_, first_);
+        NTL::swap(list.first_, first_);
         if(list.first_)list.first_->prev_ = &list.first_;
         if(first_)first_->prev_ = &first_;
     }
@@ -546,3 +548,22 @@ template<typename T> class OwningList : public List<T, DefaultAllocator<T> >  //
         swap(static_cast<List<T, DefaultAllocator<T> > &>(list1), static_cast<List<T, DefaultAllocator<T> > &>(list2));
     }
 };
+
+
+}  // end namespace NTL_Internal_
+
+
+namespace NTL
+{
+    using NTL_Internal_::StackNode;
+    using NTL_Internal_::Stack;
+    using NTL_Internal_::OwningStack;
+
+    using NTL_Internal_::SimpleListNode;
+    using NTL_Internal_::SimpleList;
+    using NTL_Internal_::OwningSimpleList;
+
+    using NTL_Internal_::ListNode;
+    using NTL_Internal_::List;
+    using NTL_Internal_::OwningList;
+}

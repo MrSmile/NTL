@@ -5,6 +5,7 @@
 #include "list.h"
 
 using namespace std;
+using namespace NTL;
 
 
 void test_string()

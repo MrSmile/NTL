@@ -6,9 +6,12 @@
 #include "allocator.h"
 
 
+namespace NTL_Internal_ {
 
-class TreeNodeBase_ : public Heavy
+
+class TreeNodeBase : public Heavy
 {
+    template<typename T1> friend class TreeNode;
     template<typename T1, typename A> friend class Tree;
 
 
@@ -18,27 +21,27 @@ class TreeNodeBase_ : public Heavy
     };
 
 
-    TreeNodeBase_ *parent_, *left_, *right_;
+    TreeNodeBase *parent_, *left_, *right_;
     NodeType_ type_;
 
 
-    const TreeNodeBase_ *first_() const
+    const TreeNodeBase *first_() const
     {
-        for(const TreeNodeBase_ *node = this;; node = node->left_)if(!node->left_)return node;
+        for(const TreeNodeBase *node = this;; node = node->left_)if(!node->left_)return node;
     }
 
-    const TreeNodeBase_ *last_() const
+    const TreeNodeBase *last_() const
     {
-        for(const TreeNodeBase_ *node = this;; node = node->right_)if(!node->right_)return node;
+        for(const TreeNodeBase *node = this;; node = node->right_)if(!node->right_)return node;
     }
 
 
-    void set_parent_(TreeNodeBase_ *ptr, NodeType_ tp)
+    void set_parent_(TreeNodeBase *ptr, NodeType_ tp)
     {
         parent_ = ptr;  type_ = tp;
         switch(tp)
         {
-        case t_root:  *reinterpret_cast<TreeNodeBase_ **>(ptr) = this;  return;
+        case t_root:  *reinterpret_cast<TreeNodeBase **>(ptr) = this;  return;
         case t_right:  ptr->right_ = this;  return;
         default:  ptr->left_ = this;  return;
         }
@@ -46,7 +49,7 @@ class TreeNodeBase_ : public Heavy
 
     void rotate_left_()
     {
-        TreeNodeBase_ *next = right_;  next->set_parent_(parent_, type_);
+        TreeNodeBase *next = right_;  next->set_parent_(parent_, type_);
         if((right_ = next->left_))
         {
             right_->parent_ = this;  right_->type_ = t_right;
@@ -56,7 +59,7 @@ class TreeNodeBase_ : public Heavy
 
     void rotate_right_()
     {
-        TreeNodeBase_ *next = left_;  next->set_parent_(parent_, type_);
+        TreeNodeBase *next = left_;  next->set_parent_(parent_, type_);
         if((left_ = next->right_))
         {
             left_->parent_ = this;  left_->type_ = t_left;
@@ -64,7 +67,7 @@ class TreeNodeBase_ : public Heavy
         next->right_ = this;  parent_ = next;  type_ = t_right;
     }
 
-    TreeNodeBase_ *make_red_()
+    TreeNodeBase *make_red_()
     {
         if(type_ == t_left)
             if(parent_->type_ == t_left_red)
@@ -88,7 +91,7 @@ class TreeNodeBase_ : public Heavy
         return 0;
     }
 
-    TreeNodeBase_ *remove_red_()
+    TreeNodeBase *remove_red_()
     {
         if(type_ == t_left_red)type_ = t_left;
         else if(type_ == t_left)
@@ -122,9 +125,9 @@ class TreeNodeBase_ : public Heavy
         return 0;
     }
 
-    void swap_(TreeNodeBase_ *node)
+    void swap_(TreeNodeBase *node)
     {
-        TreeNodeBase_ *l = left_, *r = right_, *p = parent_;  NodeType_ t = type_;
+        TreeNodeBase *l = left_, *r = right_, *p = parent_;  NodeType_ t = type_;
         if(node->parent_ == this)
         {
             assert(node->type_ == t_left || node->type_ == t_left_red);
@@ -140,7 +143,7 @@ class TreeNodeBase_ : public Heavy
         }
     }
 
-    void insert_(TreeNodeBase_ *node, bool after)
+    void insert_(TreeNodeBase *node, bool after)
     {
         assert(parent_ && !node->parent_);  node->parent_ = this;  node->left_ = node->right_ = 0;
         if(after)
@@ -169,20 +172,20 @@ class TreeNodeBase_ : public Heavy
             assert(right_->parent_ == this && right_->type_ == t_right && left_);
             right_->check_();
         }
-        assert(type_ != t_root || *reinterpret_cast<TreeNodeBase_ **>(parent_) == this);
+        assert(type_ != t_root || *reinterpret_cast<TreeNodeBase **>(parent_) == this);
     }
 
 
     struct Place_
     {
-        const TreeNodeBase_ *node;
+        const TreeNodeBase *node;
         int dir;
 
         Place_() : node(0), dir(-1)
         {
         }
 
-        Place_(const TreeNodeBase_ *ptr, int d)
+        Place_(const TreeNodeBase *ptr, int d)
         {
             if(d > 0)
                 if(ptr->right_)
@@ -210,10 +213,9 @@ class TreeNodeBase_ : public Heavy
     };
 
 
-protected:
-    const TreeNodeBase_ *prev_() const
+    const TreeNodeBase *prev_() const
     {
-        assert(parent_);  const TreeNodeBase_ *node = this;
+        assert(parent_);  const TreeNodeBase *node = this;
         if(!left_)
         {
             while(node->type_ > t_right)node = node->parent_;
@@ -223,9 +225,9 @@ protected:
             if(!node->right_)return node;
     }
 
-    const TreeNodeBase_ *next_() const
+    const TreeNodeBase *next_() const
     {
-        assert(parent_);  const TreeNodeBase_ *node = this;
+        assert(parent_);  const TreeNodeBase *node = this;
         if(!right_)
         {
             while(node->type_ == t_right)node = node->parent_;
@@ -237,11 +239,11 @@ protected:
 
 
 public:
-    TreeNodeBase_() : parent_(0)
+    TreeNodeBase() : parent_(0)
     {
     }
 
-    ~TreeNodeBase_()
+    ~TreeNodeBase()
     {
         if(parent_)remove();
     }
@@ -249,15 +251,15 @@ public:
     void remove()
     {
         assert(parent_);
-        while(left_)swap_(const_cast<TreeNodeBase_ *>(left_->last_()));
+        while(left_)swap_(const_cast<TreeNodeBase *>(left_->last_()));
 
-        TreeNodeBase_ *node = this;
+        TreeNodeBase *node = this;
         do node = node->remove_red_();
         while(node);
 
         if(type_ > t_right)parent_->left_ = 0;
         else if(type_ == t_right)parent_->right_ = 0;
-        else *reinterpret_cast<TreeNodeBase_ **>(parent_) = 0;
+        else *reinterpret_cast<TreeNodeBase **>(parent_) = 0;
         parent_ = 0;
     }
 
@@ -268,7 +270,7 @@ public:
 };
 
 
-template<typename T> class TreeNode : public TreeNodeBase_
+template<typename T> class TreeNode : public TreeNodeBase
 {
 public:
     const T *prev() const
@@ -295,30 +297,30 @@ public:
 
 template<typename T, typename A = EmptyAllocator<T> > class Tree : private A, public Heavy
 {
-    TreeNodeBase_ *root_;
+    TreeNodeBase *root_;
 
 
-    typedef TreeNodeBase_::Place_ PlaceBase_;
+    typedef TreeNodeBase::Place_ PlaceBase_;
 
 
-    static const T *const_cast_(const TreeNodeBase_ *node)
+    static const T *const_cast_(const TreeNodeBase *node)
     {
         return static_cast<const T *>(static_cast<const TreeNode<T> *>(node));
     }
 
-    static T *cast_(const TreeNodeBase_ *node)
+    static T *cast_(const TreeNodeBase *node)
     {
         return const_cast<T *>(static_cast<const T *>(static_cast<const TreeNode<T> *>(node)));
     }
 
-    void set_root_(TreeNodeBase_ *node)
+    void set_root_(TreeNodeBase *node)
     {
         assert(!root_);
-        root_ = node;  node->parent_ = reinterpret_cast<TreeNodeBase_ *>(&root_);
-        node->left_ = node->right_ = 0;  node->type_ = TreeNodeBase_::t_root;
+        root_ = node;  node->parent_ = reinterpret_cast<TreeNodeBase *>(&root_);
+        node->left_ = node->right_ = 0;  node->type_ = TreeNodeBase::t_root;
     }
 
-    TreeNodeBase_ *copy_node_(TreeNodeBase_ *parent, const TreeNodeBase_ *old)
+    TreeNodeBase *copy_node_(TreeNodeBase *parent, const TreeNodeBase *old)
     {
         TreeNode<T> *node = create(*const_cast_(old));  if(!node)return 0;
         node->parent_ = parent;  node->left_ = node->right_ = 0;
@@ -328,7 +330,7 @@ template<typename T, typename A = EmptyAllocator<T> > class Tree : private A, pu
     template<typename K> PlaceBase_ find_place_(const K &key) const
     {
         PlaceBase_ res;
-        for(TreeNodeBase_ *node = root_; node;)
+        for(TreeNodeBase *node = root_; node;)
         {
             int dir = -const_cast_(node)->cmp(key);
             res.node = node;  res.dir = dir;
@@ -341,9 +343,9 @@ template<typename T, typename A = EmptyAllocator<T> > class Tree : private A, pu
 
     void swap_(Tree<T, A> &tree)
     {
-        if(root_)root_->parent_ = reinterpret_cast<TreeNodeBase_ *>(&tree.root_);
-        if(tree.root_)tree.root_->parent_ = reinterpret_cast<TreeNodeBase_ *>(&root_);
-        ::swap(root_, tree.root_);
+        if(root_)root_->parent_ = reinterpret_cast<TreeNodeBase *>(&tree.root_);
+        if(tree.root_)tree.root_->parent_ = reinterpret_cast<TreeNodeBase *>(&root_);
+        NTL::swap(root_, tree.root_);
     }
 
 
@@ -450,20 +452,20 @@ public:
 
     void check_()  // DEBUG
     {
-        if(!root_)return;  assert(root_->type_ == TreeNodeBase_::t_root);  root_->check_();
+        if(!root_)return;  assert(root_->type_ == TreeNodeBase::t_root);  root_->check_();
     }
 
     void clear()
     {
-        if(root_)for(TreeNodeBase_ *node = root_;;)
+        if(root_)for(TreeNodeBase *node = root_;;)
         {
             if(node->left_)node = node->left_;
             else if(node->right_)node = node->right_;
             else
             {
-                TreeNodeBase_ *ptr = node;  node = node->parent_;
-                if(ptr->type_ > TreeNodeBase_::t_right)node->left_ = 0;
-                else if(ptr->type_ == TreeNodeBase_::t_right)node->right_ = 0;
+                TreeNodeBase *ptr = node;  node = node->parent_;
+                if(ptr->type_ > TreeNodeBase::t_right)node->left_ = 0;
+                else if(ptr->type_ == TreeNodeBase::t_right)node->right_ = 0;
                 else
                 {
                     ptr->parent_ = 0;  remove(cast_(ptr));  root_ = 0;  return;
@@ -476,10 +478,10 @@ public:
     template<typename A1> bool copy(const Tree<T, A1> &tree)
     {
         assert(!root_);  if(!tree.root_)return true;
-        TreeNodeBase_ *node = copy_node_(reinterpret_cast<TreeNodeBase_ *>(&root_), tree.root_);
+        TreeNodeBase *node = copy_node_(reinterpret_cast<TreeNodeBase *>(&root_), tree.root_);
         if(!node)return false;  root_ = node;
 
-        for(const TreeNodeBase_ *old = tree.root_;;)
+        for(const TreeNodeBase *old = tree.root_;;)
             if(!node->left_ && old->left_)
             {
                 if(!(node = node->left_ = copy_node_(node, old = old->left_)))break;
@@ -490,7 +492,7 @@ public:
             }
             else
             {
-                if(old->type_ == TreeNodeBase_::t_root)return true;
+                if(old->type_ == TreeNodeBase::t_root)return true;
                 old = old->parent_;  node = node->parent_;
             }
         clear();  return false;
@@ -568,7 +570,7 @@ public:
     template<typename K> T *take(const K &key)
     {
         PlaceBase_ place = find_place_(key);  if(!place.dir)return 0;
-        TreeNodeBase_ *node = const_cast<TreeNodeBase_ *>(place.node);
+        TreeNodeBase *node = const_cast<TreeNodeBase *>(place.node);
         node->remove();  return cast_(node);
     }
 
@@ -576,7 +578,7 @@ public:
     void insert(TreeNode<T> *node, const PlaceBase_ &place)
     {
         assert(place.dir);
-        if(place.node)const_cast<TreeNodeBase_ *>(place.node)->insert_(node, place.dir > 0);
+        if(place.node)const_cast<TreeNodeBase *>(place.node)->insert_(node, place.dir > 0);
         else set_root_(node);
     }
 
@@ -657,3 +659,16 @@ public:
         return id_;
     }
 };
+
+
+}  // end namespace NTL_Internal_
+
+
+namespace NTL
+{
+    using NTL_Internal_::TreeNode;
+    using NTL_Internal_::Tree;
+    using NTL_Internal_::OwningTree;
+
+    using NTL_Internal_::SimpleKey;
+}

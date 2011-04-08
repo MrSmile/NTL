@@ -3,6 +3,7 @@
 #include "tree.h"
 
 using namespace std;
+using namespace NTL;
 
 
 struct Data
