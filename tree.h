@@ -158,21 +158,24 @@ class TreeNodeBase : public Heavy
         while(node);
     }
 
-    void check_()  // DEBUG
+    size_t check_()  // DEBUG
     {
+        size_t lev = 0;
         assert(type_ != t_left_red || parent_->type_ != t_left_red);
         if(left_)
         {
             assert(left_->parent_ == this && left_->type_ > t_right);
-            assert(right_ || left_->type_ != t_left && !left_->left_ && !left_->right_);
-            left_->check_();
+            lev = left_->check_();
+            if(right_)
+            {
+                assert(right_->parent_ == this && right_->type_ == t_right && left_);
+                assert(lev == right_->check_());
+            }
+            else assert(left_->type_ == t_left_red && !left_->left_ && !left_->right_);
         }
-        if(right_)
-        {
-            assert(right_->parent_ == this && right_->type_ == t_right && left_);
-            right_->check_();
-        }
+        else assert(!right_);
         assert(type_ != t_root || *reinterpret_cast<TreeNodeBase **>(parent_) == this);
+        return type_ == t_left_red ? lev : lev + 1;
     }
 
 
@@ -450,9 +453,9 @@ public:
     }
 
 
-    void check_()  // DEBUG
+    size_t check_()  // DEBUG
     {
-        if(!root_)return;  assert(root_->type_ == TreeNodeBase::t_root);  root_->check_();
+        if(!root_)return 0;  assert(root_->type_ == TreeNodeBase::t_root);  return root_->check_();
     }
 
     void clear()
