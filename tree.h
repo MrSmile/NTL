@@ -370,12 +370,19 @@ public:
 
         T *node() const
         {
-            return cast_(PlaceBase_::node);
+            return PlaceBase_::dir ? 0 : cast_(PlaceBase_::node);
         }
 
-        int direction() const
+        T *before() const
         {
-            return PlaceBase_::dir;
+            if(!PlaceBase_::node)return 0;
+            return cast_(PlaceBase_::dir >= 0 ? PlaceBase_::node : PlaceBase_::node->prev_());
+        }
+
+        T *after() const
+        {
+            if(!PlaceBase_::node)return 0;
+            return cast_(PlaceBase_::dir <= 0 ? PlaceBase_::node : PlaceBase_::node->next_());
         }
     };
 
@@ -410,12 +417,19 @@ public:
 
         const T *node() const
         {
-            return const_cast_(PlaceBase_::node);
+            return PlaceBase_::dir ? 0 : const_cast_(PlaceBase_::node);
         }
 
-        int direction() const
+        const T *before() const
         {
-            return PlaceBase_::dir;
+            if(!PlaceBase_::node)return 0;
+            return const_cast_(PlaceBase_::dir >= 0 ? PlaceBase_::node : PlaceBase_::node->prev_());
+        }
+
+        const T *after() const
+        {
+            if(!PlaceBase_::node)return 0;
+            return const_cast_(PlaceBase_::dir <= 0 ? PlaceBase_::node : PlaceBase_::node->next_());
         }
     };
 
@@ -551,26 +565,11 @@ public:
         return const_cast<T *>(const_cast<const Tree<T, A> *>(this)->find_next(key));
     }
 
-
     template<typename K> T *take(const K &key)
     {
         PlaceBase_ place = find_place_(key);  if(!place.dir)return 0;
         TreeNodeBase_ *node = const_cast<TreeNodeBase_ *>(place.node);
         node->remove();  return cast_(node);
-    }
-
-    template<typename K> T *take_prev(const K &key)
-    {
-        PlaceBase_ place = find_place_(key);  if(!place.node)return 0;
-        TreeNodeBase_ *node = const_cast<TreeNodeBase_ *>(place.dir >= 0 ? place.node : place.node->prev_());
-        if(node)node->remove();  return cast_(node);
-    }
-
-    template<typename K> T *take_next(const K &key)
-    {
-        PlaceBase_ place = find_place_(key);  if(!place.node)return 0;
-        TreeNodeBase_ *node = const_cast<TreeNodeBase_ *>(place.dir <= 0 ? place.node : place.node->next_());
-        if(node)node->remove();  return cast_(node);
     }
 
 
