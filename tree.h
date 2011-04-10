@@ -125,24 +125,6 @@ class TreeNodeBase : public Heavy
         return 0;
     }
 
-    void swap_(TreeNodeBase *node)
-    {
-        TreeNodeBase *l = left_, *r = right_, *p = parent_;  NodeType_ t = type_;
-        if(node->parent_ == this)
-        {
-            assert(node->type_ == t_left || node->type_ == t_left_red);
-            parent_ = node;  type_ = node->type_;  node->set_parent_(p, t);
-            if(left_ = node->left_)left_->parent_ = this;  node->left_ = this;
-            if(right_ = node->right_)right_->parent_ = this;  if(node->right_ = r)r->parent_ = node;
-        }
-        else
-        {
-            set_parent_(node->parent_, node->type_);  node->set_parent_(p, t);
-            if(left_ = node->left_)left_->parent_ = this;  if(node->left_ = l)l->parent_ = node;
-            if(right_ = node->right_)right_->parent_ = this;  if(node->right_ = r)r->parent_ = node;
-        }
-    }
-
     void insert_(TreeNodeBase *node, bool after)
     {
         assert(parent_ && !node->parent_);  node->parent_ = this;  node->left_ = node->right_ = 0;
@@ -254,7 +236,36 @@ public:
     void remove()
     {
         assert(parent_);
-        while(left_)swap_(const_cast<TreeNodeBase *>(left_->last_()));
+        if(left_)
+        {
+            TreeNodeBase *node = const_cast<TreeNodeBase *>(left_->last_());
+            if(node->left_)
+            {
+                node->left_->set_parent_(node->parent_, node->type_);
+                node->set_parent_(parent_, type_);
+                node->left_ = left_;  node->right_ = right_;
+                left_->parent_ = right_->parent_ = node;
+                parent_ = 0;  return;
+            }
+            TreeNodeBase *np = parent_;  NodeType_ nt = type_;
+            if(node != left_)
+            {
+                set_parent_(node->parent_, t_right);
+                node->left_ = left_;  left_->parent_ = node;
+            }
+            else if(node->type_ == t_left_red)
+            {
+                node->set_parent_(np, nt);  node->right_ = 0;
+                parent_ = 0;  return;
+            }
+            else
+            {
+                parent_ = node;  type_ = node->type_;
+                node->left_ = this;
+            }
+            if((node->right_ = right_))right_->parent_ = node;
+            node->set_parent_(np, nt);  left_ = right_ = 0;
+        }
 
         TreeNodeBase *node = this;
         do node = node->remove_red_();
