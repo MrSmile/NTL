@@ -6,7 +6,9 @@
 #include "allocator.h"
 
 
+
 namespace NTL_Internal_ {
+
 
 
 class TreeNodeBase : public Heavy
@@ -675,7 +677,9 @@ public:
 };
 
 
+
 }  // end namespace NTL_Internal_
+
 
 
 namespace NTL

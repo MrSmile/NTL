@@ -6,7 +6,9 @@
 #include "base.h"
 
 
+
 namespace NTL_Internal_ {
+
 
 
 template<typename C> class Character;
@@ -46,6 +48,7 @@ template<class S, typename C> struct StringLike
     Concatenation<const S &, LiteralBase<C>, C> operator + (const C *str) const;
     Concatenation<const S &, Character<C>, C> operator + (C ch) const;
 };
+
 
 template<typename S1, typename S2, typename C> class Concatenation : public StringLike<Concatenation<S1, S2, C>, C>
 {
@@ -107,6 +110,7 @@ template<typename S, typename C> inline Concatenation<Character<C>, const S &, C
 {
     return Concatenation<Character<C>, const S &, C>(ch1, static_cast<const S &>(str2));
 }
+
 
 
 template<typename C> class Character : public StringLike<Character<C>, C>
@@ -516,7 +520,9 @@ public:
 typedef StringBase<char> String;
 
 
+
 }  // end namespace NTL_Internal_
+
 
 
 namespace NTL

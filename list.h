@@ -6,7 +6,9 @@
 #include "allocator.h"
 
 
+
 namespace NTL_Internal_ {
+
 
 
 template<typename T> class StackNode : public Heavy
@@ -550,7 +552,9 @@ template<typename T> class OwningList : public List<T, DefaultAllocator<T> >  //
 };
 
 
+
 }  // end namespace NTL_Internal_
+
 
 
 namespace NTL

@@ -10,7 +10,9 @@
 #include <cstddef>
 
 
+
 namespace NTL_Internal_ {
+
 
 
 #define new_nt new(std::nothrow)
@@ -19,6 +21,7 @@ namespace NTL_Internal_ {
 using std::swap;
 using std::memcpy;
 using std::memset;
+
 
 
 #if defined _DEBUG || defined DEBUG
@@ -36,6 +39,7 @@ struct invalid_ptr_t
 static invalid_ptr_t invalid_ptr;
 
 #endif
+
 
 
 #ifdef _MSC_VER
@@ -138,6 +142,7 @@ class Invalid  // Non instantable
     Invalid();
 };
 
+
 class Heavy  // Non copyable
 {
     Heavy(Heavy &);
@@ -148,6 +153,7 @@ public:
     {
     }
 };
+
 
 
 template<typename T, typename T1 = T> struct Comparable
@@ -260,7 +266,9 @@ template<typename T> struct Comparable<T, T>
 };
 
 
+
 }  // end namespace NTL_Internal_
+
 
 
 namespace NTL

@@ -6,7 +6,9 @@
 #include "base.h"
 
 
+
 namespace NTL_Internal_ {
+
 
 
 template<typename T> class Pointer : public Heavy
@@ -159,7 +161,9 @@ public:
 };
 
 
+
 }  // end namespace NTL_Internal_
+
 
 
 namespace NTL

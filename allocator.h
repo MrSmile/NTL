@@ -6,7 +6,9 @@
 #include "base.h"
 
 
+
 namespace NTL_Internal_ {
+
 
 
 template<typename A, typename T> struct Allocator
@@ -155,7 +157,9 @@ template<typename T> struct DefaultAllocator : public Allocator<DefaultAllocator
 };
 
 
+
 }  // end namespace NTL_Internal_
+
 
 
 namespace NTL
