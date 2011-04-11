@@ -715,22 +715,22 @@ public:
 
 template<typename T, typename A = EmptyAllocator<T> > class Tree : public GeneralTree<TreeNode<T>, TreeBase, A>
 {
-    typedef GeneralTree<TreeNode<T>, TreeBase, A> Self_;
+    typedef GeneralTree<TreeNode<T>, TreeBase, A> Base_;
 
     friend void swap(Tree<T, A> &tree1, Tree<T, A> &tree2)
     {
-        swap(static_cast<Self_ &>(tree1), static_cast<Self_ &>(tree2));
+        swap(static_cast<Base_ &>(tree1), static_cast<Base_ &>(tree2));
     }
 };
 
 
 template<typename T> class OwningTree : public Tree<T, DefaultAllocator<T> >  // template typedef workaround
 {
-    typedef Tree<T, DefaultAllocator<T> > Self_;
+    typedef Tree<T, DefaultAllocator<T> > Base_;
 
     friend void swap(OwningTree<T> &tree1, OwningTree<T> &tree2)
     {
-        swap(static_cast<Self_ &>(tree1), static_cast<Self_ &>(tree2));
+        swap(static_cast<Base_ &>(tree1), static_cast<Base_ &>(tree2));
     }
 };
 

@@ -163,9 +163,11 @@ public:
 
 template<typename T> class OwningStack : public Stack<T, DefaultAllocator<T> >  // template typedef workaround
 {
+    typedef Stack<T, DefaultAllocator<T> > Base_;
+
     friend void swap(OwningStack<T> &stack1, OwningStack<T> &stack2)
     {
-        swap(static_cast<Stack<T, DefaultAllocator<T> > &>(stack1), static_cast<Stack<T, DefaultAllocator<T> > &>(stack2));
+        swap(static_cast<Base_ &>(stack1), static_cast<Base_ &>(stack2));
     }
 };
 
@@ -370,9 +372,11 @@ public:
 
 template<typename T> class OwningSimpleList : public SimpleList<T, DefaultAllocator<T> >  // template typedef workaround
 {
+    typedef SimpleList<T, DefaultAllocator<T> > Base_;
+
     friend void swap(OwningSimpleList<T> &list1, OwningSimpleList<T> &list2)
     {
-        swap(static_cast<SimpleList<T, DefaultAllocator<T> > &>(list1), static_cast<SimpleList<T, DefaultAllocator<T> > &>(list2));
+        swap(static_cast<Base_ &>(list1), static_cast<Base_ &>(list2));
     }
 };
 
@@ -545,9 +549,11 @@ public:
 
 template<typename T> class OwningList : public List<T, DefaultAllocator<T> >  // template typedef workaround
 {
+    typedef List<T, DefaultAllocator<T> > Base_;
+
     friend void swap(OwningList<T> &list1, OwningList<T> &list2)
     {
-        swap(static_cast<List<T, DefaultAllocator<T> > &>(list1), static_cast<List<T, DefaultAllocator<T> > &>(list2));
+        swap(static_cast<Base_ &>(list1), static_cast<Base_ &>(list2));
     }
 };
 
