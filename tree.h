@@ -352,6 +352,8 @@ public:
 
 template<typename N, typename H, typename A> class GeneralTree : private A, public H::Tree, public Heavy
 {
+    template<typename T, typename A1> friend class Indexer;
+
     typedef typename H::Tree Tree_;
     typedef typename H::Node Node_;
     typedef typename N::Type_ Type_;
@@ -406,6 +408,7 @@ public:
     class Place : private PlaceBase_
     {
         template<typename N1, typename H1, typename A1> friend class GeneralTree;
+        template<typename T, typename A1> friend class Indexer;
 
         Place(const PlaceBase_ &place) : PlaceBase_(place)
         {
@@ -446,6 +449,7 @@ public:
     class ConstPlace : private PlaceBase_
     {
         template<typename N1, typename H1, typename A1> friend class GeneralTree;
+        template<typename T, typename A1> friend class Indexer;
 
         ConstPlace(const PlaceBase_ &place) : PlaceBase_(place)
         {
@@ -596,26 +600,6 @@ public:
     template<typename K> Type_ *find(const K &key)
     {
         return const_cast<Type_ *>(const_cast<const GeneralTree<N, H, A> *>(this)->find(key));
-    }
-
-    template<typename K> const Type_ *find_prev(const K &key) const
-    {
-        return ConstPlace(find_place_(key)).before();
-    }
-
-    template<typename K> Type_ *find_prev(const K &key)
-    {
-        return Place(find_place_(key)).before();
-    }
-
-    template<typename K> const Type_ *find_next(const K &key) const
-    {
-        return ConstPlace(find_place_(key)).after();
-    }
-
-    template<typename K> Type_ *find_next(const K &key)
-    {
-        return Place(find_place_(key)).after();
     }
 
     template<typename K> Type_ *take(const K &key)
@@ -875,7 +859,7 @@ class IndexerBase
             else node = node->left_;  return node;
     }
 
-    PlaceBase_ at_place_(size_t index) const
+    PlaceBase_ place_at_(size_t index) const
     {
         Tree_::PlaceBase_ res;
         for(const Node_ *node = static_cast<const Tree_ *>(this)->root_; node;)
@@ -965,10 +949,45 @@ public:
 template<typename T, typename A = EmptyAllocator<T> > class Indexer : public GeneralTree<IndexerNode<T>, IndexerTypes, A>
 {
     typedef GeneralTree<IndexerNode<T>, IndexerTypes, A> Base_;
-    typedef typename Base_::ConstPlace ConstPlace;
-    typedef typename Base_::Place Place;
+    typedef typename Base_::PlaceBase_ PlaceBase_;
+    typedef typename Base_::ConstPlace ConstPlace_;
+    typedef typename Base_::Place Place_;
+
 
 public:
+    class Place : public Place_
+    {
+        template<typename T1, typename A1> friend class Indexer;
+
+        Place(const PlaceBase_ &place) : Place_(place)
+        {
+        }
+
+    public:
+        size_t index() const
+        {
+            if(!PlaceBase_::node)return 0;
+            return PlaceBase_::dir > 0 ? PlaceBase_::node->index() + 1 : PlaceBase_::node->index();
+        }
+    };
+
+    class ConstPlace : public ConstPlace_
+    {
+        template<typename T1, typename A1> friend class Indexer;
+
+        ConstPlace(const PlaceBase_ &place) : ConstPlace_(place)
+        {
+        }
+
+    public:
+        size_t index() const
+        {
+            if(!PlaceBase_::node)return 0;
+            return PlaceBase_::dir > 0 ? PlaceBase_::node->index() + 1 : PlaceBase_::node->index();
+        }
+    };
+
+
     friend void swap(Indexer<T, A> &tree1, Indexer<T, A> &tree2)
     {
         swap(static_cast<Base_ &>(tree1), static_cast<Base_ &>(tree2));
@@ -981,6 +1000,17 @@ public:
 #else
         return 0;
 #endif
+    }
+
+
+    template<typename K> ConstPlace find_place(const K &key) const
+    {
+        return Base_::find_place_(key);
+    }
+
+    template<typename K> Place find_place(const K &key)
+    {
+        return Base_::find_place_(key);
     }
 
     const T *at(size_t index) const
@@ -1003,14 +1033,14 @@ public:
         return at(index);
     }
 
-    ConstPlace at_place(size_t index) const
+    ConstPlace place_at(size_t index) const
     {
-        return IndexerBase::at_place_(index);
+        return IndexerBase::place_at_(index);
     }
 
-    Place at_place(size_t index)
+    Place place_at(size_t index)
     {
-        return IndexerBase::at_place_(index);
+        return IndexerBase::place_at_(index);
     }
 
     T *take_at(size_t index)
@@ -1020,7 +1050,7 @@ public:
 
     void insert(IndexerNode<T> *node, size_t index)
     {
-        Base_::insert(node, IndexerBase::at_place_(index));
+        Base_::insert(node, IndexerBase::place_at_(index));
     }
 };
 

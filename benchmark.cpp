@@ -33,7 +33,7 @@ void time_tree()
     for(int i = 0; i < N; i++)
     {
         tree1.get(rand());  tree1.get(rand());
-        delete tree1.find_next(rand());
+        delete tree1.find_place(rand()).after();
     }
 
     clock_t tm1 = clock();
