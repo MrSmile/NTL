@@ -15,6 +15,7 @@ template<typename N> class GeneralTreeNode : public N, public Heavy
 {
     template<typename N1> friend class GeneralTreeBase;
     template<typename N1, typename B, typename A> friend class GeneralTree;
+    friend class IndexerNodeBase;
 
 
     typedef GeneralTreeNode<N> Node_;
@@ -295,6 +296,7 @@ template<typename B> class GeneralTreeBase : public B
 {
     template<typename N> friend class GeneralTreeNode;
     template<typename N, typename B1, typename A> friend class GeneralTree;
+    friend class IndexerBase;
 
 
     typedef GeneralTreeNode<typename B::Node_> Node_;
@@ -312,7 +314,7 @@ template<typename B> class GeneralTreeBase : public B
     {
         if(root_)root_->parent_ = tree.root_cast_();
         if(tree.root_)tree.root_->parent_ = root_cast_();
-        NTL::swap(root_, tree.root_);
+        NTL::swap(root_, tree.root_);  swap_size_(tree);
     }
 
 public:
@@ -514,13 +516,14 @@ public:
                 ptr->parent_ = 0;  remove(cast_(ptr));
             }
         }
+        Tree_::clear_size_();
     }
 
     template<typename A1> bool copy(const GeneralTree<N, B, A1> &tree)
     {
         assert(!Tree_::root_);  if(!tree.Tree_::root_)return true;
         Node_ *node = copy_node_(Tree_::root_cast_(), tree.Tree_::root_);
-        if(!node)return false;  Tree_::root_ = node;
+        if(!node)return false;  Tree_::root_ = node;  copy_size_(tree);
 
         for(const Node_ *old = tree.Tree_::root_;;)
             if(!node->left_ && old->left_)
@@ -643,9 +646,24 @@ class TreeNodeBase;
 class TreeBase
 {
     template<typename B> friend class GeneralTreeBase;
+    template<typename N, typename B, typename A> friend class GeneralTree;
 
     typedef TreeNodeBase Node_;
+
+
+    void clear_size_()
+    {
+    }
+
+    void swap_size_(TreeBase &)
+    {
+    }
+
+    void copy_size_(const TreeBase &)
+    {
+    }
 };
+
 
 class TreeNodeBase
 {
@@ -736,6 +754,175 @@ template<typename T> class OwningTree : public Tree<T, DefaultAllocator<T> >  //
 
 
 
+class IndexerNodeBase;
+
+class IndexerBase
+{
+    template<typename B> friend class GeneralTreeBase;
+    template<typename T, typename A> friend class Indexer;
+    friend class IndexerNodeBase;
+
+    typedef IndexerNodeBase Node_;
+
+
+    size_t size_;
+
+
+    void check_index_();  // DEBUG
+
+public:
+    IndexerBase() : size_(0)
+    {
+    }
+
+    void clear_size_()
+    {
+        size_ = 0;
+    }
+
+    void swap_size_(IndexerBase &tree)
+    {
+        NTL::swap(size_, tree.size_);
+    }
+
+    void copy_size_(const IndexerBase &tree)
+    {
+        size_ = tree.size_;
+    }
+};
+
+
+class IndexerNodeBase
+{
+    template<typename N> friend class GeneralTreeNode;
+    template<typename N, typename B, typename A> friend class GeneralTree;
+    friend class IndexerBase;
+
+    typedef GeneralTreeBase<IndexerBase> Tree_;
+    typedef GeneralTreeNode<IndexerNodeBase> Node_;
+
+
+    size_t index_;
+
+
+    void swap_index_(IndexerNodeBase *node)
+    {
+        NTL::swap(index_, node->index_);
+    }
+
+    void copy_index_(const IndexerNodeBase *node)
+    {
+        index_ = node->index_;
+    }
+
+    void add_index_(const IndexerNodeBase *node)
+    {
+        index_ += node->index_ + 1;
+    }
+
+    void sub_index_(const IndexerNodeBase *node)
+    {
+        index_ -= node->index_ + 1;
+    }
+
+    void inc_index_()
+    {
+        index_ = 0;
+        for(Node_ *node = static_cast<Node_ *>(this);; node = node->parent_)
+            if(node->type_ == Node_::t_root)
+            {
+                reinterpret_cast<Tree_ *>(node->parent_)->size_++;  return;
+            }
+            else if(node->type_ > Node_::t_right)node->parent_->index_++;
+    }
+
+    void dec_index_()
+    {
+        for(Node_ *node = static_cast<Node_ *>(this);; node = node->parent_)
+            if(node->type_ == Node_::t_root)
+            {
+                reinterpret_cast<Tree_ *>(node->parent_)->size_--;  return;
+            }
+            else if(node->type_ > Node_::t_right)node->parent_->index_--;
+    }
+
+    size_t check_index_()  // DEBUG
+    {
+        Node_ *node = static_cast<Node_ *>(this);
+        size_t left = (node->left_ ? node->left_->check_index_() : 0);
+        size_t right = (node->right_ ? node->right_->check_index_() : 0);
+        assert(left == index_);  return left + right + 1;
+    }
+};
+
+inline void IndexerBase::check_index_()  // DEBUG
+{
+    Node_ *root = static_cast<GeneralTreeBase<IndexerBase> *>(this)->root_;
+    assert((root ? root->check_index_() : 0) == size_);
+}
+
+
+template<typename T> class IndexerNode : public GeneralTreeNode<IndexerNodeBase>
+{
+    template<typename N, typename B, typename A> friend class GeneralTree;
+
+
+    typedef T Type_;
+    typedef GeneralTreeNode<IndexerNodeBase> Node_;
+
+
+public:
+    const T *prev() const
+    {
+        return static_cast<const T *>(static_cast<const IndexerNode<T> *>(prev_()));
+    }
+
+    T *prev()
+    {
+        return const_cast<T *>(static_cast<const T *>(static_cast<const IndexerNode<T> *>(prev_())));
+    }
+
+    const T *next() const
+    {
+        return static_cast<const T *>(static_cast<const IndexerNode<T> *>(next_()));
+    }
+
+    T *next()
+    {
+        return const_cast<T *>(static_cast<const T *>(static_cast<const IndexerNode<T> *>(next_())));
+    }
+};
+
+
+template<typename T, typename A = EmptyAllocator<T> > class Indexer : public GeneralTree<IndexerNode<T>, IndexerBase, A>
+{
+    typedef GeneralTree<IndexerNode<T>, IndexerBase, A> Base_;
+
+    friend void swap(Indexer<T, A> &tree1, Indexer<T, A> &tree2)
+    {
+        swap(static_cast<Base_ &>(tree1), static_cast<Base_ &>(tree2));
+    }
+
+public:
+    size_t check_()  // DEBUG
+    {
+        size_t lev = Base_::check_();  IndexerBase::check_index_();  return lev;
+    }
+};
+
+
+template<typename T> class OwningIndexer : public Indexer<T, DefaultAllocator<T> >  // template typedef workaround
+{
+    typedef Indexer<T, DefaultAllocator<T> > Base_;
+
+    friend void swap(OwningIndexer<T> &tree1, OwningIndexer<T> &tree2)
+    {
+        swap(static_cast<Base_ &>(tree1), static_cast<Base_ &>(tree2));
+    }
+};
+
+
+
 template<typename T> class SimpleKey : public Comparable<SimpleKey<T>, T>, public Comparable<SimpleKey<T> >
 {
     T id_;
@@ -785,6 +972,10 @@ namespace NTL
     using NTL_Internal_::TreeNode;
     using NTL_Internal_::Tree;
     using NTL_Internal_::OwningTree;
+
+    using NTL_Internal_::IndexerNode;
+    using NTL_Internal_::Indexer;
+    using NTL_Internal_::OwningIndexer;
 
     using NTL_Internal_::SimpleKey;
 }
