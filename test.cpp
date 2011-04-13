@@ -17,6 +17,8 @@ void test_string()
     str += Literal("Next line") + '\n';
     str += "0 " + Literal("1 ") + "2 " + "3 " + "3 " + "5 " + "6 " + "7 " + "8 " + "9 " + "10 " + '\n';
     str += '\n';  cout << str.data();
+
+    if(str > "ZZZ")cout << "Greater than 'ZZZ'\n";
 }
 
 

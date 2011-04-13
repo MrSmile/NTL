@@ -13,8 +13,8 @@ namespace NTL_Internal_ {
 
 template<typename H> class GeneralTreeNode : public H::NodeBase, public Heavy
 {
-    template<typename H1> friend class GeneralTreeBase;
-    template<typename N, typename H1, typename A> friend class GeneralTree;
+    template<typename> friend class GeneralTreeBase;
+    template<typename, typename, typename> friend class GeneralTree;
     friend class IndexerNodeBase;
     friend class IndexerBase;
 
@@ -207,32 +207,6 @@ template<typename H> class GeneralTreeNode : public H::NodeBase, public Heavy
     };
 
 
-protected:
-    const Node_ *prev_() const
-    {
-        assert(parent_);  const Node_ *node = this;
-        if(!left_)
-        {
-            while(node->type_ > t_right)node = node->parent_;
-            return node->type_ ? node->parent_ : 0;
-        }
-        for(node = node->left_;; node = node->right_)
-            if(!node->right_)return node;
-    }
-
-    const Node_ *next_() const
-    {
-        assert(parent_);  const Node_ *node = this;
-        if(!right_)
-        {
-            while(node->type_ == t_right)node = node->parent_;
-            return node->type_ ? node->parent_ : 0;
-        }
-        for(node = node->right_;; node = node->left_)
-            if(!node->left_)return node;
-    }
-
-
 public:
     GeneralTreeNode() : parent_(0)
     {
@@ -286,6 +260,30 @@ public:
         parent_ = 0;
     }
 
+    const Node_ *prev() const
+    {
+        assert(parent_);  const Node_ *node = this;
+        if(!left_)
+        {
+            while(node->type_ > t_right)node = node->parent_;
+            return node->type_ ? node->parent_ : 0;
+        }
+        for(node = node->left_;; node = node->right_)
+            if(!node->right_)return node;
+    }
+
+    const Node_ *next() const
+    {
+        assert(parent_);  const Node_ *node = this;
+        if(!right_)
+        {
+            while(node->type_ == t_right)node = node->parent_;
+            return node->type_ ? node->parent_ : 0;
+        }
+        for(node = node->right_;; node = node->left_)
+            if(!node->left_)return node;
+    }
+
     bool assigned()
     {
         return parent_ != 0;
@@ -295,8 +293,8 @@ public:
 
 template<typename H> class GeneralTreeBase : public H::Base
 {
-    template<typename H1> friend class GeneralTreeNode;
-    template<typename N, typename H1, typename A> friend class GeneralTree;
+    template<typename> friend class GeneralTreeNode;
+    template<typename, typename, typename> friend class GeneralTree;
     friend class IndexerBase;
 
 
@@ -352,7 +350,7 @@ public:
 
 template<typename N, typename H, typename A> class GeneralTree : private A, public H::Tree, public Heavy
 {
-    template<typename T, typename A1> friend class Indexer;
+    template<typename, typename> friend class Indexer;
 
     typedef typename H::Tree Tree_;
     typedef typename H::Node Node_;
@@ -405,11 +403,12 @@ template<typename N, typename H, typename A> class GeneralTree : private A, publ
 
 
 public:
-    class Place : private PlaceBase_
+    class Place : protected PlaceBase_
     {
-        template<typename N1, typename H1, typename A1> friend class GeneralTree;
-        template<typename T, typename A1> friend class Indexer;
+        template<typename, typename, typename> friend class GeneralTree;
+        template<typename, typename> friend class Indexer;
 
+    protected:
         Place(const PlaceBase_ &place) : PlaceBase_(place)
         {
         }
@@ -436,21 +435,22 @@ public:
         Type_ *before() const
         {
             if(!PlaceBase_::node)return 0;
-            return cast_(PlaceBase_::dir >= 0 ? PlaceBase_::node : PlaceBase_::node->prev_());
+            return cast_(PlaceBase_::dir >= 0 ? PlaceBase_::node : PlaceBase_::node->prev());
         }
 
         Type_ *after() const
         {
             if(!PlaceBase_::node)return 0;
-            return cast_(PlaceBase_::dir <= 0 ? PlaceBase_::node : PlaceBase_::node->next_());
+            return cast_(PlaceBase_::dir <= 0 ? PlaceBase_::node : PlaceBase_::node->next());
         }
     };
 
-    class ConstPlace : private PlaceBase_
+    class ConstPlace : protected PlaceBase_
     {
-        template<typename N1, typename H1, typename A1> friend class GeneralTree;
-        template<typename T, typename A1> friend class Indexer;
+        template<typename, typename, typename> friend class GeneralTree;
+        template<typename, typename> friend class Indexer;
 
+    protected:
         ConstPlace(const PlaceBase_ &place) : PlaceBase_(place)
         {
         }
@@ -646,8 +646,8 @@ struct TreeTypes
 
 class TreeNodeBase
 {
-    template<typename H> friend class GeneralTreeNode;
-    template<typename N, typename H, typename A> friend class GeneralTree;
+    template<typename> friend class GeneralTreeNode;
+    template<typename, typename, typename> friend class GeneralTree;
 
 
     void swap_index_(TreeNodeBase *)
@@ -678,8 +678,8 @@ class TreeNodeBase
 
 class TreeBase
 {
-    template<typename H> friend class GeneralTreeBase;
-    template<typename N, typename H, typename A> friend class GeneralTree;
+    template<typename> friend class GeneralTreeBase;
+    template<typename, typename, typename> friend class GeneralTree;
 
 
     void clear_size_()
@@ -698,31 +698,31 @@ class TreeBase
 
 template<typename T> class TreeNode : public GeneralTreeNode<TreeTypes>
 {
-    template<typename N, typename H, typename A> friend class GeneralTree;
+    template<typename, typename, typename> friend class GeneralTree;
 
-
+    typedef GeneralTreeNode<TreeTypes> Base_;
     typedef T Type_;
 
 
 public:
     const T *prev() const
     {
-        return static_cast<const T *>(static_cast<const TreeNode<T> *>(prev_()));
+        return static_cast<const T *>(static_cast<const TreeNode<T> *>(Base_::prev()));
     }
 
     T *prev()
     {
-        return const_cast<T *>(static_cast<const T *>(static_cast<const TreeNode<T> *>(prev_())));
+        return const_cast<T *>(static_cast<const T *>(static_cast<const TreeNode<T> *>(Base_::prev())));
     }
 
     const T *next() const
     {
-        return static_cast<const T *>(static_cast<const TreeNode<T> *>(next_()));
+        return static_cast<const T *>(static_cast<const TreeNode<T> *>(Base_::next()));
     }
 
     T *next()
     {
-        return const_cast<T *>(static_cast<const T *>(static_cast<const TreeNode<T> *>(next_())));
+        return const_cast<T *>(static_cast<const T *>(static_cast<const TreeNode<T> *>(Base_::next())));
     }
 };
 
@@ -764,8 +764,8 @@ struct IndexerTypes
 
 class IndexerNodeBase
 {
-    template<typename H> friend class GeneralTreeNode;
-    template<typename N, typename H, typename A> friend class GeneralTree;
+    template<typename> friend class GeneralTreeNode;
+    template<typename, typename, typename> friend class GeneralTree;
     friend class IndexerBase;
 
     typedef IndexerTypes::Tree Tree_;
@@ -818,9 +818,9 @@ public:
 
 class IndexerBase
 {
-    template<typename H> friend class GeneralTreeBase;
-    template<typename N, typename H, typename A> friend class GeneralTree;
-    template<typename T, typename A> friend class Indexer;
+    template<typename> friend class GeneralTreeBase;
+    template<typename, typename, typename> friend class GeneralTree;
+    template<typename, typename> friend class Indexer;
     friend class IndexerNodeBase;
 
     typedef IndexerTypes::Tree Tree_;
@@ -917,31 +917,31 @@ inline void IndexerNodeBase::dec_index_()
 
 template<typename T> class IndexerNode : public GeneralTreeNode<IndexerTypes>
 {
-    template<typename N, typename H, typename A> friend class GeneralTree;
+    template<typename, typename, typename> friend class GeneralTree;
 
-
+    typedef GeneralTreeNode<IndexerTypes> Base_;
     typedef T Type_;
 
 
 public:
     const T *prev() const
     {
-        return static_cast<const T *>(static_cast<const IndexerNode<T> *>(prev_()));
+        return static_cast<const T *>(static_cast<const IndexerNode<T> *>(Base_::prev()));
     }
 
     T *prev()
     {
-        return const_cast<T *>(static_cast<const T *>(static_cast<const IndexerNode<T> *>(prev_())));
+        return const_cast<T *>(static_cast<const T *>(static_cast<const IndexerNode<T> *>(Base_::prev())));
     }
 
     const T *next() const
     {
-        return static_cast<const T *>(static_cast<const IndexerNode<T> *>(next_()));
+        return static_cast<const T *>(static_cast<const IndexerNode<T> *>(Base_::next()));
     }
 
     T *next()
     {
-        return const_cast<T *>(static_cast<const T *>(static_cast<const IndexerNode<T> *>(next_())));
+        return const_cast<T *>(static_cast<const T *>(static_cast<const IndexerNode<T> *>(Base_::next())));
     }
 };
 
@@ -950,16 +950,14 @@ template<typename T, typename A = EmptyAllocator<T> > class Indexer : public Gen
 {
     typedef GeneralTree<IndexerNode<T>, IndexerTypes, A> Base_;
     typedef typename Base_::PlaceBase_ PlaceBase_;
-    typedef typename Base_::ConstPlace ConstPlace_;
-    typedef typename Base_::Place Place_;
 
 
 public:
-    class Place : public Place_
+    class Place : public Base_::Place
     {
-        template<typename T1, typename A1> friend class Indexer;
+        template<typename, typename> friend class Indexer;
 
-        Place(const PlaceBase_ &place) : Place_(place)
+        Place(const PlaceBase_ &place) : Base_::Place(place)
         {
         }
 
@@ -971,11 +969,11 @@ public:
         }
     };
 
-    class ConstPlace : public ConstPlace_
+    class ConstPlace : public Base_::ConstPlace
     {
-        template<typename T1, typename A1> friend class Indexer;
+        template<typename, typename> friend class Indexer;
 
-        ConstPlace(const PlaceBase_ &place) : ConstPlace_(place)
+        ConstPlace(const PlaceBase_ &place) : Base_::ConstPlace(place)
         {
         }
 

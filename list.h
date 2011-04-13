@@ -13,7 +13,7 @@ namespace NTL_Internal_ {
 
 template<typename T> class StackNode : public Heavy
 {
-    template<typename T1, typename A> friend class Stack;
+    template<typename, typename> friend class Stack;
 
 
     StackNode<T> *next_;
@@ -175,7 +175,7 @@ template<typename T> class OwningStack : public Stack<T, DefaultAllocator<T> >  
 
 template<typename T> class SimpleListNode : public Heavy
 {
-    template<typename T1, typename A> friend class SimpleList;
+    template<typename, typename> friend class SimpleList;
 
 
     SimpleListNode<T> *next_;
@@ -384,7 +384,7 @@ template<typename T> class OwningSimpleList : public SimpleList<T, DefaultAlloca
 
 template<typename T> class ListNode : public Heavy
 {
-    template<typename T1, typename A> friend class List;
+    template<typename, typename> friend class List;
 
 
     ListNode<T> *next_, **prev_;

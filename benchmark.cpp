@@ -1,4 +1,5 @@
 #include <map>
+#include <ctime>
 #include <iostream>
 #include "tree.h"
 

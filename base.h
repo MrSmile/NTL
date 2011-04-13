@@ -17,10 +17,7 @@ namespace NTL_Internal_ {
 
 #define new_nt new(std::nothrow)
 
-
 using std::swap;
-using std::memcpy;
-using std::memset;
 
 
 
@@ -42,62 +39,11 @@ static invalid_ptr_t invalid_ptr;
 
 
 
-#ifdef _MSC_VER
-
-inline void debug_break()
-{
-    __asm int 3;
-}
-
-#elif defined __GNUC__
-
-inline void debug_break()
-{
-    asm("int $3");
-}
-
-#else
-
-#include <cstdlib>
-
-inline void debug_break()
-{
-    abort();
-}
-
-#endif
-
-
-#ifdef NTL_DEBUG
-
-#include <iostream>
-
-inline void ntl_assert(bool test, const char *msg)
-{
-    if(test)return;  std::cout << msg;  debug_break();
-}
-
-#define NTL_STRING(str) #str
-#define NTL_ASSERT(expr, file, line) \
-    NTL_Internal_::ntl_assert(expr, "Assert failed: " #expr "; file " file "; line " NTL_STRING(line) ".\n")
-#define assert(expr) NTL_ASSERT(expr, __FILE__, __LINE__)
-
-#else
-
-inline void ntl_assert()
-{
-}
-
-#define assert(expr) NTL_Internal_::ntl_assert()
-
-#endif
-
-
-
 #if defined _MSC_VER
 
 #include <intrin.h>
 #pragma intrinsic(_InterlockedExchangeAdd)
+#pragma warning(disable: 4800)
 
 inline size_t sync_inc(volatile size_t &n)
 {
@@ -267,6 +213,60 @@ template<typename T> struct Comparable<T, T>
 
 
 
+#ifdef _MSC_VER
+
+inline void debug_break()
+{
+    __asm int 3;
+}
+
+#elif defined __GNUC__
+
+inline void debug_break()
+{
+    asm("int $3");
+}
+
+#else
+
+#include <cstdlib>
+
+inline void debug_break()
+{
+    abort();
+}
+
+#endif
+
+
+#undef assert
+
+#ifdef NTL_DEBUG
+
+#include <iostream>
+
+inline void ntl_assert(bool test, const char *msg)
+{
+    if(test)return;  std::cout << msg;  debug_break();
+}
+
+#define NTL_STRING(str) #str
+#define NTL_ASSERT(expr, file, line) \
+    NTL_Internal_::ntl_assert(expr, "Assert failed: " #expr "; file " file "; line " NTL_STRING(line) ".\n")
+#define assert(expr) NTL_ASSERT(expr, __FILE__, __LINE__)
+
+#else
+
+inline void ntl_assert()
+{
+}
+
+#define assert(expr) NTL_Internal_::ntl_assert()
+
+#endif
+
+
+
 }  // end namespace NTL_Internal_
 
 
@@ -274,13 +274,10 @@ template<typename T> struct Comparable<T, T>
 namespace NTL
 {
     using std::swap;
-    using std::memcpy;
-    using std::memset;
 
 #ifdef NTL_DEBUG
     using NTL_Internal_::invalid_ptr;
 #endif
-    using NTL_Internal_::debug_break;
 
     using NTL_Internal_::sync_inc;
     using NTL_Internal_::sync_dec;
@@ -289,4 +286,6 @@ namespace NTL
     using NTL_Internal_::Heavy;
 
     using NTL_Internal_::Comparable;
+
+    using NTL_Internal_::debug_break;
 }
