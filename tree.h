@@ -11,15 +11,16 @@ namespace NTL_Internal_ {
 
 
 
-template<typename N> class GeneralTreeNode : public N, public Heavy
+template<typename H> class GeneralTreeNode : public H::NodeBase, public Heavy
 {
-    template<typename N1> friend class GeneralTreeBase;
-    template<typename N1, typename B, typename A> friend class GeneralTree;
+    template<typename H1> friend class GeneralTreeBase;
+    template<typename N, typename H1, typename A> friend class GeneralTree;
     friend class IndexerNodeBase;
+    friend class IndexerBase;
 
 
-    typedef GeneralTreeNode<N> Node_;
-    typedef typename N::Tree_ Tree_;
+    typedef GeneralTreeNode<H> Node_;
+    typedef typename H::Tree Tree_;
 
 
     enum NodeType_
@@ -148,7 +149,7 @@ template<typename N> class GeneralTreeNode : public N, public Heavy
         while(node);
     }
 
-    size_t check_()  // DEBUG
+    size_t check_() const  // DEBUG
     {
         size_t lev = 0;
         assert(type_ != t_left_red || parent_->type_ != t_left_red);
@@ -278,7 +279,7 @@ public:
         do node = node->remove_red_();
         while(node);
 
-        N::dec_index_();
+        H::NodeBase::dec_index_();
         if(type_ > t_right)parent_->left_ = 0;
         else if(type_ == t_right)parent_->right_ = 0;
         else reinterpret_cast<Tree_ *>(parent_)->root_ = 0;
@@ -292,14 +293,14 @@ public:
 };
 
 
-template<typename B> class GeneralTreeBase : public B
+template<typename H> class GeneralTreeBase : public H::Base
 {
-    template<typename N> friend class GeneralTreeNode;
-    template<typename N, typename B1, typename A> friend class GeneralTree;
+    template<typename H1> friend class GeneralTreeNode;
+    template<typename N, typename H1, typename A> friend class GeneralTree;
     friend class IndexerBase;
 
 
-    typedef GeneralTreeNode<typename B::Node_> Node_;
+    typedef typename H::Node Node_;
 
 
     Node_ *root_;
@@ -310,7 +311,7 @@ template<typename B> class GeneralTreeBase : public B
         return reinterpret_cast<Node_ *>(this);
     }
 
-    void swap_(GeneralTreeBase<B> &tree)
+    void swap_(GeneralTreeBase<H> &tree)
     {
         if(root_)root_->parent_ = tree.root_cast_();
         if(tree.root_)tree.root_->parent_ = root_cast_();
@@ -322,9 +323,13 @@ public:
     {
     }
 
-    size_t check_()  // DEBUG
+    size_t check_() const  // DEBUG
     {
+#ifdef NTL_DEBUG
         if(!root_)return 0;  assert(root_->type_ == Node_::t_root);  return root_->check_();
+#else
+        return 0;
+#endif
     }
 
 
@@ -345,11 +350,11 @@ public:
 };
 
 
-template<typename N, typename B, typename A> class GeneralTree : private A, public GeneralTreeBase<B>, public Heavy
+template<typename N, typename H, typename A> class GeneralTree : private A, public H::Tree, public Heavy
 {
+    typedef typename H::Tree Tree_;
+    typedef typename H::Node Node_;
     typedef typename N::Type_ Type_;
-    typedef typename N::Node_ Node_;
-    typedef GeneralTreeBase<B> Tree_;
     typedef typename Node_::Place_ PlaceBase_;
 
 
@@ -380,7 +385,7 @@ template<typename N, typename B, typename A> class GeneralTree : private A, publ
     template<typename K> PlaceBase_ find_place_(const K &key) const
     {
         PlaceBase_ res;
-        for(Node_ *node = Tree_::root_; node;)
+        for(const Node_ *node = Tree_::root_; node;)
         {
             int dir = -const_cast_(node)->cmp(key);
             res.node = node;  res.dir = dir;
@@ -391,7 +396,7 @@ template<typename N, typename B, typename A> class GeneralTree : private A, publ
         return res;
     }
 
-    void swap_(GeneralTree<N, B, A> &tree)
+    void swap_(GeneralTree<N, H, A> &tree)
     {
         Tree_::swap_(tree);
     }
@@ -400,6 +405,8 @@ template<typename N, typename B, typename A> class GeneralTree : private A, publ
 public:
     class Place : private PlaceBase_
     {
+        template<typename N1, typename H1, typename A1> friend class GeneralTree;
+
         Place(const PlaceBase_ &place) : PlaceBase_(place)
         {
         }
@@ -438,6 +445,8 @@ public:
 
     class ConstPlace : private PlaceBase_
     {
+        template<typename N1, typename H1, typename A1> friend class GeneralTree;
+
         ConstPlace(const PlaceBase_ &place) : PlaceBase_(place)
         {
         }
@@ -519,7 +528,7 @@ public:
         Tree_::clear_size_();
     }
 
-    template<typename A1> bool copy(const GeneralTree<N, B, A1> &tree)
+    template<typename A1> bool copy(const GeneralTree<N, H, A1> &tree)
     {
         assert(!Tree_::root_);  if(!tree.Tree_::root_)return true;
         Node_ *node = copy_node_(Tree_::root_cast_(), tree.Tree_::root_);
@@ -542,7 +551,7 @@ public:
         clear();  return false;
     }
 
-    friend void swap(GeneralTree<N, B, A> &tree1, GeneralTree<N, B, A> &tree2)
+    friend void swap(GeneralTree<N, H, A> &tree1, GeneralTree<N, H, A> &tree2)
     {
         tree1.swap_(tree2);
     }
@@ -586,29 +595,27 @@ public:
 
     template<typename K> Type_ *find(const K &key)
     {
-        return const_cast<Type_ *>(const_cast<const GeneralTree<N, B, A> *>(this)->find(key));
+        return const_cast<Type_ *>(const_cast<const GeneralTree<N, H, A> *>(this)->find(key));
     }
 
     template<typename K> const Type_ *find_prev(const K &key) const
     {
-        PlaceBase_ place = find_place_(key);  if(!place.node)return 0;
-        return const_cast_(place.dir >= 0 ? place.node : place.node->prev_());
+        return ConstPlace(find_place_(key)).before();
     }
 
     template<typename K> Type_ *find_prev(const K &key)
     {
-        return const_cast<Type_ *>(const_cast<const GeneralTree<N, B, A> *>(this)->find_prev(key));
+        return Place(find_place_(key)).before();
     }
 
     template<typename K> const Type_ *find_next(const K &key) const
     {
-        PlaceBase_ place = find_place_(key);  if(!place.node)return 0;
-        return const_cast_(place.dir <= 0 ? place.node : place.node->next_());
+        return ConstPlace(find_place_(key)).after();
     }
 
     template<typename K> Type_ *find_next(const K &key)
     {
-        return const_cast<Type_ *>(const_cast<const GeneralTree<N, B, A> *>(this)->find_next(key));
+        return Place(find_place_(key)).after();
     }
 
     template<typename K> Type_ *take(const K &key)
@@ -641,36 +648,22 @@ public:
 
 
 
+class TreeBase;
 class TreeNodeBase;
 
-class TreeBase
+struct TreeTypes
 {
-    template<typename B> friend class GeneralTreeBase;
-    template<typename N, typename B, typename A> friend class GeneralTree;
-
-    typedef TreeNodeBase Node_;
-
-
-    void clear_size_()
-    {
-    }
-
-    void swap_size_(TreeBase &)
-    {
-    }
-
-    void copy_size_(const TreeBase &)
-    {
-    }
+    typedef TreeBase Base;
+    typedef TreeNodeBase NodeBase;
+    typedef GeneralTreeBase<TreeTypes> Tree;
+    typedef GeneralTreeNode<TreeTypes> Node;
 };
 
 
 class TreeNodeBase
 {
-    template<typename N> friend class GeneralTreeNode;
-    template<typename N, typename B, typename A> friend class GeneralTree;
-
-    typedef GeneralTreeBase<TreeBase> Tree_;
+    template<typename H> friend class GeneralTreeNode;
+    template<typename N, typename H, typename A> friend class GeneralTree;
 
 
     void swap_index_(TreeNodeBase *)
@@ -699,13 +692,32 @@ class TreeNodeBase
 };
 
 
-template<typename T> class TreeNode : public GeneralTreeNode<TreeNodeBase>
+class TreeBase
 {
-    template<typename N, typename B, typename A> friend class GeneralTree;
+    template<typename H> friend class GeneralTreeBase;
+    template<typename N, typename H, typename A> friend class GeneralTree;
+
+
+    void clear_size_()
+    {
+    }
+
+    void swap_size_(TreeBase &)
+    {
+    }
+
+    void copy_size_(const TreeBase &)
+    {
+    }
+};
+
+
+template<typename T> class TreeNode : public GeneralTreeNode<TreeTypes>
+{
+    template<typename N, typename H, typename A> friend class GeneralTree;
 
 
     typedef T Type_;
-    typedef GeneralTreeNode<TreeNodeBase> Node_;
 
 
 public:
@@ -731,9 +743,9 @@ public:
 };
 
 
-template<typename T, typename A = EmptyAllocator<T> > class Tree : public GeneralTree<TreeNode<T>, TreeBase, A>
+template<typename T, typename A = EmptyAllocator<T> > class Tree : public GeneralTree<TreeNode<T>, TreeTypes, A>
 {
-    typedef GeneralTree<TreeNode<T>, TreeBase, A> Base_;
+    typedef GeneralTree<TreeNode<T>, TreeTypes, A> Base_;
 
     friend void swap(Tree<T, A> &tree1, Tree<T, A> &tree2)
     {
@@ -754,52 +766,26 @@ template<typename T> class OwningTree : public Tree<T, DefaultAllocator<T> >  //
 
 
 
+class IndexerBase;
 class IndexerNodeBase;
 
-class IndexerBase
+struct IndexerTypes
 {
-    template<typename B> friend class GeneralTreeBase;
-    template<typename T, typename A> friend class Indexer;
-    friend class IndexerNodeBase;
-
-    typedef IndexerNodeBase Node_;
-
-
-    size_t size_;
-
-
-    void check_index_();  // DEBUG
-
-public:
-    IndexerBase() : size_(0)
-    {
-    }
-
-    void clear_size_()
-    {
-        size_ = 0;
-    }
-
-    void swap_size_(IndexerBase &tree)
-    {
-        NTL::swap(size_, tree.size_);
-    }
-
-    void copy_size_(const IndexerBase &tree)
-    {
-        size_ = tree.size_;
-    }
+    typedef IndexerBase Base;
+    typedef IndexerNodeBase NodeBase;
+    typedef GeneralTreeBase<IndexerTypes> Tree;
+    typedef GeneralTreeNode<IndexerTypes> Node;
 };
 
 
 class IndexerNodeBase
 {
-    template<typename N> friend class GeneralTreeNode;
-    template<typename N, typename B, typename A> friend class GeneralTree;
+    template<typename H> friend class GeneralTreeNode;
+    template<typename N, typename H, typename A> friend class GeneralTree;
     friend class IndexerBase;
 
-    typedef GeneralTreeBase<IndexerBase> Tree_;
-    typedef GeneralTreeNode<IndexerNodeBase> Node_;
+    typedef IndexerTypes::Tree Tree_;
+    typedef IndexerTypes::Node Node_;
 
 
     size_t index_;
@@ -825,50 +811,132 @@ class IndexerNodeBase
         index_ -= node->index_ + 1;
     }
 
-    void inc_index_()
-    {
-        index_ = 0;
-        for(Node_ *node = static_cast<Node_ *>(this);; node = node->parent_)
-            if(node->type_ == Node_::t_root)
-            {
-                reinterpret_cast<Tree_ *>(node->parent_)->size_++;  return;
-            }
-            else if(node->type_ > Node_::t_right)node->parent_->index_++;
-    }
+    void inc_index_();
+    void dec_index_();
 
-    void dec_index_()
+    size_t check_index_() const  // DEBUG
     {
-        for(Node_ *node = static_cast<Node_ *>(this);; node = node->parent_)
-            if(node->type_ == Node_::t_root)
-            {
-                reinterpret_cast<Tree_ *>(node->parent_)->size_--;  return;
-            }
-            else if(node->type_ > Node_::t_right)node->parent_->index_--;
-    }
-
-    size_t check_index_()  // DEBUG
-    {
-        Node_ *node = static_cast<Node_ *>(this);
+        const Node_ *node = static_cast<const Node_ *>(this);
         size_t left = (node->left_ ? node->left_->check_index_() : 0);
         size_t right = (node->right_ ? node->right_->check_index_() : 0);
         assert(left == index_);  return left + right + 1;
     }
+
+public:
+    size_t index() const
+    {
+        size_t index = index_;
+        for(const Node_ *node = static_cast<const Node_ *>(this); node->type_ != Node_::t_root; node = node->parent_)
+            if(node->type_ == Node_::t_right)index += node->parent_->index_ + 1;  return index;
+    }
 };
 
-inline void IndexerBase::check_index_()  // DEBUG
+
+class IndexerBase
 {
-    Node_ *root = static_cast<GeneralTreeBase<IndexerBase> *>(this)->root_;
-    assert((root ? root->check_index_() : 0) == size_);
+    template<typename H> friend class GeneralTreeBase;
+    template<typename N, typename H, typename A> friend class GeneralTree;
+    template<typename T, typename A> friend class Indexer;
+    friend class IndexerNodeBase;
+
+    typedef IndexerTypes::Tree Tree_;
+    typedef IndexerTypes::Node Node_;
+    typedef Node_::Place_ PlaceBase_;
+
+
+    size_t size_;
+
+
+    void clear_size_()
+    {
+        size_ = 0;
+    }
+
+    void swap_size_(IndexerBase &tree)
+    {
+        NTL::swap(size_, tree.size_);
+    }
+
+    void copy_size_(const IndexerBase &tree)
+    {
+        size_ = tree.size_;
+    }
+
+
+    const Node_ *at_(size_t index) const  // DEBUG
+    {
+        assert(index < size_);
+        const Node_ *node = static_cast<const Tree_ *>(this)->root_;
+        while(index != node->index_)
+            if(index > node->index_)
+            {
+                index -= node->index_ + 1;  node = node->right_;
+            }
+            else node = node->left_;  return node;
+    }
+
+    PlaceBase_ at_place_(size_t index) const
+    {
+        Tree_::PlaceBase_ res;
+        for(const Node_ *node = static_cast<const Tree_ *>(this)->root_; node;)
+            if(index > node->index_)
+            {
+                res.node = node;  res.dir = 1;
+                index -= node->index_ + 1;  node = node->right_;
+            }
+            else
+            {
+                res.node = node;  res.dir = -1;
+                node = node->left_;
+            }
+        return res;
+    }
+
+    void check_index_() const  // DEBUG
+    {
+        const Node_ *root = static_cast<const Tree_ *>(this)->root_;
+        assert((root ? root->check_index_() : 0) == size_);
+    }
+
+public:
+    IndexerBase() : size_(0)
+    {
+    }
+
+    size_t size() const
+    {
+        return size_;
+    }
+};
+
+inline void IndexerNodeBase::inc_index_()
+{
+    index_ = 0;
+    for(Node_ *node = static_cast<Node_ *>(this);; node = node->parent_)
+        if(node->type_ == Node_::t_root)
+        {
+            reinterpret_cast<Tree_ *>(node->parent_)->size_++;  return;
+        }
+        else if(node->type_ > Node_::t_right)node->parent_->index_++;
+}
+
+inline void IndexerNodeBase::dec_index_()
+{
+    for(Node_ *node = static_cast<Node_ *>(this);; node = node->parent_)
+        if(node->type_ == Node_::t_root)
+        {
+            reinterpret_cast<Tree_ *>(node->parent_)->size_--;  return;
+        }
+        else if(node->type_ > Node_::t_right)node->parent_->index_--;
 }
 
 
-template<typename T> class IndexerNode : public GeneralTreeNode<IndexerNodeBase>
+template<typename T> class IndexerNode : public GeneralTreeNode<IndexerTypes>
 {
-    template<typename N, typename B, typename A> friend class GeneralTree;
+    template<typename N, typename H, typename A> friend class GeneralTree;
 
 
     typedef T Type_;
-    typedef GeneralTreeNode<IndexerNodeBase> Node_;
 
 
 public:
@@ -894,19 +962,65 @@ public:
 };
 
 
-template<typename T, typename A = EmptyAllocator<T> > class Indexer : public GeneralTree<IndexerNode<T>, IndexerBase, A>
+template<typename T, typename A = EmptyAllocator<T> > class Indexer : public GeneralTree<IndexerNode<T>, IndexerTypes, A>
 {
-    typedef GeneralTree<IndexerNode<T>, IndexerBase, A> Base_;
+    typedef GeneralTree<IndexerNode<T>, IndexerTypes, A> Base_;
+    typedef typename Base_::ConstPlace ConstPlace;
+    typedef typename Base_::Place Place;
 
+public:
     friend void swap(Indexer<T, A> &tree1, Indexer<T, A> &tree2)
     {
         swap(static_cast<Base_ &>(tree1), static_cast<Base_ &>(tree2));
     }
 
-public:
-    size_t check_()  // DEBUG
+    size_t check_() const  // DEBUG
     {
+#ifdef NTL_DEBUG
         size_t lev = Base_::check_();  IndexerBase::check_index_();  return lev;
+#else
+        return 0;
+#endif
+    }
+
+    const T *at(size_t index) const
+    {
+        return static_cast<const T *>(static_cast<const IndexerNode<T> *>(IndexerBase::at_(index)));
+    }
+
+    T *at(size_t index)
+    {
+        return const_cast<T *>(static_cast<const T *>(static_cast<const IndexerNode<T> *>(IndexerBase::at_(index))));
+    }
+
+    const T *operator [] (size_t index) const
+    {
+        return at(index);
+    }
+
+    T *operator [] (size_t index)
+    {
+        return at(index);
+    }
+
+    ConstPlace at_place(size_t index) const
+    {
+        return IndexerBase::at_place_(index);
+    }
+
+    Place at_place(size_t index)
+    {
+        return IndexerBase::at_place_(index);
+    }
+
+    T *take_at(size_t index)
+    {
+        T *node = at(index);  static_cast<IndexerNode<T> *>(node)->remove();  return node;
+    }
+
+    void insert(IndexerNode<T> *node, size_t index)
+    {
+        Base_::insert(node, IndexerBase::at_place_(index));
     }
 };
 

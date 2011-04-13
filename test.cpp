@@ -93,14 +93,16 @@ void test_tree()
     {
         OwningIndexer<NodeT2> tree;
         for(int i = 0; i < 10; i++)tree.get(i);
-        tree.check_();
+        tree.insert(new_nt NodeT2(444), 4);  tree.check_();
         {
             OwningIndexer<NodeT2> copy;  copy.check_();
             if(!copy.copy(tree))cout << "Copy failed!\n";
             else delete copy.find(1005)->next();
             copy.check_();  swap(tree, copy);  copy.check_();
         }
-        tree.check_();
+        tree.check_();  size_t index = 0;
+        for(NodeT2 *node = tree.first(); node; node = node->next(), index++)
+            assert(tree[index] == node && node->index() == index);
         for(NodeT2 *node = tree.first(); node; node = node->next())
             cout << node->id() << ' ';  cout << endl;
         for(NodeT2 *node = tree.last(); node; node = node->prev())
