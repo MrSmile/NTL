@@ -8,17 +8,21 @@ using namespace std;
 using namespace NTL;
 
 
+
 void test_string()
 {
     cout << "\n=== Testing Strings ===\n";
+    {
+        String copy, str = "~~~";
+        str = "Zzz: " + str + '\n';
+        copy = "...";  copy = str;
+        str += Literal("Next line") + '\n';
+        str += "0 " + Literal("1 ") + "2 " + "3 " + "3 " + "5 " + "6 " + "7 " + "8 " + "9 " + "10 " + '\n';
+        str += '\n';  cout << copy.data() << str.data();
 
-    String str = "~~~";
-    str = "Zzz: " + str + '\n';
-    str += Literal("Next line") + '\n';
-    str += "0 " + Literal("1 ") + "2 " + "3 " + "3 " + "5 " + "6 " + "7 " + "8 " + "9 " + "10 " + '\n';
-    str += '\n';  cout << str.data();
-
-    if(str > "ZZZ")cout << "Greater than 'ZZZ'\n";
+        if(str > "ZZZ")cout << "Greater than 'ZZZ'\n";
+    }
+    cout << endl;
 }
 
 
@@ -49,6 +53,19 @@ struct Node : public SimpleKey<int>
 };
 
 int Node::count = 0;
+
+void test_pointer()
+{
+    cout << "\n=== Testing Pointers ===\n";
+    {
+        Pointer<Node> del(new_nt Node(555));
+        Pointer<Node> node(new_nt Node(666));
+        Array<Node> array(10);  del = new_nt Node(888);
+        delete node.detach();
+    }
+    cout << endl;
+}
+
 
 struct NodeT1 : public TreeNode<NodeT1>, public Node
 {
@@ -110,18 +127,7 @@ void test_tree()
         for(NodeT2 *node = tree.last(); node; node = node->prev())
             cout << node->id() << ' ';  cout << endl;
     }
-}
-
-
-Node *test_pointer()
-{
-    cout << "\n=== Testing Pointers ===\n";
-
-    Pointer<Node> del(new_nt Node(555));
-    Pointer<Node> node(new_nt Node(666));
-    Array<Node> array(10);
-    del = new_nt Node(888);
-    return node.detach();
+    cout << endl;
 }
 
 
@@ -214,6 +220,7 @@ void test_list()
         for(NodeL3 *node = list.first(); node; node = node->next())
             cout << node->id() << ' ';  cout << endl;
     }
+    cout << endl;
 }
 
 
@@ -221,18 +228,15 @@ void time_tree();
 
 int main(int n, char **arg)
 {
-    if(n == 1)
-    {
-        test_string();
-        test_tree();
-        delete test_pointer();
-        test_list();
-        return 0;
-    }
-
     for(int i = 1; i < n; i++)
-        if(arg[i] == Literal("tree"))time_tree();
+        if(arg[i] == Literal("string"))test_string();
+        else if(arg[i] == Literal("pointer"))test_pointer();
+        else if(arg[i] == Literal("tree"))
+        {
+            test_tree();  time_tree();
+        }
+        else if(arg[i] == Literal("list"))test_list();
 
+    if(n <= 1)cout << "Usage: test [string] [pointer] [tree] [list]\n";
     return 0;
-
 }

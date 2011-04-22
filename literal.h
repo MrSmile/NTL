@@ -314,16 +314,15 @@ template<typename C> class StringBase : public StringLike<StringBase<C>, C>,
     static size_t *alloc_(size_t n)  // n = len + 1
     {
         if(!n)return 0;
-        size_t *ptr_ = reinterpret_cast<size_t *>(new_nt char[2 * sizeof(size_t) + n * sizeof(C)]);
-        if(!ptr_)return 0;  ptr_[0] = 0;  ptr_[1] = n - 1;  return ptr_;
+        size_t *ptr = reinterpret_cast<size_t *>(new_nt char[2 * sizeof(size_t) + n * sizeof(C)]);
+        if(!ptr)return 0;  ptr[0] = 0;  ptr[1] = n - 1;  return ptr;
     }
 
-    static size_t *copy_(const C *str, size_t n)  // n = len
+    template<class S> static size_t *copy_(const StringLike<S, C> &str)
     {
-        if(!str)return 0;
-        size_t *ptr_ = reinterpret_cast<size_t *>(new_nt char[2 * sizeof(size_t) + (n + 1) * sizeof(C)]);
-        if(!ptr_)return 0;  ptr_[0] = 0;  ptr_[1] = n;  memcpy(ptr_ + 2, str, n * sizeof(C));
-        reinterpret_cast<C *>(ptr_ + 2)[n] = C(0);  return ptr_;
+        if(!str.valid())return 0;  size_t *ptr = alloc_(str.length() + 1);
+        if(!ptr)return 0;  C *buf = reinterpret_cast<C *>(ptr + 2);
+        str.fill(buf);  *buf = C(0);  return ptr;
     }
 
     void add_ref_() const
@@ -350,7 +349,7 @@ protected:
 
     const C *buffer() const
     {
-        assert(ptr_ && !ptr_[0]);  return reinterpret_cast<const C *>(ptr_ + 2);
+        assert(ptr_);  return reinterpret_cast<const C *>(ptr_ + 2);
     }
 
     C *buffer()
@@ -364,33 +363,29 @@ public:
     {
     }
 
-    StringBase(const StringBase &str)
+    StringBase(const StringBase<C> &str)
     {
-        str.add_ref_();  ptr_ = str.ptr_;
-    }
-
-    StringBase(const LiteralBase<C> &str)
-    {
-        ptr_ = copy_(str.data(), str.length());
-    }
-
-    StringBase(const C *str, size_t n)
-    {
-        ptr_ = copy_(str, n);
-    }
-
-    StringBase(const C *str)
-    {
-        ptr_ = copy_(str, LiteralBase<C>(str).length());
+        ptr_ = str.ptr_;  add_ref_();
     }
 
     template<class S> StringBase(const StringLike<S, C> &str)
     {
-        if(!str.valid())
-        {
-            ptr_ = 0;  return;
-        }
-        if(!(ptr_ = alloc_(str.length() + 1)))return;  C *buf = buffer();  str.fill(buf);  *buf = C(0);
+        ptr_ = copy_(str);
+    }
+
+    StringBase(const StringLike<StringBase<C>, C> &str)
+    {
+        ptr_ = static_cast<const StringBase<C> &>(str).ptr_;  add_ref_();
+    }
+
+    StringBase(const C *str, size_t n)
+    {
+        ptr_ = copy_(LiteralBase<C>(str, n));
+    }
+
+    StringBase(const C *str)
+    {
+        ptr_ = copy_(LiteralBase<C>(str));
     }
 
     ~StringBase()
@@ -409,44 +404,34 @@ public:
         size_t *tmp = str1.ptr_;  str1.ptr_ = str2.ptr_;  str2.ptr_ = tmp;
     }
 
-    StringBase &operator = (const StringBase &str)
+    StringBase<C> &operator = (const StringBase<C> &str)
     {
         str.add_ref_();  free_();  ptr_ = str.ptr_;  return *this;
     }
 
-    StringBase &operator = (const LiteralBase<C> &str)
+    template<class S> StringBase<C> &operator = (const StringLike<S, C> &str)
     {
-        size_t *res = copy_(str.data(), str.length());  free_();  ptr_ = res;  return *this;
+        size_t *res = copy_(str);  free_();  ptr_ = res;  return *this;
     }
 
-    StringBase &operator = (const C *str)
+    StringBase<C> &operator = (const StringLike<StringBase<C>, C> &str)
+    {
+        return *this = static_cast<const StringBase<C> &>(str);
+    }
+
+    StringBase<C> &operator = (const C *str)
     {
         return *this = LiteralBase<C>(str);
     }
 
-    template<class S> StringBase &operator = (const StringLike<S, C> &str)
-    {
-        if(!str.valid())
-        {
-            clear();  return *this;
-        }
-        size_t *res = alloc_(str.length() + 1);
-        if(res)
-        {
-            C *buf = reinterpret_cast<C *>(res + 2);  str.fill(buf);  *buf = C(0);
-        }
-        free_();  ptr_ = res;  return *this;
-    }
-
-    template<class S> StringBase &operator += (const S &str)
+    template<class S> StringBase<C> &operator += (const S &str)
     {
         return *this = *this + str;
     }
 
     operator const LiteralBase<C>() const
     {
-        return !ptr_ ? LiteralBase<C>() :
-            LiteralBase<C>(buffer(), ptr_[1]);
+        return !ptr_ ? LiteralBase<C>() : LiteralBase<C>(buffer(), ptr_[1]);
     }
 
 
