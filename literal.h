@@ -41,8 +41,8 @@ template<class S, typename C> struct StringLike
     // must be defined:
     // bool S::valid() const;
     // size_t S::length() const;
-    // void S::fill(C *&buf) const;
-    // void S::fill(C *&buf, size_t &max, size_t &start) const;
+    // void S::fill(B &buf) const;
+    // void B::operator () (const C *ptr, size_t len);
 
     bool valid() const
     {
@@ -54,14 +54,9 @@ template<class S, typename C> struct StringLike
         return static_cast<const S *>(this)->length();
     }
 
-    void fill(C *&buf) const
+    template<typename B> void fill(B &buf) const
     {
-        return static_cast<const S *>(this)->fill(buf);
-    }
-
-    void fill(C *&buf, size_t &max, size_t &start) const
-    {
-        return static_cast<const S *>(this)->fill(buf, max, start);
+        static_cast<const S *>(this)->fill(buf);
     }
 
     template<typename S1> Concatenation<const S &, const S1 &, C> operator + (const StringLike<S1, C> &str) const;
@@ -90,14 +85,9 @@ public:
         return op1_.length() + op2_.length();
     }
 
-    void fill(C *&buf) const
+    template<typename B> void fill(B &buf) const
     {
         op1_.fill(buf);  op2_.fill(buf);
-    }
-
-    void fill(C *&buf, size_t &max, size_t &start) const
-    {
-        op1_.fill(buf, max, start);  op2_.fill(buf, max, start);
     }
 };
 
@@ -158,22 +148,9 @@ public:
         return 1;
     }
 
-    void fill(C *&buf) const
+    template<typename B> void fill(B &buf) const
     {
-        *buf++ = ch_;
-    }
-
-    void fill(C *&buf, size_t &max, size_t &start) const
-    {
-        if(start)
-        {
-            start--;  return;
-        }
-        if(max)
-        {
-            *buf = ch_;  max--;
-        }
-        buf++;
+        buf(&ch_, 1);
     }
 };
 
@@ -283,27 +260,9 @@ public:
         return len_;
     }
 
-    void fill(C *&buf) const
+    template<typename B> void fill(B &buf) const
     {
-        memcpy(buf, ptr_, len_ * sizeof(C));  buf += len_;
-    }
-
-    void fill(C *&buf, size_t &max, size_t &start) const
-    {
-        if(start >= len_)
-        {
-            start -= len_;  return;
-        }
-        size_t len = len_ - start;
-        if(len < max)
-        {
-            memcpy(buf, ptr_ + start, len * sizeof(C));  max -= len;
-        }
-        else
-        {
-            memcpy(buf, ptr_ + start, max * sizeof(C));  max = 0;
-        }
-        start = 0;  buf += len;
+        buf(ptr_, len_);
     }
 };
 
@@ -331,6 +290,21 @@ template<typename C> class StringBase : public StringLike<StringBase<C>, C>,
     size_t *volatile ptr_;  // refcount, length, data
 
 
+    struct Buffer
+    {
+        C *buf;
+
+        Buffer(size_t *ptr) : buf(reinterpret_cast<C *>(ptr + 2))
+        {
+        }
+
+        void operator () (const C *ptr, size_t len)
+        {
+            std::memcpy(buf, ptr, len * sizeof(C));  buf += len;
+        }
+    };
+
+
     static size_t *alloc_(size_t n)  // n = len + 1
     {
         if(!n)return 0;
@@ -341,8 +315,7 @@ template<typename C> class StringBase : public StringLike<StringBase<C>, C>,
     template<class S> static size_t *copy_(const StringLike<S, C> &str)
     {
         if(!str.valid())return 0;  size_t *ptr = alloc_(str.length() + 1);
-        if(!ptr)return 0;  C *buf = reinterpret_cast<C *>(ptr + 2);
-        str.fill(buf);  *buf = C(0);  return ptr;
+        if(!ptr)return 0;  Buffer buf(ptr);  str.fill(buf);  *buf.buf = C(0);  return ptr;
     }
 
     void add_ref_() const
@@ -503,28 +476,9 @@ public:
         return ptr_ ? ptr_[1] : 0;
     }
 
-    void fill(C *&buf) const
+    template<typename B> void fill(B &buf) const
     {
-        if(!ptr_)return;  memcpy(buf, buffer(), ptr_[1] * sizeof(C));  buf += ptr_[1];
-    }
-
-    void fill(C *&buf, size_t &max, size_t &start) const
-    {
-        if(!ptr_)return;
-        if(start >= ptr_[1])
-        {
-            start -= ptr_[1];  return;
-        }
-        size_t len = ptr_[1] - start;
-        if(len < max)
-        {
-            memcpy(buf, buffer() + start, len * sizeof(C));  max -= len;
-        }
-        else
-        {
-            memcpy(buf, buffer() + start, max * sizeof(C));  max = 0;
-        }
-        start = 0;  buf += len;
+        if(!ptr_)return;  buf(buffer(), ptr_[1]);
     }
 };
 
