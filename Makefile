@@ -1,9 +1,11 @@
 
 SOURCE = test.cpp benchmark.cpp 
-HEADER = base.h allocator.h pointer.h list.h tree.h literal.h
+HEADER = include/base.h include/allocator.h include/pointer.h \
+	include/list.h include/tree.h include/literal.h
+FLAGS = -std=c++98 -pedantic -fno-exceptions -Iinclude
 
 debug: $(SOURCE) $(HEADER)
-	g++ -g -DDEBUG -std=c++98 -pedantic -fno-exceptions $(SOURCE) -o test
+	g++ -g -DDEBUG $(FLAGS) $(SOURCE) -o test
 
 release: $(SOURCE) $(HEADER)
-	g++ -O3 -fno-exceptions $(SOURCE) -o test
+	g++ -O3 $(FLAGS) $(SOURCE) -o test
