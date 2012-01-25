@@ -46,8 +46,8 @@ template<class S, typename C> struct StringLike
     // must be defined:
     // bool S::valid() const;
     // size_t S::length() const;
-    // void S::fill(B &buf) const;
-    // void B::operator () (const C *ptr, size_t len);
+    // bool S::fill(B &buf) const;
+    // bool B::operator () (const C *ptr, size_t len);
 
     bool valid() const
     {
@@ -59,9 +59,9 @@ template<class S, typename C> struct StringLike
         return static_cast<const S *>(this)->length();
     }
 
-    template<typename B> void fill(B &buf) const
+    template<typename B> bool fill(B &buf) const
     {
-        static_cast<const S *>(this)->fill(buf);
+        return static_cast<const S *>(this)->fill(buf);
     }
 
     template<typename S1> Concatenation<const S &, const S1 &, C> operator + (const StringLike<S1, C> &str) const;
@@ -90,9 +90,9 @@ public:
         return op1_.length() + op2_.length();
     }
 
-    template<typename B> void fill(B &buf) const
+    template<typename B> bool fill(B &buf) const
     {
-        op1_.fill(buf);  op2_.fill(buf);
+        return op1_.fill(buf) && op2_.fill(buf);
     }
 };
 
@@ -153,9 +153,9 @@ public:
         return 1;
     }
 
-    template<typename B> void fill(B &buf) const
+    template<typename B> bool fill(B &buf) const
     {
-        buf(&ch_, 1);
+        return buf(&ch_, 1);
     }
 };
 
@@ -265,9 +265,9 @@ public:
         return len_;
     }
 
-    template<typename B> void fill(B &buf) const
+    template<typename B> bool fill(B &buf) const
     {
-        buf(ptr_, len_);
+        return buf(ptr_, len_);
     }
 };
 
@@ -303,9 +303,9 @@ template<typename C> class StringBase : public StringLike<StringBase<C>, C>,
         {
         }
 
-        void operator () (const C *ptr, size_t len)
+        bool operator () (const C *ptr, size_t len)
         {
-            memcpy(buf, ptr, len * sizeof(C));  buf += len;
+            memcpy(buf, ptr, len * sizeof(C));  buf += len;  return true;
         }
     };
 
@@ -481,9 +481,9 @@ public:
         return ptr_ ? ptr_[1] : 0;
     }
 
-    template<typename B> void fill(B &buf) const
+    template<typename B> bool fill(B &buf) const
     {
-        if(!ptr_)return;  buf(buffer(), ptr_[1]);
+        return ptr_ ? buf(buffer(), ptr_[1]) : true;
     }
 };
 
