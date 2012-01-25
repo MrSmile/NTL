@@ -169,7 +169,8 @@ template<typename H> class GeneralTreeNode : public H::NodeBase, public Heavy
         while(node);
     }
 
-    size_t check_() const  // DEBUG
+#ifdef NTL_DEBUG
+    size_t check_() const
     {
         size_t lev = 0;
         assert(type_ != t_left_red || parent_->type_ != t_left_red);
@@ -188,6 +189,7 @@ template<typename H> class GeneralTreeNode : public H::NodeBase, public Heavy
         assert(type_ != t_root || reinterpret_cast<Tree_ *>(parent_)->root_ == this);
         return type_ == t_left_red ? lev : lev + 1;
     }
+#endif
 
 
     struct Place_
@@ -341,7 +343,7 @@ public:
     {
     }
 
-    size_t check_() const  // DEBUG
+    size_t check_() const
     {
 #ifdef NTL_DEBUG
         if(!root_)return 0;  assert(root_->type_ == Node_::t_root);  return root_->check_();
@@ -818,13 +820,15 @@ class IndexerNodeBase
     void inc_index_();
     void dec_index_();
 
-    size_t check_index_() const  // DEBUG
+#ifdef NTL_DEBUG
+    size_t check_index_() const
     {
         const Node_ *node = static_cast<const Node_ *>(this);
         size_t left = (node->left_ ? node->left_->check_index_() : 0);
         size_t right = (node->right_ ? node->right_->check_index_() : 0);
         assert(left == index_);  return left + right + 1;
     }
+#endif
 
 public:
     size_t index() const
@@ -867,7 +871,7 @@ class IndexerBase
     }
 
 
-    const Node_ *at_(size_t index) const  // DEBUG
+    const Node_ *at_(size_t index) const
     {
         assert(index < size_);
         const Node_ *node = static_cast<const Tree_ *>(this)->root_;
@@ -896,11 +900,13 @@ class IndexerBase
         return res;
     }
 
-    void check_index_() const  // DEBUG
+#ifdef NTL_DEBUG
+    void check_index_() const
     {
         const Node_ *root = static_cast<const Tree_ *>(this)->root_;
         assert((root ? root->check_index_() : 0) == size_);
     }
+#endif
 
 public:
     IndexerBase() : size_(0)
@@ -1011,7 +1017,7 @@ public:
         swap(static_cast<Base_ &>(tree1), static_cast<Base_ &>(tree2));
     }
 
-    size_t check_() const  // DEBUG
+    size_t check_() const
     {
 #ifdef NTL_DEBUG
         size_t lev = Base_::check_();  IndexerBase::check_index_();  return lev;
