@@ -31,6 +31,11 @@ namespace NTL_Internal_ {
 
 
 
+using std::strlen;
+using std::memcpy;
+using std::memcmp;
+
+
 template<typename C> class Character;
 template<typename C> class StringBase;
 template<typename C> class LiteralBase;
@@ -267,16 +272,16 @@ public:
 };
 
 template<> inline LiteralBase<char>::LiteralBase(const char *str) :
-    ptr_(str), len_(str ? std::strlen(str) : 0)
+    ptr_(str), len_(str ? strlen(str) : 0)
 {
 }
 
 template<> inline int LiteralBase<char>::cmp(const LiteralBase &str) const
 {
     if(!ptr_)return str.ptr_ ? -1 : 0;  if(!str.ptr_)return 1;
-    if(len_ < str.len_)return std::memcmp(ptr_, str.ptr_, len_) > 0 ? 1 : -1;
-    if(len_ > str.len_)return std::memcmp(ptr_, str.ptr_, str.len_) < 0 ? -1 : 1;
-    return std::memcmp(ptr_, str.ptr_, len_);
+    if(len_ < str.len_)return memcmp(ptr_, str.ptr_, len_) > 0 ? 1 : -1;
+    if(len_ > str.len_)return memcmp(ptr_, str.ptr_, str.len_) < 0 ? -1 : 1;
+    return memcmp(ptr_, str.ptr_, len_);
 }
 
 typedef LiteralBase<char> Literal;
@@ -300,7 +305,7 @@ template<typename C> class StringBase : public StringLike<StringBase<C>, C>,
 
         void operator () (const C *ptr, size_t len)
         {
-            std::memcpy(buf, ptr, len * sizeof(C));  buf += len;
+            memcpy(buf, ptr, len * sizeof(C));  buf += len;
         }
     };
 

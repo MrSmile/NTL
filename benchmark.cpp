@@ -21,10 +21,10 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ***************************************************************************************************/
 
-#include <map>
-#include <ctime>
-#include <iostream>
 #include "tree.h"
+#include <iostream>
+#include <ctime>
+#include <map>
 
 using namespace std;
 using namespace NTL;

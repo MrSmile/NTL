@@ -31,6 +31,128 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
 
+#ifdef _MSC_VER
+
+namespace NTL_Internal_
+{
+    inline void debug_break()
+    {
+        __asm int 3;
+    }
+}
+
+#elif defined __GNUC__
+
+namespace NTL_Internal_
+{
+    inline void debug_break()
+    {
+        asm("int $3");
+    }
+}
+
+#else
+
+#include <cstdlib>
+
+namespace NTL_Internal_
+{
+    inline void debug_break()
+    {
+        std::abort();
+    }
+}
+
+#endif
+
+
+#undef assert
+
+#ifdef NTL_DEBUG
+
+#include <iostream>
+
+namespace NTL_Internal_
+{
+    inline void ntl_assert(bool test, const char *msg)
+    {
+        if(test)return;  std::cout << msg;  debug_break();
+    }
+}
+
+#define NTL_STRING(str) #str
+#define NTL_ASSERT(expr, file, line) \
+    NTL_Internal_::ntl_assert(expr, "Assert failed: " #expr "; file " file "; line " NTL_STRING(line) ".\n")
+#define assert(expr) NTL_ASSERT(expr, __FILE__, __LINE__)
+
+#else
+
+namespace NTL_Internal_
+{
+    inline void ntl_assert()
+    {
+    }
+}
+
+#define assert(expr) NTL_Internal_::ntl_assert()
+
+#endif
+
+
+
+#if defined _MSC_VER
+
+#include <intrin.h>
+#pragma intrinsic(_InterlockedExchangeAdd)
+#pragma warning(disable: 4800)
+
+namespace NTL_Internal_
+{
+    inline size_t sync_inc(volatile size_t &n)
+    {
+        return size_t(_InterlockedExchangeAdd(reinterpret_cast<volatile long *>(&n), 1));
+    }
+
+    inline size_t sync_dec(volatile size_t &n)
+    {
+        return size_t(_InterlockedExchangeAdd(reinterpret_cast<volatile long *>(&n), -1));
+    }
+}
+
+#elif defined __GNUC__
+
+namespace NTL_Internal_
+{
+    inline size_t sync_inc(volatile size_t &n)
+    {
+        return __sync_fetch_and_add(&n, size_t(1));
+    }
+
+    inline size_t sync_dec(volatile size_t &n)
+    {
+        return __sync_fetch_and_sub(&n, size_t(1));
+    }
+}
+
+#else  // Not thread safe!!!
+
+namespace NTL_Internal_
+{
+    inline size_t sync_inc(volatile size_t &n)
+    {
+        n++;
+    }
+
+    inline size_t sync_dec(volatile size_t &n)
+    {
+        n--;
+    }
+}
+
+#endif
+
+
+
 namespace NTL_Internal_ {
 
 
@@ -54,50 +176,6 @@ struct invalid_ptr_t
 };
 
 static invalid_ptr_t invalid_ptr;
-
-#endif
-
-
-
-#if defined _MSC_VER
-
-#include <intrin.h>
-#pragma intrinsic(_InterlockedExchangeAdd)
-#pragma warning(disable: 4800)
-
-inline size_t sync_inc(volatile size_t &n)
-{
-    return size_t(_InterlockedExchangeAdd(reinterpret_cast<volatile long *>(&n), 1));
-}
-
-inline size_t sync_dec(volatile size_t &n)
-{
-    return size_t(_InterlockedExchangeAdd(reinterpret_cast<volatile long *>(&n), -1));
-}
-
-#elif defined __GNUC__
-
-inline size_t sync_inc(volatile size_t &n)
-{
-    return __sync_fetch_and_add(&n, size_t(1));
-}
-
-inline size_t sync_dec(volatile size_t &n)
-{
-    return __sync_fetch_and_sub(&n, size_t(1));
-}
-
-#else  // Not thread safe!!!
-
-inline size_t sync_inc(volatile size_t &n)
-{
-    n++;
-}
-
-inline size_t sync_dec(volatile size_t &n)
-{
-    n--;
-}
 
 #endif
 
@@ -230,60 +308,6 @@ template<typename T> struct Comparable<T, T>
         return obj1.cmp(obj2) <= 0;
     }
 };
-
-
-
-#ifdef _MSC_VER
-
-inline void debug_break()
-{
-    __asm int 3;
-}
-
-#elif defined __GNUC__
-
-inline void debug_break()
-{
-    asm("int $3");
-}
-
-#else
-
-#include <cstdlib>
-
-inline void debug_break()
-{
-    abort();
-}
-
-#endif
-
-
-#undef assert
-
-#ifdef NTL_DEBUG
-
-#include <iostream>
-
-inline void ntl_assert(bool test, const char *msg)
-{
-    if(test)return;  std::cout << msg;  debug_break();
-}
-
-#define NTL_STRING(str) #str
-#define NTL_ASSERT(expr, file, line) \
-    NTL_Internal_::ntl_assert(expr, "Assert failed: " #expr "; file " file "; line " NTL_STRING(line) ".\n")
-#define assert(expr) NTL_ASSERT(expr, __FILE__, __LINE__)
-
-#else
-
-inline void ntl_assert()
-{
-}
-
-#define assert(expr) NTL_Internal_::ntl_assert()
-
-#endif
 
 
 
