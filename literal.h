@@ -295,11 +295,11 @@ template<typename C> class StringBase : public StringLike<StringBase<C>, C>,
     size_t *volatile ptr_;  // refcount, length, data
 
 
-    struct Buffer
+    struct Buffer_
     {
         C *buf;
 
-        Buffer(size_t *ptr) : buf(reinterpret_cast<C *>(ptr + 2))
+        Buffer_(size_t *ptr) : buf(reinterpret_cast<C *>(ptr + 2))
         {
         }
 
@@ -320,7 +320,7 @@ template<typename C> class StringBase : public StringLike<StringBase<C>, C>,
     template<class S> static size_t *copy_(const StringLike<S, C> &str)
     {
         if(!str.valid())return 0;  size_t *ptr = alloc_(str.length() + 1);
-        if(!ptr)return 0;  Buffer buf(ptr);  str.fill(buf);  *buf.buf = C(0);  return ptr;
+        if(!ptr)return 0;  Buffer_ buf(ptr);  str.fill(buf);  *buf.buf = C(0);  return ptr;
     }
 
     void add_ref_() const
