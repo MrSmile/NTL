@@ -104,6 +104,7 @@ template<typename H> class GeneralTreeNode : public H::NodeBase, public Heavy
             }
             else type_ = t_left_red;
         else if(type_ == t_right)
+        {
             if(parent_->left_ && parent_->left_->type_ == t_left_red)
             {
                 parent_->left_->type_ = t_left;  return parent_;
@@ -116,6 +117,7 @@ template<typename H> class GeneralTreeNode : public H::NodeBase, public Heavy
                     left_->type_ = t_left;  parent_->rotate_right_();  return this;
                 }
             }
+        }
         return 0;
     }
 
@@ -132,6 +134,7 @@ template<typename H> class GeneralTreeNode : public H::NodeBase, public Heavy
                 parent_->rotate_left_();  return parent_->parent_;
             }
         else if(type_ == t_right)
+        {
             if(parent_->left_->type_ == t_left)
                 if(parent_->left_->left_ && parent_->left_->left_->type_ == t_left_red)
                 {
@@ -150,6 +153,7 @@ template<typename H> class GeneralTreeNode : public H::NodeBase, public Heavy
                 {
                     parent_->rotate_right_();  parent_->left_->type_ = t_left_red;
                 }
+        }
         return 0;
     }
 

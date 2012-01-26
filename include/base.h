@@ -31,7 +31,17 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
 
+#if defined _DEBUG || defined DEBUG
+#define NTL_DEBUG
+#else 
+#undef NTL_DEBUG
+#endif
+
+
+
 #ifdef _MSC_VER
+
+#define NTL_UNUSED
 
 namespace NTL_Internal_
 {
@@ -43,6 +53,8 @@ namespace NTL_Internal_
 
 #elif defined __GNUC__
 
+#define NTL_UNUSED  __attribute__((unused))
+
 namespace NTL_Internal_
 {
     inline void debug_break()
@@ -52,6 +64,8 @@ namespace NTL_Internal_
 }
 
 #else
+
+#define NTL_UNUSED
 
 #include <cstdlib>
 
@@ -163,9 +177,7 @@ using std::swap;
 
 
 
-#if defined _DEBUG || defined DEBUG
-
-#define NTL_DEBUG
+#ifdef NTL_DEBUG
 
 struct invalid_ptr_t
 {
@@ -175,7 +187,7 @@ struct invalid_ptr_t
     }
 };
 
-static invalid_ptr_t invalid_ptr;
+static invalid_ptr_t invalid_ptr NTL_UNUSED;
 
 #endif
 
