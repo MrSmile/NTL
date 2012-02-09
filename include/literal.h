@@ -190,6 +190,11 @@ public:
 
     C operator [] (size_t index) const
     {
+        return at(index);
+    }
+
+    C at(size_t index) const
+    {
         assert(index < len_);  return ptr_[index];
     }
 
@@ -435,7 +440,12 @@ public:
 
     C operator [] (size_t index) const
     {
-        assert(ptr_ && index < ptr_[1]);  return buffer()[index];
+        return at(index);
+    }
+
+    C at(size_t index) const
+    {
+        assert(ptr_ && index <= ptr_[1]);  return buffer()[index];
     }
 
     LiteralBase<C> substr(size_t beg, size_t n = size_t(-1)) const
