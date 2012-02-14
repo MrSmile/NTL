@@ -66,8 +66,8 @@ template<typename H> class GeneralTreeNode : public H::NodeBase, public Heavy
 
     void set_parent_(Node_ *ptr, NodeType_ tp)
     {
-        parent_ = ptr;  type_ = tp;
-        switch(tp)
+        parent_ = ptr;
+        switch(type_ = tp)
         {
         case t_root:  reinterpret_cast<Tree_ *>(ptr)->root_ = this;  return;
         case t_right:  ptr->right_ = this;  return;
@@ -99,42 +99,29 @@ template<typename H> class GeneralTreeNode : public H::NodeBase, public Heavy
     {
         switch(type_)
         {
-        case t_left:
-            if(parent_->type_ == t_left_red)
-            {
-                parent_->parent_->rotate_right_();  return parent_;
-            }
-            type_ = t_left_red;  break;
-
         case t_right:
             if(parent_->left_ && parent_->left_->type_ == t_left_red)
             {
                 parent_->left_->type_ = t_left;  return parent_;
             }
-            parent_->rotate_left_();
-            if(type_ == t_left_red)
+            parent_->rotate_left_();  if(type_ != t_left_red)return 0;
+            left_->type_ = t_left;  parent_->rotate_right_();  return this;
+
+        case t_left:
+            if(parent_->type_ == t_left_red)
             {
-                left_->type_ = t_left;  parent_->rotate_right_();  return this;
+                parent_->parent_->rotate_right_();  return parent_;
             }
+            type_ = t_left_red;
+        default:
+            return 0;
         }
-        return 0;
     }
 
     Node_ *remove_red_()
     {
         switch(type_)
         {
-        case t_left_red:
-            type_ = t_left;  break;
-
-        case t_left:
-            if(!parent_->right_->left_ || parent_->right_->left_->type_ != t_left_red)
-            {
-                parent_->rotate_left_();  return parent_->parent_;
-            }
-            parent_->right_->rotate_right_();  parent_->rotate_left_();
-            parent_->type_ = t_left;  break;
-
         case t_right:
             if(parent_->left_->type_ == t_left)
             {
@@ -152,8 +139,21 @@ template<typename H> class GeneralTreeNode : public H::NodeBase, public Heavy
             {
                 parent_->rotate_right_();  parent_->left_->type_ = t_left_red;
             }
+            return 0;
+
+        case t_left:
+            if(!parent_->right_->left_ || parent_->right_->left_->type_ != t_left_red)
+            {
+                parent_->rotate_left_();  return parent_->parent_;
+            }
+            parent_->right_->rotate_right_();  parent_->rotate_left_();
+            parent_->type_ = t_left;  return 0;
+
+        case t_left_red:
+            type_ = t_left;
+        default:
+            return 0;
         }
-        return 0;
     }
 
     void insert_(Node_ *node, bool after)
