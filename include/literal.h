@@ -48,6 +48,7 @@ template<class S, typename C> struct StringLike
     // size_t S::length() const;
     // bool S::fill(B &buf) const;
     // bool B::operator () (const C *ptr, size_t len);
+    // bool B::operator () (C ch);
 
     bool valid() const
     {
@@ -155,7 +156,7 @@ public:
 
     template<typename B> bool fill(B &buf) const
     {
-        return buf(&ch_, 1);
+        return buf(ch_);
     }
 };
 
@@ -312,6 +313,11 @@ template<typename C> class StringBase : public StringLike<StringBase<C>, C>,
         {
             memcpy(buf, ptr, len * sizeof(C));  buf += len;  return true;
         }
+
+        bool operator () (C ch)
+        {
+            *buf++ = ch;  return true;
+        }
     };
 
 
@@ -347,7 +353,8 @@ protected:
 
     bool resize(size_t n)
     {
-        free_();  return (ptr_ = alloc_(n)) != 0;
+        size_t *res = alloc_(n);  if(!res && n)return false;
+        free_();  ptr_ = res;  return true;
     }
 
     const C *buffer() const
