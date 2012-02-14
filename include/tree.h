@@ -97,25 +97,24 @@ template<typename H> class GeneralTreeNode : public H::NodeBase, public Heavy
 
     Node_ *make_red_()
     {
-        if(type_ == t_left)
+        switch(type_)
+        {
+        case t_left:
             if(parent_->type_ == t_left_red)
             {
                 parent_->parent_->rotate_right_();  return parent_;
             }
-            else type_ = t_left_red;
-        else if(type_ == t_right)
-        {
+            type_ = t_left_red;  break;
+
+        case t_right:
             if(parent_->left_ && parent_->left_->type_ == t_left_red)
             {
                 parent_->left_->type_ = t_left;  return parent_;
             }
-            else
+            parent_->rotate_left_();
+            if(type_ == t_left_red)
             {
-                parent_->rotate_left_();
-                if(type_ == t_left_red)
-                {
-                    left_->type_ = t_left;  parent_->rotate_right_();  return this;
-                }
+                left_->type_ = t_left;  parent_->rotate_right_();  return this;
             }
         }
         return 0;
@@ -123,36 +122,36 @@ template<typename H> class GeneralTreeNode : public H::NodeBase, public Heavy
 
     Node_ *remove_red_()
     {
-        if(type_ == t_left_red)type_ = t_left;
-        else if(type_ == t_left)
-            if(parent_->right_->left_ && parent_->right_->left_->type_ == t_left_red)
-            {
-                parent_->right_->rotate_right_();  parent_->rotate_left_();  parent_->type_ = t_left;
-            }
-            else
+        switch(type_)
+        {
+        case t_left_red:
+            type_ = t_left;  break;
+
+        case t_left:
+            if(!parent_->right_->left_ || parent_->right_->left_->type_ != t_left_red)
             {
                 parent_->rotate_left_();  return parent_->parent_;
             }
-        else if(type_ == t_right)
-        {
+            parent_->right_->rotate_right_();  parent_->rotate_left_();
+            parent_->type_ = t_left;  break;
+
+        case t_right:
             if(parent_->left_->type_ == t_left)
-                if(parent_->left_->left_ && parent_->left_->left_->type_ == t_left_red)
-                {
-                    parent_->left_->left_->type_ = t_left;  parent_->rotate_right_();
-                }
-                else
+            {
+                if(!parent_->left_->left_ || parent_->left_->left_->type_ != t_left_red)
                 {
                     parent_->left_->type_ = t_left_red;  return parent_;
                 }
+                parent_->left_->left_->type_ = t_left;  parent_->rotate_right_();
+            }
+            else if(parent_->left_->right_->left_ && parent_->left_->right_->left_->type_ == t_left_red)
+            {
+                parent_->left_->rotate_left_();  parent_->rotate_right_();
+            }
             else
-                if(parent_->left_->right_->left_ && parent_->left_->right_->left_->type_ == t_left_red)
-                {
-                    parent_->left_->rotate_left_();  parent_->rotate_right_();
-                }
-                else
-                {
-                    parent_->rotate_right_();  parent_->left_->type_ = t_left_red;
-                }
+            {
+                parent_->rotate_right_();  parent_->left_->type_ = t_left_red;
+            }
         }
         return 0;
     }
