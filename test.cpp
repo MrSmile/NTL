@@ -21,7 +21,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ***************************************************************************************************/
 
-#include "literal.h"
+#include "format.h"
 #include "pointer.h"
 #include "tree.h"
 #include "list.h"
@@ -41,6 +41,15 @@ void test_string()
         str += '\n';  std::cout << copy.data() << str.data();
 
         if(str > "ZZZ")std::cout << "Greater than 'ZZZ'\n";
+    }
+    std::cout << "\n=== Testing Format ===\n";
+    {
+        NTL::String str = NTL::format("Format %1:%2:%3;") + '\n';
+        str += NTL::format("Format %3:%2:%1;") % "111" % "222" % "333" + '\n';
+        str += NTL::format("Format %1:%2%2:%3%3%3;") % "111" % "22" % "3" + '\n';
+        str += NTL::format("Format %1:%2:%3;") % NTL::arg("AA") % NTL::arg("BB") % NTL::arg("CC") + '\n';
+        str += NTL::format("Format %A:%B:%C;") % NTL::arg<'C'>("CC") % NTL::arg<'B'>("BB") % NTL::arg<'A'>("AA") + '\n';
+        std::cout << str.data();
     }
     std::cout << std::endl;
 }
