@@ -96,6 +96,7 @@ template<typename C> Argument<LiteralBase<C>, C, C(0)> arg(const C *str)
 }
 
 
+
 template<typename T, typename S, typename C, C ch, C def> class Composite;
 
 template<typename T, typename C, C def> class ArgBase : public StringLike<T, C>
@@ -104,6 +105,7 @@ template<typename T, typename C, C def> class ArgBase : public StringLike<T, C>
     {
         next_ = def < C('9') ? def + 1 : C(0)
     };
+
 
 public:
     template<typename S, C ch> Composite<T, const Argument<S, C, ch> &, C, ch, next_>
@@ -128,38 +130,28 @@ public:
     {
         return Composite<T, LiteralBase<C>, C, def, next_>(*static_cast<const T *>(this), str);
     }
+
+    size_t length() const;
+    template<typename B> bool fill(B &buf) const;
 };
 
 
 template<typename T, typename S, typename C, C ch, C def> class Composite :
     public ArgBase<Composite<T, S, C, ch, def>, C, def>
 {
+    template<typename, typename C1, C1> friend class ArgBase;
     template<typename, typename, typename C1, C1, C1> friend class Composite;
-    template<typename C1, C1> friend class Format;
+    template<typename, typename> friend class FormatMaker;
+
+    enum Flag_
+    {
+        flag_ = T::flag_
+    };
+
 
     const T &prev_;
     S arg_;
 
-
-    size_t arg_len_(C cur) const
-    {
-        return cur == ch ? arg_.length() : prev_.arg_len_(cur);
-    }
-
-    template<typename B> bool put_arg_(C cur, B &buf) const
-    {
-        return cur == ch ? arg_.fill(buf) : prev_.put_arg_(cur, buf);
-    }
-
-    template<typename T1> size_t length_(const T1 &top) const
-    {
-        return prev_.length_(top);
-    }
-
-    template<typename T1, typename B> bool fill_(const T1 &top, B &buf) const
-    {
-        return prev_.fill_(top, buf);
-    }
 
 public:
     template<typename S1> Composite(const T &prev, const S1 &arg) : prev_(prev), arg_(arg)
@@ -170,60 +162,23 @@ public:
     {
         return prev_.valid() && arg_.valid();
     }
-
-    size_t length() const
-    {
-        return prev_.length_(*this);
-    }
-
-    template<typename B> bool fill(B &buf) const
-    {
-        return prev_.fill_(*this, buf);
-    }
 };
 
 
 template<typename C, C ch> class Format : public ArgBase<Format<C, ch>, C, C('1')>
 {
+    template<typename, typename C1, C1> friend class ArgBase;
     template<typename, typename, typename C1, C1, C1> friend class Composite;
+    template<typename, typename> friend class FormatMaker;
+
+    enum Flag_
+    {
+        flag_ = ch
+    };
+
 
     LiteralBase<C> fmt_;
 
-
-    size_t arg_len_(C cur) const
-    {
-        return 1;
-    }
-
-    template<typename B> bool put_arg_(C cur, B &buf) const
-    {
-        return buf(cur);
-    }
-
-    template<typename T1> size_t length_(const T1 &top) const
-    {
-        size_t res = fmt_.length();
-        for(size_t i = 0; i < fmt_.length(); i++)if(fmt_[i] == ch)
-        {
-            res -= 2;  if(++i >= fmt_.length())return res + 1;
-            res += top.arg_len_(fmt_[i]);
-        }
-        return res;
-    }
-
-    template<typename T1, typename B> bool fill_(const T1 &top, B &buf) const
-    {
-        for(size_t i = 0; i < fmt_.length(); i++)
-        {
-            if(fmt_[i] == ch)
-            {
-                if(++i >= fmt_.length())return true;
-                if(!top.put_arg_(fmt_[i], buf))return false;;
-            }
-            else if(!buf(fmt_[i]))return false;
-        }
-        return true;
-    }
 
 public:
     Format(const LiteralBase<C> &str) : fmt_(str)
@@ -233,16 +188,6 @@ public:
     bool valid() const
     {
         return fmt_.valid();
-    }
-
-    size_t length() const
-    {
-        return length_(*this);
-    }
-
-    template<typename B> bool fill(B &buf) const
-    {
-        return fill_(*this, buf);
     }
 };
 
@@ -274,6 +219,73 @@ template<typename C> Format<C, C('%')> format(const C *str, size_t n)
 template<typename C> Format<C, C('%')> format(const C *str)
 {
     return Format<C, C('%')>(LiteralBase<C>(str));
+}
+
+
+
+template<typename T, typename C> struct FormatMaker
+{
+    static const LiteralBase<C> &format(const T &obj)
+    {
+        return obj.fmt_;
+    }
+
+    static size_t length(const T &obj, C cur)
+    {
+        return 1;
+    }
+
+    template<typename B> static bool fill(const T &obj, C cur, B &buf)
+    {
+        return buf(cur);
+    }
+};
+
+template<typename T, typename S, typename C, C ch, C def> struct FormatMaker<Composite<T, S, C, ch, def>, C>
+{
+    static const LiteralBase<C> &format(const Composite<T, S, C, ch, def> &obj)
+    {
+        return FormatMaker<T, C>::format(obj.prev_);
+    }
+
+    static size_t length(const Composite<T, S, C, ch, def> &obj, C cur)
+    {
+        return cur == ch ? obj.arg_.length() : FormatMaker<T, C>::length(obj.prev_, cur);
+    }
+
+    template<typename B> static bool fill(const Composite<T, S, C, ch, def> &obj, C cur, B &buf)
+    {
+        return cur == ch ? obj.arg_.fill(buf) : FormatMaker<T, C>::fill(obj.prev_, cur, buf);
+    }
+};
+
+
+template<typename T, typename C, C def> size_t ArgBase<T, C, def>::length() const
+{
+    const T &self = *static_cast<const T *>(this);
+    const LiteralBase<C> &fmt = FormatMaker<T, C>::format(self);  size_t res = fmt.length();
+    for(size_t i = 0; i < fmt.length(); i++)if(fmt[i] == C(T::flag_))
+    {
+        res -= 2;  if(++i >= fmt.length())return res + 1;
+        res += FormatMaker<T, C>::length(self, fmt[i]);
+    }
+    return res;
+}
+
+template<typename T, typename C, C def> template<typename B> bool ArgBase<T, C, def>::fill(B &buf) const
+{
+    const T &self = *static_cast<const T *>(this);
+    const LiteralBase<C> &fmt = FormatMaker<T, C>::format(self);
+    for(size_t i = 0; i < fmt.length(); i++)
+    {
+        if(fmt[i] == C(T::flag_))
+        {
+            if(++i >= fmt.length())return true;
+            if(!FormatMaker<T, C>::fill(self, fmt[i], buf))return false;
+        }
+        else if(!buf(fmt[i]))return false;
+    }
+    return true;
 }
 
 
