@@ -50,6 +50,13 @@ void test_string()
         str += NTL::format("Format %1:%2:%3;") % NTL::arg("AA") % NTL::arg("BB") % NTL::arg("CC") + '\n';
         str += NTL::format("Format %A:%B:%C;") % NTL::arg<'C'>("CC") % NTL::arg<'B'>("BB") % NTL::arg<'A'>("AA") + '\n';
         std::cout << str.data();
+
+        std::cout << NTL::String(NTL::format<'$'>("Test $%$a;\n") % NTL::arg<'a'>("A")).data();
+        std::cout << NTL::String(NTL::format<'$'>("Test $%$a$b;\n") % NTL::arg<'a'>("A") % NTL::arg<'b'>("B")).data();
+        std::cout << NTL::String(NTL::format<'$'>("Test $%$a$b$c;\n") % NTL::arg<'a'>("A") % NTL::arg<'b'>("B") % NTL::arg<'c'>("C")).data();
+        std::cout << NTL::String(NTL::format("Test %%%1%2%3%4;\n") % "A" % "B" % "C" % "D").data();
+        std::cout << NTL::String(NTL::format("Test %%%1%2%3%4%5;\n") % "A" % "B" % "C" % "D" % "E").data();
+        std::cout << NTL::String(NTL::format("Test %%%1%2%3%4%5%6;\n") % "A" % "B" % "C" % "D" % "E" % "F").data();
     }
     std::cout << std::endl;
 }

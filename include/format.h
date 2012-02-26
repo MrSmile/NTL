@@ -259,6 +259,177 @@ template<typename T, typename S, typename C, C ch, C def> struct FormatMaker<Com
     }
 };
 
+template<typename S1, typename C, C ch, C ch1>
+    struct FormatMaker<Composite<Format<C, ch>, S1, C, ch1, C('2')>, C>
+{
+    typedef Composite<Format<C, ch>, S1, C, ch1, C('2')> Type_;
+
+    static const LiteralBase<C> &format(const Type_ &obj)
+    {
+        return obj.prev_.fmt_;
+    }
+
+    static size_t length(const Type_ &obj, C cur)
+    {
+        switch(cur)
+        {
+        case ch1:  return obj.arg_.length();
+        default:  return 1;
+        }
+    }
+
+    template<typename B> static bool fill(const Type_ &obj, C cur, B &buf)
+    {
+        switch(cur)
+        {
+        case ch1:  return obj.arg_.fill(buf);
+        default:  return buf(cur);
+        }
+    }
+};
+
+template<typename S1, typename S2, typename C, C ch, C ch1, C ch2>
+    struct FormatMaker<Composite<Composite<Format<C, ch>, S1, C, ch1, C('2')>, S2, C, ch2, C('3')>, C>
+{
+    typedef Composite<Composite<Format<C, ch>, S1, C, ch1, C('2')>, S2, C, ch2, C('3')> Type_;
+
+    static const LiteralBase<C> &format(const Type_ &obj)
+    {
+        return obj.prev_.prev_.fmt_;
+    }
+
+    static size_t length(const Type_ &obj, C cur)
+    {
+        switch(cur)
+        {
+        case ch1:  return obj.prev_.arg_.length();
+        case ch2:  return obj.arg_.length();
+        default:  return 1;
+        }
+    }
+
+    template<typename B> static bool fill(const Type_ &obj, C cur, B &buf)
+    {
+        switch(cur)
+        {
+        case ch1:  return obj.prev_.arg_.fill(buf);
+        case ch2:  return obj.arg_.fill(buf);
+        default:  return buf(cur);
+        }
+    }
+};
+
+template<typename S1, typename S2, typename S3, typename C, C ch, C ch1, C ch2, C ch3>
+    struct FormatMaker<Composite<Composite<Composite<Format<C, ch>,
+        S1, C, ch1, C('2')>, S2, C, ch2, C('3')>, S3, C, ch3, C('4')>, C>
+{
+    typedef Composite<Composite<Composite<Format<C, ch>,
+        S1, C, ch1, C('2')>, S2, C, ch2, C('3')>, S3, C, ch3, C('4')> Type_;
+
+    static const LiteralBase<C> &format(const Type_ &obj)
+    {
+        return obj.prev_.prev_.prev_.fmt_;
+    }
+
+    static size_t length(const Type_ &obj, C cur)
+    {
+        switch(cur)
+        {
+        case ch1:  return obj.prev_.prev_.arg_.length();
+        case ch2:  return obj.prev_.arg_.length();
+        case ch3:  return obj.arg_.length();
+        default:  return 1;
+        }
+    }
+
+    template<typename B> static bool fill(const Type_ &obj, C cur, B &buf)
+    {
+        switch(cur)
+        {
+        case ch1:  return obj.prev_.prev_.arg_.fill(buf);
+        case ch2:  return obj.prev_.arg_.fill(buf);
+        case ch3:  return obj.arg_.fill(buf);
+        default:  return buf(cur);
+        }
+    }
+};
+
+template<typename S1, typename S2, typename S3, typename S4, typename C, C ch, C ch1, C ch2, C ch3, C ch4>
+    struct FormatMaker<Composite<Composite<Composite<Composite<Format<C, ch>,
+        S1, C, ch1, C('2')>, S2, C, ch2, C('3')>, S3, C, ch3, C('4')>, S4, C, ch4, C('5')>, C>
+{
+    typedef Composite<Composite<Composite<Composite<Format<C, ch>,
+        S1, C, ch1, C('2')>, S2, C, ch2, C('3')>, S3, C, ch3, C('4')>, S4, C, ch4, C('5')> Type_;
+
+    static const LiteralBase<C> &format(const Type_ &obj)
+    {
+        return obj.prev_.prev_.prev_.prev_.fmt_;
+    }
+
+    static size_t length(const Type_ &obj, C cur)
+    {
+        switch(cur)
+        {
+        case ch1:  return obj.prev_.prev_.prev_.arg_.length();
+        case ch2:  return obj.prev_.prev_.arg_.length();
+        case ch3:  return obj.prev_.arg_.length();
+        case ch4:  return obj.arg_.length();
+        default:  return 1;
+        }
+    }
+
+    template<typename B> static bool fill(const Type_ &obj, C cur, B &buf)
+    {
+        switch(cur)
+        {
+        case ch1:  return obj.prev_.prev_.prev_.arg_.fill(buf);
+        case ch2:  return obj.prev_.prev_.arg_.fill(buf);
+        case ch3:  return obj.prev_.arg_.fill(buf);
+        case ch4:  return obj.arg_.fill(buf);
+        default:  return buf(cur);
+        }
+    }
+};
+
+template<typename S1, typename S2, typename S3, typename S4, typename S5, typename C, C ch, C ch1, C ch2, C ch3, C ch4, C ch5>
+    struct FormatMaker<Composite<Composite<Composite<Composite<Composite<Format<C, ch>,
+        S1, C, ch1, C('2')>, S2, C, ch2, C('3')>, S3, C, ch3, C('4')>, S4, C, ch4, C('5')>, S5, C, ch5, C('6')>, C>
+{
+    typedef Composite<Composite<Composite<Composite<Composite<Format<C, ch>,
+        S1, C, ch1, C('2')>, S2, C, ch2, C('3')>, S3, C, ch3, C('4')>, S4, C, ch4, C('5')>, S5, C, ch5, C('6')> Type_;
+
+    static const LiteralBase<C> &format(const Type_ &obj)
+    {
+        return obj.prev_.prev_.prev_.prev_.prev_.fmt_;
+    }
+
+    static size_t length(const Type_ &obj, C cur)
+    {
+        switch(cur)
+        {
+        case ch1:  return obj.prev_.prev_.prev_.prev_.arg_.length();
+        case ch2:  return obj.prev_.prev_.prev_.arg_.length();
+        case ch3:  return obj.prev_.prev_.arg_.length();
+        case ch4:  return obj.prev_.arg_.length();
+        case ch5:  return obj.arg_.length();
+        default:  return 1;
+        }
+    }
+
+    template<typename B> static bool fill(const Type_ &obj, C cur, B &buf)
+    {
+        switch(cur)
+        {
+        case ch1:  return obj.prev_.prev_.prev_.prev_.arg_.fill(buf);
+        case ch2:  return obj.prev_.prev_.prev_.arg_.fill(buf);
+        case ch3:  return obj.prev_.prev_.arg_.fill(buf);
+        case ch4:  return obj.prev_.arg_.fill(buf);
+        case ch5:  return obj.arg_.fill(buf);
+        default:  return buf(cur);
+        }
+    }
+};
+
 
 template<typename T, typename C, C def> size_t ArgBase<T, C, def>::length() const
 {
