@@ -22,6 +22,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ***************************************************************************************************/
 
 #include "format.h"
+#include "win-utf.h"
 #include "pointer.h"
 #include "tree.h"
 #include "list.h"
@@ -57,6 +58,10 @@ void test_string()
         std::cout << NTL::String(NTL::format("Test %%%1%2%3%4;\n") % "A" % "B" % "C" % "D").data();
         std::cout << NTL::String(NTL::format("Test %%%1%2%3%4%5;\n") % "A" % "B" % "C" % "D" % "E").data();
         std::cout << NTL::String(NTL::format("Test %%%1%2%3%4%5%6;\n") % "A" % "B" % "C" % "D" % "E" % "F").data();
+    }
+    std::cout << "\n=== Testing UTF16 ===\n";
+    {
+        // TODO
     }
     std::cout << std::endl;
 }

@@ -1,8 +1,8 @@
 
 SOURCE = test.cpp benchmark.cpp 
 HEADER = include/base.h include/allocator.h include/pointer.h \
-	include/list.h include/tree.h include/literal.h include/format.h
-FLAGS = -std=c++98 -pedantic -fno-exceptions -Iinclude -Wall
+	include/list.h include/tree.h include/literal.h include/format.h include/win-utf.h
+FLAGS = -std=c++98 -pedantic -fno-exceptions -Iinclude -Wall -Wno-parentheses
 
 debug: $(SOURCE) $(HEADER)
 	g++ -g -DDEBUG $(FLAGS) $(SOURCE) -o test
