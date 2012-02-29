@@ -45,315 +45,388 @@ template<> inline int LiteralBase<wchar_t>::cmp(const LiteralBase &str) const
     return std::wmemcmp(ptr_, str.ptr_, len_);
 }
 
+typedef LiteralBase<wchar_t> WLiteral;
 
 
-class WStringConv : public StringLike<WStringConv, char>, public StringBase<wchar_t>
+
+typedef unsigned long uchar;
+
+
+struct Utf8to16Counter
 {
-    typedef unsigned long uchar_;
+    size_t length;
+    uchar next, lim;
+    unsigned count;
 
-
-    struct Counter_
+    Utf8to16Counter() : length(0), count(0)
     {
-        size_t length;
-        uchar_ next, lim;
-        unsigned count;
+    }
 
-        Counter_() : length(0), count(0)
-        {
-        }
-
-        bool operator () (const char *ptr, size_t len)
-        {
-            for(; len > 0; len--)operator () (*ptr++);  return true;
-        }
-
-        bool operator () (char ch)
-        {
-            if(!(ch & 0x80))
-            {
-                length += count ? 2 : 1;  count = 0;
-            }
-            else if(!(ch & 0x40))
-            {
-                if(count)
-                {
-                    next = next << 6 | ch & 0x3F;
-                    if(!--count)length += next >= 0x10000 && next < 0x110000 ? 2 : 1;
-                }
-                else length++;
-            }
-            else
-            {
-                if(count)length++;
-                if(!(ch & 0x20))
-                {
-                    count = 1;  next = ch & 0x1F;  lim = 0x80;
-                }
-                else if(!(ch & 0x10))
-                {
-                    count = 2;  next = ch & 0x0F;  lim = 0x800;
-                }
-                else if(!(ch & 0x08))
-                {
-                    count = 3;  next = ch & 0x07;  lim = 0x10000;
-                }
-                else if(!(ch & 0x04))
-                {
-                    count = 4;  next = ch & 0x03;  lim = 0x200000;
-                }
-                else if(!(ch & 0x02))
-                {
-                    count = 5;  next = ch & 0x01;  lim = 0x4000000;
-                }
-                else
-                {
-                    length++;  count = 0;
-                }
-            }
-            return true;
-        }
-
-        size_t end()
-        {
-            return count ? length + 1 : length;
-        }
-    };
-
-
-    struct Buffer_
+    bool operator () (const char *ptr, size_t len)
     {
-        wchar_t *buf;
-        uchar_ next, lim;
-        unsigned count;
+        for(; len > 0; len--)operator () (*ptr++);  return true;
+    }
 
-        Buffer_(wchar_t *ptr) : buf(ptr), count(0)
+    bool operator () (char ch)
+    {
+        if(!(ch & 0x80))
         {
+            length += count ? 2 : 1;  count = 0;
         }
-
-        bool operator () (const char *ptr, size_t len)
+        else if(!(ch & 0x40))
         {
-            for(; len > 0; len--)operator () (*ptr++);  return true;
-        }
-
-        bool operator () (char ch)
-        {
-            if(!(ch & 0x80))
+            if(count)
             {
-                if(count)*buf++ = 0xFFFD;  count = 0;  *buf++ = ch;
+                next = next << 6 | ch & 0x3F;
+                if(!--count)length += next >= 0x10000 && next < 0x110000 ? 2 : 1;
             }
-            else if(!(ch & 0x40))
+            else length++;
+        }
+        else
+        {
+            if(count)length++;
+            if(!(ch & 0x20))
             {
-                if(count)
-                {
-                    next = next << 6 | ch & 0x3F;
-                    if(!--count)
-                    {
-                        if(next < lim)*buf++ = 0xFFFD;
-                        else if(next < 0xE000)
-                            if(next < 0xD800)*buf++ = next;
-                            else *buf++ = 0xFFFD;
-                        else if(next < 0x10000)*buf++ = next;
-                        else if(next < 0x11000)
-                        {
-                            next -= 0x10000;
-                            *buf++ = 0xD800 | next >> 10;
-                            *buf++ = 0xDC00 | next & 0x3FF;
-                        }
-                        else *buf++ = 0xFFFD;
-                    }
-                }
-                else *buf++ = 0xFFFD;
+                count = 1;  next = ch & 0x1F;  lim = 0x80;
+            }
+            else if(!(ch & 0x10))
+            {
+                count = 2;  next = ch & 0x0F;  lim = 0x800;
+            }
+            else if(!(ch & 0x08))
+            {
+                count = 3;  next = ch & 0x07;  lim = 0x10000;
+            }
+            else if(!(ch & 0x04))
+            {
+                count = 4;  next = ch & 0x03;  lim = 0x200000;
+            }
+            else if(!(ch & 0x02))
+            {
+                count = 5;  next = ch & 0x01;  lim = 0x4000000;
             }
             else
             {
-                if(count)*buf++ = 0xFFFD;
-                if(!(ch & 0x20))
-                {
-                    count = 1;  next = ch & 0x1F;  lim = 0x80;
-                }
-                else if(!(ch & 0x10))
-                {
-                    count = 2;  next = ch & 0x0F;  lim = 0x800;
-                }
-                else if(!(ch & 0x08))
-                {
-                    count = 3;  next = ch & 0x07;  lim = 0x10000;
-                }
-                else if(!(ch & 0x04))
-                {
-                    count = 4;  next = ch & 0x03;  lim = 0x200000;
-                }
-                else if(!(ch & 0x02))
-                {
-                    count = 5;  next = ch & 0x01;  lim = 0x4000000;
-                }
-                else
-                {
-                    *buf++ = 0xFFFD;  count = 0;
-                }
+                length++;  count = 0;
             }
-            return true;
-        }
-
-        void end()
-        {
-            if(count)*buf++ = 0xFFFD;  *buf = 0;
-        }
-    };
-
-
-    template<class S> static size_t count_(const StringLike<S, char> &str)
-    {
-        if(!str.valid())return 0;  Counter_ buf;  str.fill(buf);  return buf.end() + 1;
-    }
-
-    template<class S> void copy_(const StringLike<S, char> &str, size_t offs = 0)
-    {
-        if(!valid())return;  Buffer_ buf(buffer() + offs);  str.fill(buf);  buf.end();
-    }
-
-
-public:
-    WStringConv()
-    {
-    }
-
-    WStringConv(const WStringConv &str) : StringBase<wchar_t>(str)
-    {
-    }
-
-    template<class S> WStringConv(const StringLike<S, wchar_t> &str) : StringBase<wchar_t>(str)
-    {
-    }
-
-    template<class S> WStringConv(const StringLike<S, char> &str) : StringBase<wchar_t>(count_(str))
-    {
-        copy_(str);
-    }
-
-    template<class S> StringBase<wchar_t> &operator = (const StringLike<S, char> &str)
-    {
-        if(resize(count_(str)))copy_(str);  return *this;
-    }
-
-    template<class S> StringBase<wchar_t> &operator += (const StringLike<S, char> &str)
-    {
-        size_t offs = StringBase<wchar_t>::length(), len = count_(str);
-        StringBase<wchar_t> tmp;  swap(tmp, *static_cast<StringBase<wchar_t> *>(this));
-        if(len && tmp.valid() && resize(offs + len))
-        {
-            std::memcpy(buffer(), tmp.data(), offs * sizeof(wchar_t));  copy_(str, offs);
-        }
-        return *this;
-    }
-
-
-    bool valid() const
-    {
-        return StringBase<wchar_t>::valid();
-    }
-
-    size_t length() const
-    {
-        if(!valid())return 0;  const wchar_t *ptr = buffer();  size_t count = 0;
-        for(size_t len = StringBase<wchar_t>::length(); len > 0; len--)
-        {
-            uchar_ ch = *ptr++;
-            if(ch < 0x80)count++;
-            else if(ch < 0x800)count += 2;
-            else if(ch < 0xD800 || ch >= 0xE000)count += 3;
-            else if(ch < 0xDC00 && uchar_(*ptr) >= 0xDC00 && uchar_(*ptr) < 0xE000)
-            {
-                count += 4;  ptr++;  len--;
-            }
-            else count += 3;
-        }
-        return count;
-    }
-
-    template<typename B> bool fill(B &buf) const
-    {
-        if(!valid())return true;  const wchar_t *ptr = buffer();
-        for(size_t len = StringBase<wchar_t>::length(); len > 0; len--)
-        {
-            uchar_ ch = *ptr++;
-            if(ch >= 0x80)
-            {
-                if(ch >= 0x800)
-                {
-                    if(ch >= 0xD800 && ch < 0xE000)
-                    {
-                        uchar_ ch1 = *ptr;
-                        if(ch >= 0xDC00 || ch1 < 0xDC00 || ch1 >= 0xE000)
-                        {
-                            if(!buf("\xEF\xBF\xBD", 3))return false;  continue;
-                        }
-                        else
-                        {
-                            ptr++;  len--;
-                            ch = ((ch & 0x3FF) + 0x40) << 10 | ch1 & 0x3FF;
-                            if(!buf(char(0xF0 | ch >> 18)))return false;
-                            if(!buf(char(0x80 | ch >> 12 & 0x3F)))return false;;
-                        }
-                    }
-                    else if(!buf(char(0xE0 | ch >> 12)))return false;
-                    if(!buf(char(0x80 | ch >> 6 & 0x3F)))return false;
-                }
-                else if(!buf(char(0xC0 | ch >> 6)))return false;
-                if(!buf(char(0x80 | ch & 0x3F)))return false;
-            }
-            else if(!buf(char(ch)))return false;
         }
         return true;
+    }
+
+    size_t end()
+    {
+        return count ? length + 1 : length;
+    }
+};
+
+
+template<typename B> struct Utf8to16Filler
+{
+    B &buf;
+    uchar next, lim;
+    unsigned count;
+
+    Utf8to16Filler(B &ref) : buf(ref), count(0)
+    {
+    }
+
+    bool operator () (const char *ptr, size_t len)
+    {
+        for(; len > 0; len--)if(!operator () (*ptr++))return false;  return true;
+    }
+
+    bool operator () (char ch)
+    {
+        if(!(ch & 0x80))
+        {
+            if(count && !buf(wchar_t(0xFFFD)))return false;
+            count = 0;  if(!buf(wchar_t(ch)))return false;
+        }
+        else if(!(ch & 0x40))
+        {
+            if(count)
+            {
+                next = next << 6 | ch & 0x3F;
+                if(!--count)
+                {
+                    if(next < lim)next = 0xFFFD;
+                    else if(next < 0xE000)
+                    {
+                        if(next >= 0xD800)next = 0xFFFD;
+                    }
+                    else if(next >= 0x10000)
+                    {
+                        if(next < 0x11000)
+                        {
+                            next -= 0x10000;
+                            if(!buf(wchar_t(0xD800 | next >> 10)))return false;
+                            next = 0xDC00 | next & 0x3FF;
+                        }
+                        else next = 0xFFFD;
+                    }
+                    if(!buf(wchar_t(next)))return false;
+                }
+            }
+            else if(!buf(wchar_t(0xFFFD)))return false;
+        }
+        else
+        {
+            if(count && !buf(wchar_t(0xFFFD)))return false;
+            if(!(ch & 0x20))
+            {
+                count = 1;  next = ch & 0x1F;  lim = 0x80;
+            }
+            else if(!(ch & 0x10))
+            {
+                count = 2;  next = ch & 0x0F;  lim = 0x800;
+            }
+            else if(!(ch & 0x08))
+            {
+                count = 3;  next = ch & 0x07;  lim = 0x10000;
+            }
+            else if(!(ch & 0x04))
+            {
+                count = 4;  next = ch & 0x03;  lim = 0x200000;
+            }
+            else if(!(ch & 0x02))
+            {
+                count = 5;  next = ch & 0x01;  lim = 0x4000000;
+            }
+            else
+            {
+                if(!buf(L'\xFFFD'))return false;  count = 0;
+            }
+        }
+        return true;
+    }
+
+    bool end()
+    {
+        return !count || buf(wchar_t(0xFFFD));
+    }
+};
+
+
+struct Utf16to8Counter
+{
+    size_t length;
+    bool next;
+
+    Utf16to8Counter() : length(0), next(false)
+    {
+    }
+
+    bool operator () (const wchar_t *ptr, size_t len)
+    {
+        for(; len > 0; len--)operator () (*ptr++);  return true;
+    }
+
+    bool operator () (wchar_t ch)
+    {
+        if(next)
+        {
+            next = false;
+            if(ch >= 0xDC00 && ch < 0xE000)
+            {
+                length++;  return true;
+            }
+        }
+        if(ch < 0x80)length++;
+        else if(ch < 0x800)length += 2;
+        else
+        {
+            if(ch >= 0xD800 && ch < 0xDC00)next = true;
+            length += 3;
+        }
+        return true;
+    }
+
+    size_t end()
+    {
+        return length;
+    }
+};
+
+
+template<typename B> struct Utf16to8Filler
+{
+    B &buf;
+    uchar next;
+
+    Utf16to8Filler(B &ref) : buf(ref), next(0)
+    {
+    }
+
+    bool operator () (const wchar_t *ptr, size_t len)
+    {
+        for(; len > 0; len--)operator () (*ptr++);  return true;
+    }
+
+    bool operator () (wchar_t ch)
+    {
+        if(next)
+        {
+            if(ch >= 0xDC00 && ch < 0xE000)
+            {
+                ch |= next;  next = 0;
+                return buf(char(0xF0 | ch >> 18)) && buf(char(0x80 | ch >> 12 & 0x3F)) &&
+                    buf(char(0x80 | ch >> 6 & 0x3F)) && buf(char(0x80 | ch & 0x3F));
+            }
+            else if(!buf("\xEF\xBF\xBD", 3))return false;  next = 0;
+        }
+        if(ch < 0x80)return buf(char(ch));
+        if(ch < 0x800)return buf(char(0xC0 | ch >> 6)) && buf(char(0x80 | ch & 0x3F));
+        if(ch >= 0xD800 && ch < 0xE000)
+        {
+            if(ch >= 0xDC00)return buf("\xEF\xBF\xBD", 3);
+            next = ((ch & 0x3FF) + 0x40) << 10;  return true;
+        }
+        return buf(char(0xE0 | ch >> 12)) && buf(char(0x80 | ch >> 6 & 0x3F)) && buf(char(0x80 | ch & 0x3F));
+    }
+
+    bool end()
+    {
+        return !next || buf("\xEF\xBF\xBD", 3);
     }
 };
 
 
 
-class WString : public WStringConv
+template<typename S> class Utf8to16 : public StringLike<Utf8to16<S>, wchar_t>
+{
+    S src_;
+
+public:
+    template<typename T> Utf8to16(const T &str) : src_(str)
+    {
+    }
+
+    Utf8to16(const char *str, size_t n) : src_(str, n)
+    {
+    }
+
+    bool valid() const
+    {
+        return src_.valid();
+    }
+
+    size_t length() const
+    {
+        Utf8to16Counter cnt;  src_.fill(cnt);  return cnt.end();
+    }
+
+    template<typename B> bool fill(B &buf) const
+    {
+        Utf8to16Filler<B> flr(buf);  return src_.fill(flr) && flr.end();
+    }
+};
+
+template<typename S> Utf8to16<const StringLike<S, char> &> utf8to16(const StringLike<S, char> &str)
+{
+    return Utf8to16<const StringLike<S, char> &>(str);
+}
+
+Utf8to16<Literal> utf8to16(const char *str, size_t n)
+{
+    return Utf8to16<Literal>(str, n);
+}
+
+Utf8to16<Literal> utf8to16(const char *str)
+{
+    return Utf8to16<Literal>(str);
+}
+
+
+template<typename S> class Utf16to8 : public StringLike<Utf16to8<S>, char>
+{
+    S src_;
+
+public:
+    template<typename T> Utf16to8(const T &str) : src_(str)
+    {
+    }
+
+    Utf16to8(const wchar_t *str, size_t n) : src_(str, n)
+    {
+    }
+
+    bool valid() const
+    {
+        return src_.valid();
+    }
+
+    size_t length() const
+    {
+        Utf16to8Counter cnt;  src_.fill(cnt);  return cnt.end();
+    }
+
+    template<typename B> bool fill(B &buf) const
+    {
+        Utf16to8Filler<B> flr(buf);  return src_.fill(flr) && flr.end();
+    }
+};
+
+template<typename S> Utf16to8<const StringLike<S, wchar_t> &> utf16to8(const StringLike<S, wchar_t> &str)
+{
+    return Utf16to8<const StringLike<S, wchar_t> &>(str);
+}
+
+Utf16to8<WLiteral> utf16to8(const wchar_t *str, size_t n)
+{
+    return Utf16to8<WLiteral>(str, n);
+}
+
+Utf16to8<WLiteral> utf16to8(const wchar_t *str)
+{
+    return Utf16to8<WLiteral>(str);
+}
+
+
+
+class WString : public StringBase<wchar_t>
 {
 public:
     WString()
     {
     }
 
-    WString(const WString &str) : WStringConv(str)
+    WString(const WString &str) : StringBase<wchar_t>(str)
     {
     }
 
-    template<class S> WString(const StringLike<S, wchar_t> &str) : WStringConv(str)
+    template<class S> WString(const StringLike<S, wchar_t> &str) : StringBase<wchar_t>(str)
     {
     }
 
-    WString(const wchar_t *str, size_t n) : WStringConv(LiteralBase<wchar_t>(str, n))
+    WString(const wchar_t *str, size_t n) : StringBase<wchar_t>(str, n)
     {
     }
 
-    WString(const wchar_t *str) : WStringConv(LiteralBase<wchar_t>(str))
+    WString(const wchar_t *str) : StringBase<wchar_t>(str)
     {
     }
 
-    template<class S> WString(const StringLike<S, char> &str) : WStringConv(str)
+    template<class S> WString(const StringLike<S, char> &str) : StringBase<wchar_t>(utf8to16(str))
     {
     }
 
-    WString(const char *str, size_t n) : WStringConv(LiteralBase<char>(str, n))
+    WString(const char *str, size_t n) : StringBase<wchar_t>(utf8to16(str, n))
     {
     }
 
-    WString(const char *str) : WStringConv(LiteralBase<char>(str))
+    WString(const char *str) : StringBase<wchar_t>(utf8to16(str))
     {
     }
 
 
     WString &operator = (const WString &str)
     {
-        WStringConv::operator = (str);  return *this;
+        StringBase<wchar_t>::operator = (str);  return *this;
     }
 
     template<class S> WString &operator = (const StringLike<S, wchar_t> &str)
     {
-        WStringConv::operator = (str);  return *this;
+        StringBase<wchar_t>::operator = (str);  return *this;
     }
 
     WString &operator = (const wchar_t *str)
@@ -361,35 +434,40 @@ public:
         return *this = LiteralBase<wchar_t>(str);
     }
 
+    template<class S> WString &operator += (const StringLike<S, wchar_t> &str)
+    {
+        return *this = *this + str;
+    }
+
+    WString &operator += (const wchar_t *str)
+    {
+        return *this = *this + str;
+    }
+
     template<class S> WString &operator = (const StringLike<S, char> &str)
     {
-        WStringConv::operator = (str);  return *this;
+        return *this = utf8to16(str);  return *this;
     }
 
     WString &operator = (const char *str)
     {
-        return *this = Literal(str);
+        return *this = utf8to16(str);  return *this;
     }
 
     template<class S> WString &operator += (const StringLike<S, char> &str)
     {
-        WStringConv::operator += (str);  return *this;
+        return *this = *this + utf8to16(str);
     }
 
     WString &operator += (const char *str)
     {
-        return *this += Literal(str);
+        return *this = *this + utf8to16(str);
     }
 
 
-    size_t length() const
+    operator const Utf16to8<WLiteral> () const
     {
-        return StringBase<wchar_t>::length();
-    }
-
-    template<typename B> bool fill(B &buf) const
-    {
-        return StringBase<wchar_t>::fill(buf);
+        return Utf16to8<WLiteral>(*this);
     }
 };
 
@@ -401,5 +479,8 @@ public:
 
 namespace NTL
 {
+    using NTL_Internal_::WLiteral;
+    using NTL_Internal_::utf8to16;
+    using NTL_Internal_::utf16to8;
     using NTL_Internal_::WString;
 }
