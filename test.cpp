@@ -21,50 +21,13 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ***************************************************************************************************/
 
-#include "format.h"
-#include "win-utf.h"
+#include "alloc.h"
 #include "pointer.h"
 #include "tree.h"
 #include "list.h"
 #include <iostream>
+#include <cstdio>
 
-
-
-void test_string()
-{
-    std::cout << "\n=== Testing Strings ===\n";
-    {
-        NTL::String copy, str = "~~~";
-        str = "Zzz: " + str + '\n';
-        copy = "...";  copy = str;
-        str += NTL::Literal("Next line") + '\n';
-        str += "0 " + NTL::Literal("1 ") + "2 " + "3 " + "3 " + "5 " + "6 " + "7 " + "8 " + "9 " + "10 " + '\n';
-        str += '\n';  std::cout << copy.data() << str.data();
-
-        if(str > "ZZZ")std::cout << "Greater than 'ZZZ'\n";
-    }
-    std::cout << "\n=== Testing Format ===\n";
-    {
-        NTL::String str = NTL::format("Format %1:%2:%3;") + '\n';
-        str += NTL::format("Format %3:%2:%1;") % "111" % "222" % "333" + '\n';
-        str += NTL::format("Format %1:%2%2:%3%3%3;") % "111" % "22" % "3" + '\n';
-        str += NTL::format("Format %1:%2:%3;") % NTL::arg("AA") % NTL::arg("BB") % NTL::arg("CC") + '\n';
-        str += NTL::format("Format %A:%B:%C;") % NTL::arg<'C'>("CC") % NTL::arg<'B'>("BB") % NTL::arg<'A'>("AA") + '\n';
-        std::cout << str.data();
-
-        std::cout << NTL::String(NTL::format<'$'>("Test $%$a;\n") % NTL::arg<'a'>("A")).data();
-        std::cout << NTL::String(NTL::format<'$'>("Test $%$a$b;\n") % NTL::arg<'a'>("A") % NTL::arg<'b'>("B")).data();
-        std::cout << NTL::String(NTL::format<'$'>("Test $%$a$b$c;\n") % NTL::arg<'a'>("A") % NTL::arg<'b'>("B") % NTL::arg<'c'>("C")).data();
-        std::cout << NTL::String(NTL::format("Test %%%1%2%3%4;\n") % "A" % "B" % "C" % "D").data();
-        std::cout << NTL::String(NTL::format("Test %%%1%2%3%4%5;\n") % "A" % "B" % "C" % "D" % "E").data();
-        std::cout << NTL::String(NTL::format("Test %%%1%2%3%4%5%6;\n") % "A" % "B" % "C" % "D" % "E" % "F").data();
-    }
-    std::cout << "\n=== Testing UTF16 ===\n";
-    {
-        // TODO
-    }
-    std::cout << std::endl;
-}
 
 
 struct Node : public NTL::SimpleKey<int>
@@ -265,12 +228,23 @@ void test_list()
 }
 
 
+
+MemoryHandler mem_handler;
+
+void test_literal();
 void time_tree();
 
 int main(int n, char **arg)
 {
-    for(int i = 1; i < n; i++)
-        if(arg[i] == NTL::Literal("string"))test_string();
+    std::setbuf(stdout, 0);
+    mem_handler.make_fail(1);
+
+    test_literal();
+
+    return 0;
+
+    /*for(int i = 1; i < n; i++)
+        if(!strcmp(arg[i], "string"))test_strings();
         else if(arg[i] == NTL::Literal("pointer"))test_pointer();
         else if(arg[i] == NTL::Literal("tree"))
         {
@@ -279,5 +253,5 @@ int main(int n, char **arg)
         else if(arg[i] == NTL::Literal("list"))test_list();
 
     if(n <= 1)std::cout << "Usage: test [string] [pointer] [tree] [list]\n";
-    return 0;
+    return 0;*/
 }

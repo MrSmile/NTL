@@ -326,12 +326,12 @@ template<typename S> Utf8to16<const StringLike<S, char> &> utf8to16(const String
     return Utf8to16<const StringLike<S, char> &>(str);
 }
 
-Utf8to16<Literal> utf8to16(const char *str, size_t n)
+inline Utf8to16<Literal> utf8to16(const char *str, size_t n)
 {
     return Utf8to16<Literal>(str, n);
 }
 
-Utf8to16<Literal> utf8to16(const char *str)
+inline Utf8to16<Literal> utf8to16(const char *str)
 {
     return Utf8to16<Literal>(str);
 }
@@ -371,12 +371,12 @@ template<typename S> Utf16to8<const StringLike<S, wchar_t> &> utf16to8(const Str
     return Utf16to8<const StringLike<S, wchar_t> &>(str);
 }
 
-Utf16to8<WLiteral> utf16to8(const wchar_t *str, size_t n)
+inline Utf16to8<WLiteral> utf16to8(const wchar_t *str, size_t n)
 {
     return Utf16to8<WLiteral>(str, n);
 }
 
-Utf16to8<WLiteral> utf16to8(const wchar_t *str)
+inline Utf16to8<WLiteral> utf16to8(const wchar_t *str)
 {
     return Utf16to8<WLiteral>(str);
 }

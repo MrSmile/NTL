@@ -162,9 +162,7 @@ public:
 
 
 template<typename C> class LiteralBase : public StringLike<LiteralBase<C>, C>,
-    public Comparable<LiteralBase<C>, LiteralBase<C> >,
-    public Comparable<LiteralBase<C>, const C *>,
-    public Comparable<LiteralBase<C>, C>
+    public Comparable<LiteralBase<C>, LiteralBase<C> >, public Comparable<LiteralBase<C>, const C *>
 {
     const C *ptr_;
     size_t len_;
@@ -295,8 +293,7 @@ typedef LiteralBase<char> Literal;
 
 template<typename C> class StringBase : public StringLike<StringBase<C>, C>,
     public Comparable<StringBase<C>, LiteralBase<C> >,
-    public Comparable<StringBase<C>, const C *>,
-    public Comparable<StringBase<C>, C>
+    public Comparable<StringBase<C>, const C *>
 {
     size_t *volatile ptr_;  // refcount, length, data
 
