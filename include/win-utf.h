@@ -156,7 +156,7 @@ template<typename B> struct Utf8to16Filler
                     }
                     else if(next >= 0x10000)
                     {
-                        if(next < 0x11000)
+                        if(next < 0x110000)
                         {
                             next -= 0x10000;
                             if(!buf(wchar_t(0xD800 | next >> 10)))return false;
@@ -268,7 +268,7 @@ template<typename B> struct Utf16to8Filler
         {
             if(ch >= 0xDC00 && ch < 0xE000)
             {
-                ch |= next;  next = 0;
+                ch = next | ch & 0x3FF;  next = 0;
                 return buf(char(0xF0 | ch >> 18)) && buf(char(0x80 | ch >> 12 & 0x3F)) &&
                     buf(char(0x80 | ch >> 6 & 0x3F)) && buf(char(0x80 | ch & 0x3F));
             }
