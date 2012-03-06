@@ -79,12 +79,22 @@ void test_literal_class()
     assert(part == "str" && part < NTL::Literal("str", 4) && part > "r");
     assert(part <= "str" && part >= "str" && !(part != "str"));
 
-    std::printf("OK\n  general strlen... ");
+    std::printf("OK\n  general strlen/cmp... ");
 
-    const int data[] = {5, 4, 3, 2, 1, 0};
-    NTL::LiteralBase<int> intstr = data;  len = sizeof(data) / sizeof(int) - 1;
+    const int data[] = {50, 40, 30, 20, 10, 0};
+    typedef NTL::LiteralBase<int> ILiteral;
+    ILiteral intstr = data;  len = sizeof(data) / sizeof(int) - 1;
     assert(intstr.valid() && intstr.length() == len);
     assert(!std::memcmp(intstr.data(), data, len * sizeof(int)));
+
+    assert(ILiteral(data + len).cmp(ILiteral()) > 0);
+    const int data_p[] = {50, 40, 30, 20, 11, 0}, data_n[] = {50, 40, 30, 20, 9, 0};
+    const int data_ps[] = {50, 40, 30, 21, 0}, data_nl[] = {50, 40, 30, 20, 9, 1, 0};
+    assert(!intstr.cmp(data) && intstr.cmp(data_p) < 0 && intstr.cmp(data_n) > 0);
+    assert(intstr.cmp(ILiteral(data, len + 1)) < 0 && intstr.cmp(data_nl) > 0);
+    assert(ILiteral(data, len + 1).cmp(intstr) > 0 && intstr.cmp(data_ps) < 0);
+    assert(intstr == data && intstr < ILiteral(data, len + 1) && intstr > data_n);
+    assert(intstr <= data && intstr >= data && !(intstr != data));
 
     std::printf("OK\n");
 }

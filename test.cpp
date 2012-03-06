@@ -233,6 +233,8 @@ MemoryHandler mem_handler;
 
 void test_literal();
 void test_format();
+void test_win_utf();
+
 void time_tree();
 
 int main(int n, char **arg)
@@ -242,6 +244,7 @@ int main(int n, char **arg)
 
     test_literal();
     test_format();
+    test_win_utf();
 
     return 0;
 
