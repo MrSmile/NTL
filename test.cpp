@@ -232,6 +232,7 @@ void test_list()
 MemoryHandler mem_handler;
 
 void test_literal();
+void test_format();
 void time_tree();
 
 int main(int n, char **arg)
@@ -240,6 +241,7 @@ int main(int n, char **arg)
     mem_handler.make_fail(1);
 
     test_literal();
+    test_format();
 
     return 0;
 

@@ -112,6 +112,7 @@ struct DerivedString : public NTL::String
     }
 };
 
+
 void test_string_class()
 {
     const char *str = "string";  size_t len = std::strlen(str);
@@ -306,40 +307,3 @@ void test_literal()
     test_literal_class();
     test_string_class();
 }
-
-/*void test_string()
-{
-    std::cout << "\n=== Testing Strings ===\n";
-    {
-        NTL::String copy, str = "~~~";
-        str = "Zzz: " + str + '\n';
-        copy = "...";  copy = str;
-        str += NTL::Literal("Next line") + '\n';
-        str += "0 " + NTL::Literal("1 ") + "2 " + "3 " + "3 " + "5 " + "6 " + "7 " + "8 " + "9 " + "10 " + '\n';
-        str += '\n';  std::cout << copy.data() << str.data();
-
-        if(str > "ZZZ")std::cout << "Greater than 'ZZZ'\n";
-    }
-    std::cout << "\n=== Testing Format ===\n";
-    {
-        NTL::String str = NTL::format("Format %1:%2:%3;") + '\n';
-        str += NTL::format("Format %3:%2:%1;") % "111" % "222" % "333" + '\n';
-        str += NTL::format("Format %1:%2%2:%3%3%3;") % "111" % "22" % "3" + '\n';
-        str += NTL::format("Format %1:%2:%3;") % NTL::arg("AA") % NTL::arg("BB") % NTL::arg("CC") + '\n';
-        str += NTL::format("Format %A:%B:%C;") % NTL::arg<'C'>("CC") % NTL::arg<'B'>("BB") % NTL::arg<'A'>("AA") + '\n';
-        std::cout << str.data();
-
-        std::cout << NTL::String(NTL::format<'$'>("Test $%$a;\n") % NTL::arg<'a'>("A")).data();
-        std::cout << NTL::String(NTL::format<'$'>("Test $%$a$b;\n") % NTL::arg<'a'>("A") % NTL::arg<'b'>("B")).data();
-        std::cout << NTL::String(NTL::format<'$'>("Test $%$a$b$c;\n") % NTL::arg<'a'>("A") % NTL::arg<'b'>("B") % NTL::arg<'c'>("C")).data();
-        std::cout << NTL::String(NTL::format("Test %%%1%2%3%4;\n") % "A" % "B" % "C" % "D").data();
-        std::cout << NTL::String(NTL::format("Test %%%1%2%3%4%5;\n") % "A" % "B" % "C" % "D" % "E").data();
-        std::cout << NTL::String(NTL::format("Test %%%1%2%3%4%5%6;\n") % "A" % "B" % "C" % "D" % "E" % "F").data();
-    }
-    std::cout << "\n=== Testing UTF16 ===\n";
-    {
-        // TODO
-    }
-    std::cout << std::endl;
-}*/
-
