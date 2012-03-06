@@ -129,9 +129,8 @@ void test_string_class()
     std::printf("\nTesting String class:\n  constructors... ");
 
     mem_handler.count = 0;
-    mem_handler.make_reliable();
     {
-        NTL::Literal null;
+        NTL::String null;
         assert(!null.valid() && !null.length() && !null.data());
         assert(!mem_handler.count);
 
@@ -139,6 +138,7 @@ void test_string_class()
         assert(!dnull.valid() && !dnull.length() && !dnull.data());
         assert(!mem_handler.count);
 
+        mem_handler.make_reliable();
         NTL::Literal ltr("str~~~", 3);  NTL::String test = ltr;
         assert(test.valid() && test.length() == 3);
         assert(!std::memcmp(test.data(), ltr.data(), 3) && !test.data()[3]);
@@ -154,11 +154,13 @@ void test_string_class()
         assert(!std::memcmp(test2.data(), str, 3) && !test2.data()[3]);
         assert(mem_handler.count == 3);
 
+        mem_handler.make_fail(1);
         NTL::String copy = test1;
         assert(copy.valid() && copy.length() == len);
         assert(!std::memcmp(copy.data(), str, len + 1));
         assert(mem_handler.count == 3);
 
+        mem_handler.make_reliable();
         DerivedString dtest(len + 1);
         assert(dtest.buffer() == dtest.data());
         assert(dtest.valid() && dtest.length() == len);
@@ -176,12 +178,12 @@ void test_string_class()
 
         std::printf("OK\n  copy, resize, swap... ");
 
-        test2 = test;
+        mem_handler.make_fail(1);  test2 = test;
         assert(test2.valid() && test2.length() == 3);
         assert(!std::memcmp(test2.data(), str, 3) && !test2.data()[3]);
         assert(mem_handler.count == 4);
 
-        dtest.resize(4);
+        mem_handler.make_reliable();  dtest.resize(4);
         assert(dtest.valid() && dtest.length() == 3);
         std::memcpy(dtest.buffer(), str, 3);  dtest.buffer()[3] = '\0';
         assert(!std::memcmp(dtest.data(), str, 3) && !dtest.data()[3]);
@@ -192,7 +194,7 @@ void test_string_class()
         assert(!std::memcmp(test.data(), str, len + 1));
         assert(mem_handler.count == 5);
 
-        NTL::swap(test, test2);
+        mem_handler.make_fail(1);  NTL::swap(test, test2);
         assert(test.valid() && test.length() == 3);
         assert(!std::memcmp(test.data(), str, 3) && !test.data()[3]);
         assert(test2.valid() && test2.length() == len);
@@ -214,6 +216,7 @@ void test_string_class()
         assert(!inv2.valid() && !inv2.length() && !inv2.data());
         assert(!mem_handler.count);
 
+        mem_handler.make_reliable();
         NTL::String test1 = ltr + NTL::Literal("ring~~~", 4);
         assert(test1.valid() && test1.length() == len);
         assert(!std::memcmp(test1.data(), str, len + 1));
@@ -239,10 +242,11 @@ void test_string_class()
         assert(!std::memcmp(test5.data(), str, len + 1));
         assert(mem_handler.count == 5);
 
-        test1 = inv1 + test1;
+        mem_handler.make_fail(1);  test1 = inv1 + test1;
         assert(!test1.valid() && !test1.length() && !test1.data());
         assert(mem_handler.count == 4);
 
+        mem_handler.make_reliable();
         test2 = test2.substr(0, 4) + "ng";
         assert(test2.valid() && test2.length() == len);
         assert(!std::memcmp(test2.data(), str, len + 1));
@@ -284,6 +288,7 @@ void test_string_class()
         assert(mem_handler.count == 5);
 
         std::printf("OK\n  operator[], at(), scan(), rscan()... ");
+        mem_handler.make_fail(1);
 
         for(size_t i = 0; i <= len; i++)
             assert(test1[i] == str[i] && test1.at(i) == str[i]);
@@ -296,7 +301,6 @@ void test_string_class()
         assert(test1 != test2.substr(3) && test1 < NTL::Literal("sts") && test1 > "str");
 
         std::printf("OK\n  memory problems... ");
-        mem_handler.make_fail(1);
 
         test1 += test2;
         assert(!test1.valid() && !test1.length() && !test1.data());

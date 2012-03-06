@@ -465,7 +465,7 @@ public:
     }
 
 
-    operator const Utf16to8<WLiteral> () const
+    const Utf16to8<WLiteral> utf8() const
     {
         return Utf16to8<WLiteral>(*this);
     }
