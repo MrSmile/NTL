@@ -222,11 +222,11 @@ void test_wstring_class()
         assert(!mem_handler.count);
 
         mem_handler.make_reliable();
-        NTL::WString test = NTL::WLiteral(L"str~~~", 3) + L"ing";
+        NTL::WString test(NTL::WLiteral(L"str~~~", 3) + L"ing");
         assert(!std::wcscmp(test.data(), L"string"));
         assert(mem_handler.count == 1);
 
-        NTL::WString test1 = L"string";
+        NTL::WString test1(L"string");
         assert(!std::wcscmp(test1.data(), L"string"));
         assert(mem_handler.count == 2);
 
@@ -235,20 +235,20 @@ void test_wstring_class()
         assert(mem_handler.count == 3);
 
         mem_handler.make_fail(1);
-        NTL::WString copy1 = test1;
+        NTL::WString copy1(test1);
         assert(!std::wcscmp(copy1.data(), L"string"));
         assert(mem_handler.count == 3);
 
-        NTL::WString copy2 = static_cast<NTL::StringBase<wchar_t> &>(test2);
+        NTL::WString copy2(static_cast<NTL::StringBase<wchar_t> &>(test2));
         assert(!std::wcscmp(copy2.data(), L"str"));
         assert(mem_handler.count == 3);
 
         mem_handler.make_reliable();
-        NTL::WString test3 = NTL::Literal("str~~~", 3) + "ing";
+        NTL::WString test3(NTL::Literal("str~~~", 3) + "ing");
         assert(!std::wcscmp(test3.data(), L"string"));
         assert(mem_handler.count == 4);
 
-        NTL::WString test4 = "string";
+        NTL::WString test4("string");
         assert(!std::wcscmp(test4.data(), L"string"));
         assert(mem_handler.count == 5);
 

@@ -35,7 +35,7 @@ void test_arg_func()
     mem_handler.count = 0;
     mem_handler.make_reliable();
     {
-        NTL::String test = NTL::arg<'A'>(NTL::Literal(str, 2) + NTL::Literal(str + 2, len - 2));
+        NTL::String test(NTL::arg<'A'>(NTL::Literal(str, 2) + NTL::Literal(str + 2, len - 2)));
         assert(!std::memcmp(test.data(), str, len + 1));
         assert(mem_handler.count == 1);
 
@@ -75,7 +75,7 @@ void test_format_func()
     mem_handler.count = 0;
     mem_handler.make_reliable();
     {
-        NTL::String test = NTL::format<'#'>(NTL::Literal("A#3B#2C#1D###"));
+        NTL::String test(NTL::format<'#'>(NTL::Literal("A#3B#2C#1D###")));
         assert(!std::strcmp(test.data(), "A3B2C1D#"));
         assert(mem_handler.count == 1);
 

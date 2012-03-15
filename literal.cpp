@@ -35,13 +35,13 @@ void test_literal_class()
     NTL::Literal null;
     assert(!null.valid() && !null.length() && !null.data());
 
-    NTL::Literal test = str;
+    NTL::Literal test(str);
     assert(test.valid() && test.length() == len && !std::memcmp(test.data(), str, len));
 
     NTL::Literal part(str, 3);
     assert(part.valid() && part.length() == 3 && !std::memcmp(part.data(), str, 3));
 
-    NTL::Literal copy = test;
+    NTL::Literal copy(test);
     assert(copy.valid() && copy.length() == len && !std::memcmp(copy.data(), str, len));
 
     std::printf("OK\n  operator[], at()... ");
@@ -139,12 +139,12 @@ void test_string_class()
         assert(!mem_handler.count);
 
         mem_handler.make_reliable();
-        NTL::Literal ltr("str~~~", 3);  NTL::String test = ltr;
+        NTL::Literal ltr("str~~~", 3);  NTL::String test(ltr);
         assert(test.valid() && test.length() == 3);
         assert(!std::memcmp(test.data(), ltr.data(), 3) && !test.data()[3]);
         assert(mem_handler.count == 1);
 
-        NTL::String test1 = str;
+        NTL::String test1(str);
         assert(test1.valid() && test1.length() == len);
         assert(!std::memcmp(test1.data(), str, len + 1));
         assert(mem_handler.count == 2);
@@ -155,7 +155,7 @@ void test_string_class()
         assert(mem_handler.count == 3);
 
         mem_handler.make_fail(1);
-        NTL::String copy = test1;
+        NTL::String copy(test1);
         assert(copy.valid() && copy.length() == len);
         assert(!std::memcmp(copy.data(), str, len + 1));
         assert(mem_handler.count == 3);
