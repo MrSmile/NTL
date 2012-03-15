@@ -201,8 +201,8 @@ class Invalid  // Non instantable
 
 class Heavy  // Non copyable
 {
-    Heavy(Heavy &);
-    Heavy &operator = (Heavy &);
+    Heavy(const Heavy &);
+    Heavy &operator = (const Heavy &);
 
 public:
     Heavy()

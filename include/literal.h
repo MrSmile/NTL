@@ -408,7 +408,7 @@ public:
 
     friend void swap(StringBase<C> &str1, StringBase<C> &str2)
     {
-        size_t *tmp = str1.ptr_;  str1.ptr_ = str2.ptr_;  str2.ptr_ = tmp;
+        NTL::swap(str1.ptr_, str2.ptr_);
     }
 
     StringBase<C> &operator = (const StringBase<C> &str)

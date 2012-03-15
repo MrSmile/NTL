@@ -194,7 +194,7 @@ void test_string_class()
         assert(!std::memcmp(test.data(), str, len + 1));
         assert(mem_handler.count == 5);
 
-        mem_handler.make_fail(1);  NTL::swap(test, test2);
+        mem_handler.make_fail(1);  swap(test, test2);
         assert(test.valid() && test.length() == 3);
         assert(!std::memcmp(test.data(), str, 3) && !test.data()[3]);
         assert(test2.valid() && test2.length() == len);

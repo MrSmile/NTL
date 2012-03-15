@@ -299,7 +299,7 @@ void test_wstring_class()
         assert(!std::wcscmp(test.data(), L"string...."));
         assert(mem_handler.count == 5);
 
-        mem_handler.make_fail(1);  NTL::swap(test1, test5);
+        mem_handler.make_fail(1);  swap(test1, test5);
         assert(!std::wcscmp(test1.data(), L"str"));
         assert(!std::wcscmp(test5.data(), L"string"));
         assert(mem_handler.count == 5);
@@ -312,6 +312,7 @@ void test_wstring_class()
         assert(mem_handler.count == 6);
     }
     assert(!mem_handler.count);
+    mem_handler.make_fail(1);
 
     std::printf("OK\n");
 }

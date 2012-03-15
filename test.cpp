@@ -58,7 +58,7 @@ struct Node : public NTL::SimpleKey<int>
 
 int Node::count = 0;
 
-void test_pointer()
+/*void test_pointer()
 {
     std::cout << "\n=== Testing Pointers ===\n";
     {
@@ -68,7 +68,7 @@ void test_pointer()
         delete node.detach();
     }
     std::cout << std::endl;
-}
+}*/
 
 
 struct NodeT1 : public NTL::TreeNode<NodeT1>, public Node
@@ -77,7 +77,7 @@ struct NodeT1 : public NTL::TreeNode<NodeT1>, public Node
     {
     }
 
-    NodeT1(const Node &node) : Node(node)
+    NodeT1(const NodeT1 &node) : Node(node)
     {
     }
 };
@@ -88,7 +88,7 @@ struct NodeT2 : public NTL::IndexerNode<NodeT2>, public Node
     {
     }
 
-    NodeT2(const Node &node) : Node(node)
+    NodeT2(const NodeT2 &node) : Node(node)
     {
     }
 };
@@ -141,7 +141,7 @@ struct NodeL1 : public NTL::StackNode<NodeL1>, public Node
     {
     }
 
-    NodeL1(const Node &node) : Node(node)
+    NodeL1(const NodeL1 &node) : Node(node)
     {
     }
 };
@@ -152,7 +152,7 @@ struct NodeL2 : public NTL::SimpleListNode<NodeL2>, public Node
     {
     }
 
-    NodeL2(const Node &node) : Node(node)
+    NodeL2(const NodeL2 &node) : Node(node)
     {
     }
 };
@@ -163,7 +163,7 @@ struct NodeL3 : public NTL::ListNode<NodeL3>, public Node
     {
     }
 
-    NodeL3(const Node &node) : Node(node)
+    NodeL3(const NodeL3 &node) : Node(node)
     {
     }
 };
@@ -234,6 +234,7 @@ MemoryHandler mem_handler;
 void test_literal();
 void test_format();
 void test_win_utf();
+void test_pointer();
 
 void time_tree();
 
@@ -245,6 +246,7 @@ int main(int n, char **arg)
     test_literal();
     test_format();
     test_win_utf();
+    test_pointer();
 
     return 0;
 
