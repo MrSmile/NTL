@@ -168,7 +168,7 @@ struct NodeL3 : public NTL::ListNode<NodeL3>, public Node
     }
 };
 
-void test_list()
+/*void test_list()
 {
     std::cout << "\n=== Testing Lists, Stage 1 ===\n";
     {
@@ -225,7 +225,7 @@ void test_list()
             std::cout << node->id() << ' ';  std::cout << std::endl;
     }
     std::cout << std::endl;
-}
+}*/
 
 
 
@@ -235,6 +235,7 @@ void test_literal();
 void test_format();
 void test_win_utf();
 void test_pointer();
+void test_list();
 
 void time_tree();
 
@@ -247,6 +248,7 @@ int main(int n, char **arg)
     test_format();
     test_win_utf();
     test_pointer();
+    test_list();
 
     return 0;
 

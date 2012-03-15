@@ -83,6 +83,9 @@ public:
 
 template<typename T, typename A = EmptyAllocator<T> > class Stack : private A, public Heavy
 {
+    template<typename, typename> friend class Stack;
+
+
     StackNode<T> *first_;
 
 
