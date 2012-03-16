@@ -230,6 +230,9 @@ public:
 
 template<typename T, typename A = EmptyAllocator<T> > class SimpleList : private A, public Heavy
 {
+    template<typename, typename> friend class SimpleList;
+
+
     SimpleListNode<T> *first_, **last_;
 
 
@@ -472,6 +475,9 @@ public:
 
 template<typename T, typename A = EmptyAllocator<T> > class List : private A, public Heavy
 {
+    template<typename, typename> friend class List;
+
+
     ListNode<T> *first_;
 
 
