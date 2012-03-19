@@ -259,10 +259,15 @@ template<typename B> struct Utf16to8Filler
 
     bool operator () (const wchar_t *ptr, size_t len)
     {
-        for(; len > 0; len--)operator () (*ptr++);  return true;
+        for(; len > 0; len--)process(*ptr++);  return true;
     }
 
     bool operator () (wchar_t ch)
+    {
+        return process(ch);
+    }
+
+    bool process(uchar ch)
     {
         if(next)
         {

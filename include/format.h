@@ -141,7 +141,7 @@ template<typename T, typename S, typename C, C ch, C def> class Composite :
 {
     template<typename, typename C1, C1> friend class ArgBase;
     template<typename, typename, typename C1, C1, C1> friend class Composite;
-    template<typename, typename> friend class FormatMaker;
+    template<typename, typename> friend struct FormatMaker;
 
     enum Flag_
     {
@@ -169,7 +169,7 @@ template<typename C, C ch> class Format : public ArgBase<Format<C, ch>, C, C('1'
 {
     template<typename, typename C1, C1> friend class ArgBase;
     template<typename, typename, typename C1, C1, C1> friend class Composite;
-    template<typename, typename> friend class FormatMaker;
+    template<typename, typename> friend struct FormatMaker;
 
     enum Flag_
     {
