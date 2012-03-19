@@ -27,7 +27,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
 
-namespace NTL_Internal_ {
+namespace NTL_ {
 
 
 
@@ -461,12 +461,12 @@ template<typename T, typename C, C def> template<typename B> bool ArgBase<T, C, 
 
 
 
-}  // end namespace NTL_Internal_
+}  // end namespace NTL_
 
 
 
 namespace NTL
 {
-    using NTL_Internal_::format;
-    using NTL_Internal_::arg;
+    using NTL_::format;
+    using NTL_::arg;
 }

@@ -27,7 +27,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
 
-namespace NTL_Internal_ {
+namespace NTL_ {
 
 
 
@@ -78,7 +78,7 @@ public:
 
     friend void swap(Pointer<T> &ptr1, Pointer<T> &ptr2)
     {
-        NTL::swap(ptr1.target_, ptr2.target_);
+        swap(ptr1.target_, ptr2.target_);
     }
 
 
@@ -160,7 +160,7 @@ public:
 
     friend void swap(Array<T> &ptr1, Array<T> &ptr2)
     {
-        NTL::swap(ptr1.target_, ptr2.target_);
+        swap(ptr1.target_, ptr2.target_);
     }
 
 
@@ -182,12 +182,12 @@ public:
 
 
 
-}  // end namespace NTL_Internal_
+}  // end namespace NTL_
 
 
 
 namespace NTL
 {
-    using NTL_Internal_::Pointer;
-    using NTL_Internal_::Array;
+    using NTL_::Pointer;
+    using NTL_::Array;
 }

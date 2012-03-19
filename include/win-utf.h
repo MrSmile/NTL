@@ -28,7 +28,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
 
-namespace NTL_Internal_ {
+namespace NTL_ {
 
 
 
@@ -478,14 +478,14 @@ public:
 
 
 
-}  // end namespace NTL_Internal_
+}  // end namespace NTL_
 
 
 
 namespace NTL
 {
-    using NTL_Internal_::WLiteral;
-    using NTL_Internal_::utf8to16;
-    using NTL_Internal_::utf16to8;
-    using NTL_Internal_::WString;
+    using NTL_::WLiteral;
+    using NTL_::utf8to16;
+    using NTL_::utf16to8;
+    using NTL_::WString;
 }

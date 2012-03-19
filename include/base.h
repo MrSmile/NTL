@@ -43,7 +43,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #define NTL_UNUSED
 
-namespace NTL_Internal_
+namespace NTL_
 {
     inline void debug_break()
     {
@@ -55,7 +55,7 @@ namespace NTL_Internal_
 
 #define NTL_UNUSED  __attribute__((unused))
 
-namespace NTL_Internal_
+namespace NTL_
 {
     inline void debug_break()
     {
@@ -69,7 +69,7 @@ namespace NTL_Internal_
 
 #include <cstdlib>
 
-namespace NTL_Internal_
+namespace NTL_
 {
     inline void debug_break()
     {
@@ -86,7 +86,7 @@ namespace NTL_Internal_
 
 #include <iostream>
 
-namespace NTL_Internal_
+namespace NTL_
 {
     inline void ntl_assert(bool test, const char *msg)
     {
@@ -96,19 +96,19 @@ namespace NTL_Internal_
 
 #define NTL_STRING(str) #str
 #define NTL_ASSERT(expr, file, line) \
-    NTL_Internal_::ntl_assert(expr, "Assert failed: " #expr "; file " file "; line " NTL_STRING(line) ".\n")
+    NTL_::ntl_assert(expr, "Assert failed: " #expr "; file " file "; line " NTL_STRING(line) ".\n")
 #define assert(expr) NTL_ASSERT(expr, __FILE__, __LINE__)
 
 #else
 
-namespace NTL_Internal_
+namespace NTL_
 {
     inline void ntl_assert()
     {
     }
 }
 
-#define assert(expr) NTL_Internal_::ntl_assert()
+#define assert(expr) NTL_::ntl_assert()
 
 #endif
 
@@ -120,7 +120,7 @@ namespace NTL_Internal_
 #pragma intrinsic(_InterlockedExchangeAdd)
 #pragma warning(disable: 4800)
 
-namespace NTL_Internal_
+namespace NTL_
 {
     inline size_t sync_inc(volatile size_t &n)
     {
@@ -135,7 +135,7 @@ namespace NTL_Internal_
 
 #elif defined __GNUC__
 
-namespace NTL_Internal_
+namespace NTL_
 {
     inline size_t sync_inc(volatile size_t &n)
     {
@@ -150,7 +150,7 @@ namespace NTL_Internal_
 
 #else  // Not thread safe!!!
 
-namespace NTL_Internal_
+namespace NTL_
 {
     inline size_t sync_inc(volatile size_t &n)
     {
@@ -167,7 +167,7 @@ namespace NTL_Internal_
 
 
 
-namespace NTL_Internal_ {
+namespace NTL_ {
 
 
 
@@ -323,7 +323,7 @@ template<typename T> struct Comparable<T, T>
 
 
 
-}  // end namespace NTL_Internal_
+}  // end namespace NTL_
 
 
 
@@ -332,16 +332,16 @@ namespace NTL
     using std::swap;
 
 #ifdef NTL_DEBUG
-    using NTL_Internal_::invalid_ptr;
+    using NTL_::invalid_ptr;
 #endif
 
-    using NTL_Internal_::sync_inc;
-    using NTL_Internal_::sync_dec;
+    using NTL_::sync_inc;
+    using NTL_::sync_dec;
 
-    using NTL_Internal_::Invalid;
-    using NTL_Internal_::Heavy;
+    using NTL_::Invalid;
+    using NTL_::Heavy;
 
-    using NTL_Internal_::Comparable;
+    using NTL_::Comparable;
 
-    using NTL_Internal_::debug_break;
+    using NTL_::debug_break;
 }

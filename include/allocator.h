@@ -27,7 +27,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
 
-namespace NTL_Internal_ {
+namespace NTL_ {
 
 
 
@@ -178,13 +178,13 @@ template<typename T> struct DefaultAllocator : public Allocator<DefaultAllocator
 
 
 
-}  // end namespace NTL_Internal_
+}  // end namespace NTL_
 
 
 
 namespace NTL
 {
-    using NTL_Internal_::Allocator;
-    using NTL_Internal_::EmptyAllocator;
-    using NTL_Internal_::DefaultAllocator;
+    using NTL_::Allocator;
+    using NTL_::EmptyAllocator;
+    using NTL_::DefaultAllocator;
 }

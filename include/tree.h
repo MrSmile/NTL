@@ -27,7 +27,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
 
-namespace NTL_Internal_ {
+namespace NTL_ {
 
 
 
@@ -338,7 +338,7 @@ template<typename H> class GeneralTreeBase : public H::Base
     {
         if(root_)root_->parent_ = tree.root_cast_();
         if(tree.root_)tree.root_->parent_ = root_cast_();
-        NTL::swap(root_, tree.root_);  swap_size_(tree);
+        swap(root_, tree.root_);  swap_size_(tree);
     }
 
 public:
@@ -802,7 +802,7 @@ class IndexerNodeBase
 
     void swap_index_(IndexerNodeBase *node)
     {
-        NTL::swap(index_, node->index_);
+        swap(index_, node->index_);
     }
 
     void copy_index_(const IndexerNodeBase *node)
@@ -865,7 +865,7 @@ class IndexerBase
 
     void swap_size_(IndexerBase &tree)
     {
-        NTL::swap(size_, tree.size_);
+        swap(size_, tree.size_);
     }
 
     void copy_size_(const IndexerBase &tree)
@@ -1134,19 +1134,19 @@ public:
 
 
 
-}  // end namespace NTL_Internal_
+}  // end namespace NTL_
 
 
 
 namespace NTL
 {
-    using NTL_Internal_::TreeNode;
-    using NTL_Internal_::Tree;
-    using NTL_Internal_::OwningTree;
+    using NTL_::TreeNode;
+    using NTL_::Tree;
+    using NTL_::OwningTree;
 
-    using NTL_Internal_::IndexerNode;
-    using NTL_Internal_::Indexer;
-    using NTL_Internal_::OwningIndexer;
+    using NTL_::IndexerNode;
+    using NTL_::Indexer;
+    using NTL_::OwningIndexer;
 
-    using NTL_Internal_::SimpleKey;
+    using NTL_::SimpleKey;
 }

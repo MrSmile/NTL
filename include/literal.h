@@ -27,7 +27,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
 
-namespace NTL_Internal_ {
+namespace NTL_ {
 
 
 
@@ -408,7 +408,7 @@ public:
 
     friend void swap(StringBase<C> &str1, StringBase<C> &str2)
     {
-        NTL::swap(str1.ptr_, str2.ptr_);
+        swap(str1.ptr_, str2.ptr_);
     }
 
     StringBase<C> &operator = (const StringBase<C> &str)
@@ -505,15 +505,15 @@ typedef StringBase<char> String;
 
 
 
-}  // end namespace NTL_Internal_
+}  // end namespace NTL_
 
 
 
 namespace NTL
 {
-    using NTL_Internal_::StringLike;
-    using NTL_Internal_::LiteralBase;
-    using NTL_Internal_::Literal;
-    using NTL_Internal_::StringBase;
-    using NTL_Internal_::String;
+    using NTL_::StringLike;
+    using NTL_::LiteralBase;
+    using NTL_::Literal;
+    using NTL_::StringBase;
+    using NTL_::String;
 }

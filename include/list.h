@@ -27,7 +27,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
 
-namespace NTL_Internal_ {
+namespace NTL_ {
 
 
 
@@ -134,7 +134,7 @@ public:
 
     friend void swap(Stack<T, A> &stack1, Stack<T, A> &stack2)
     {
-        NTL::swap(stack1.first_, stack2.first_);
+        swap(stack1.first_, stack2.first_);
     }
 
 
@@ -307,7 +307,7 @@ public:
 
     friend void swap(SimpleList<T, A> &list1, SimpleList<T, A> &list2)
     {
-        NTL::swap(list1.first_, list2.first_);  NTL::swap(list1.last_, list2.last_);
+        swap(list1.first_, list2.first_);  swap(list1.last_, list2.last_);
         if(!list1.first_)list1.last_ = &list1.first_;
         if(!list2.first_)list2.last_ = &list2.first_;
     }
@@ -483,7 +483,7 @@ template<typename T, typename A = EmptyAllocator<T> > class List : private A, pu
 
     void swap_(List<T, A> &list)
     {
-        NTL::swap(list.first_, first_);
+        swap(list.first_, first_);
         if(list.first_)list.first_->prev_ = &list.first_;
         if(first_)first_->prev_ = &first_;
     }
@@ -588,21 +588,21 @@ template<typename T> class OwningList : public List<T, DefaultAllocator<T> >  //
 
 
 
-}  // end namespace NTL_Internal_
+}  // end namespace NTL_
 
 
 
 namespace NTL
 {
-    using NTL_Internal_::StackNode;
-    using NTL_Internal_::Stack;
-    using NTL_Internal_::OwningStack;
+    using NTL_::StackNode;
+    using NTL_::Stack;
+    using NTL_::OwningStack;
 
-    using NTL_Internal_::SimpleListNode;
-    using NTL_Internal_::SimpleList;
-    using NTL_Internal_::OwningSimpleList;
+    using NTL_::SimpleListNode;
+    using NTL_::SimpleList;
+    using NTL_::OwningSimpleList;
 
-    using NTL_Internal_::ListNode;
-    using NTL_Internal_::List;
-    using NTL_Internal_::OwningList;
+    using NTL_::ListNode;
+    using NTL_::List;
+    using NTL_::OwningList;
 }
