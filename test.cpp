@@ -93,7 +93,7 @@ struct NodeT2 : public NTL::IndexerNode<NodeT2>, public Node
     }
 };
 
-void test_tree()
+/*void test_tree()
 {
     std::cout << "\n=== Testing Trees, Stage 1 ===\n";
     {
@@ -132,7 +132,7 @@ void test_tree()
             std::cout << node->id() << ' ';  std::cout << std::endl;
     }
     std::cout << std::endl;
-}
+}*/
 
 
 struct NodeL1 : public NTL::StackNode<NodeL1>, public Node
@@ -236,6 +236,7 @@ void test_format();
 void test_win_utf();
 void test_pointer();
 void test_list();
+void test_tree();
 
 void time_tree();
 
@@ -248,6 +249,7 @@ int main(int n, char **arg)
     test_win_utf();
     test_pointer();
     test_list();
+    test_tree();
 
     return 0;
 

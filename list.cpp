@@ -1,5 +1,5 @@
 /***************************************************************************************************
-* Nothrow Template Library : pointer.cpp : test suite for pointer.h
+* Nothrow Template Library : list.cpp : test suite for list.h
 ****************************************************************************************************
 
 Copyright (c) 2012 Vabishchevich Nikolay aka }:+()___ [Smile]

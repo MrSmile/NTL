@@ -426,6 +426,13 @@ template<typename N, typename H, typename A> class GeneralTree : private A, publ
         Tree_::swap_(tree);
     }
 
+    void insert_(N *node, const PlaceBase_ &place)
+    {
+        assert(place.dir);
+        if(place.node)const_cast<Node_ *>(place.node)->insert_(node, place.dir > 0);
+        else set_root_(node);
+    }
+
 
 public:
     class Place : protected PlaceBase_
@@ -511,13 +518,13 @@ public:
         const Type_ *before() const
         {
             if(!PlaceBase_::node)return 0;
-            return const_cast_(PlaceBase_::dir >= 0 ? PlaceBase_::node : PlaceBase_::node->prev_());
+            return const_cast_(PlaceBase_::dir >= 0 ? PlaceBase_::node : PlaceBase_::node->prev());
         }
 
         const Type_ *after() const
         {
             if(!PlaceBase_::node)return 0;
-            return const_cast_(PlaceBase_::dir <= 0 ? PlaceBase_::node : PlaceBase_::node->next_());
+            return const_cast_(PlaceBase_::dir <= 0 ? PlaceBase_::node : PlaceBase_::node->next());
         }
     };
 
@@ -629,29 +636,32 @@ public:
 
     template<typename K> Type_ *take(const K &key)
     {
-        PlaceBase_ place = find_place_(key);  if(!place.dir)return 0;
+        PlaceBase_ place = find_place_(key);  if(place.dir)return 0;
         Node_ *node = const_cast<Node_ *>(place.node);
         node->remove();  return cast_(node);
     }
 
 
-    void insert(N *node, const PlaceBase_ &place)
+    void insert(Type_ *node, const ConstPlace &place)
     {
-        assert(place.dir);
-        if(place.node)const_cast<Node_ *>(place.node)->insert_(node, place.dir > 0);
-        else set_root_(node);
+        insert_(node, place);
     }
 
-    void insert(N *node)
+    void insert(Type_ *node, const Place &place)
     {
-        insert(node, find_place_(*node));
+        insert_(node, place);
+    }
+
+    void insert(Type_ *node)
+    {
+        insert_(node, find_place_(*node));
     }
 
     template<typename K> Type_ *get(const K &key)
     {
         PlaceBase_ place = find_place_(key);
         if(!place.dir)return cast_(place.node);
-        Type_ *node = create(key);  if(node)insert(node, place);  return node;
+        Type_ *node = create(key);  if(node)insert_(node, place);  return node;
     }
 };
 
