@@ -28,11 +28,24 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 struct MemoryHandler
 {
-    int count, cur, fail;
+    int n_new, n_del;
+    int cur, fail;
 
-    MemoryHandler() : count(0), cur(0), fail(0)
+    MemoryHandler() : n_new(0), n_del(0), cur(0), fail(0)
     {
     }
+
+    void reset()
+    {
+        n_new = n_del = 0;
+    }
+
+    void check(int tg_new, int tg_del)
+    {
+        assert(n_new == tg_new && n_del == tg_del);
+        n_new = n_del = 0;
+    }
+
 
     void make_fail(int n)
     {
@@ -47,7 +60,7 @@ struct MemoryHandler
     void *alloc_throw(size_t size)
     {
         assert(false);  void *res;
-        if((res = std::malloc(size)))count++;
+        if((res = std::malloc(size)))n_new++;
         return res;
     }
 
@@ -58,13 +71,13 @@ struct MemoryHandler
             cur = 0;  return 0;
         }
         void *res = std::malloc(size);
-        if(res)count++;  else assert(false);
+        if(res)n_new++;  else assert(false);
         return res;
     }
 
     void free(void *ptr)
     {
-        if(!ptr)return;  count--;  std::free(ptr);
+        if(!ptr)return;  n_del++;  std::free(ptr);
     }
 };
 

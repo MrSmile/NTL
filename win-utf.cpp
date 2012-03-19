@@ -180,32 +180,30 @@ void test_wide()
 
     std::printf("OK\n  utf8to16(), utf16to8()... ");
 
-    mem_handler.count = 0;
-    mem_handler.make_reliable();
+    mem_handler.reset();
     {
         typedef NTL::StringBase<wchar_t> WStr;
         WStr test1 = NTL::utf8to16(NTL::Literal("test") + ' ') + NTL::utf8to16("string~~~", 6) + NTL::utf8to16(" here");
         assert(!std::wcscmp(test1.data(), L"test string here"));
-        assert(mem_handler.count == 1);
+        mem_handler.check(1, 0);
 
         NTL::String test2 = NTL::utf16to8(NTL::WLiteral(L"test") + L' ') + NTL::utf16to8(L"string~~~", 6) + NTL::utf16to8(L" here");
         assert(!std::strcmp(test2.data(), "test string here"));
-        assert(mem_handler.count == 2);
+        mem_handler.check(1, 0);
 
         std::printf("OK\n  conversion correctness... ");
 
         size_t len = sizeof(utf8_at16) / sizeof(wchar_t);
         test1 = NTL::utf8to16(utf8_test, sizeof(utf8_test) - 1);
         assert(test1.length() == len - 1 && !std::memcmp(test1.data(), utf8_at16, len * sizeof(wchar_t)));
-        assert(mem_handler.count == 2);
+        mem_handler.check(1, 1);
 
         len = sizeof(utf16_at8);
         test2 = NTL::utf16to8(utf16_test, sizeof(utf16_test) / sizeof(wchar_t) - 1);
         assert(test2.length() == len - 1 && !std::memcmp(test2.data(), utf16_at8, len));
-        assert(mem_handler.count == 2);
+        mem_handler.check(1, 1);
     }
-    assert(!mem_handler.count);
-    mem_handler.make_fail(1);
+    mem_handler.check(0, 2);
 
     std::printf("OK\n");
 }
@@ -215,104 +213,98 @@ void test_wstring_class()
 {
     std::printf("\nTesting WString class:\n  constructors... ");
 
-    mem_handler.count = 0;
+    mem_handler.reset();
     {
         NTL::WString null;
         assert(!null.valid() && !null.length() && !null.data());
-        assert(!mem_handler.count);
+        mem_handler.check(0, 0);
 
-        mem_handler.make_reliable();
         NTL::WString test(NTL::WLiteral(L"str~~~", 3) + L"ing");
         assert(!std::wcscmp(test.data(), L"string"));
-        assert(mem_handler.count == 1);
+        mem_handler.check(1, 0);
 
         NTL::WString test1(L"string");
         assert(!std::wcscmp(test1.data(), L"string"));
-        assert(mem_handler.count == 2);
+        mem_handler.check(1, 0);
 
         NTL::WString test2(L"str~~~", 3);
         assert(!std::wcscmp(test2.data(), L"str"));
-        assert(mem_handler.count == 3);
+        mem_handler.check(1, 0);
 
-        mem_handler.make_fail(1);
         NTL::WString copy1(test1);
         assert(!std::wcscmp(copy1.data(), L"string"));
-        assert(mem_handler.count == 3);
+        mem_handler.check(0, 0);
 
         NTL::WString copy2(static_cast<NTL::StringBase<wchar_t> &>(test2));
         assert(!std::wcscmp(copy2.data(), L"str"));
-        assert(mem_handler.count == 3);
+        mem_handler.check(0, 0);
 
-        mem_handler.make_reliable();
         NTL::WString test3(NTL::Literal("str~~~", 3) + "ing");
         assert(!std::wcscmp(test3.data(), L"string"));
-        assert(mem_handler.count == 4);
+        mem_handler.check(1, 0);
 
         NTL::WString test4("string");
         assert(!std::wcscmp(test4.data(), L"string"));
-        assert(mem_handler.count == 5);
+        mem_handler.check(1, 0);
 
         NTL::WString test5("str~~~", 3);
         assert(!std::wcscmp(test5.data(), L"str"));
-        assert(mem_handler.count == 6);
+        mem_handler.check(1, 0);
 
         std::printf("OK\n  copy, concatenation, swap... ");
 
         test = test1.substr(0, 3) + L"ing";
         assert(!std::wcscmp(test.data(), L"string"));
-        assert(mem_handler.count == 6);
+        mem_handler.check(1, 1);
 
         test = L"str";
         assert(!std::wcscmp(test.data(), L"str"));
-        assert(mem_handler.count == 6);
+        mem_handler.check(1, 1);
 
         test = NTL::Literal("str~~~", 3) + "ing";
         assert(!std::wcscmp(test.data(), L"string"));
-        assert(mem_handler.count == 6);
+        mem_handler.check(1, 1);
 
         test = "str";
         assert(!std::wcscmp(test.data(), L"str"));
-        assert(mem_handler.count == 6);
+        mem_handler.check(1, 1);
 
-        mem_handler.make_fail(1);  test3 = test;
+        test3 = test;
         assert(!std::wcscmp(test3.data(), L"str"));
-        assert(mem_handler.count == 5);
+        mem_handler.check(0, 1);
 
-        mem_handler.make_reliable();
         test4 = static_cast<NTL::StringBase<wchar_t> &>(test);
         assert(!std::wcscmp(test4.data(), L"str"));
-        assert(mem_handler.count == 4);
+        mem_handler.check(0, 1);
 
         test += test1.substr(3, 1) + L"n";
         assert(!std::wcscmp(test.data(), L"strin"));
-        assert(mem_handler.count == 5);
+        mem_handler.check(1, 0);
 
         test += L"g";
         assert(!std::wcscmp(test.data(), L"string"));
-        assert(mem_handler.count == 5);
+        mem_handler.check(1, 1);
 
         test += NTL::Literal(".") + ".";
         assert(!std::wcscmp(test.data(), L"string.."));
-        assert(mem_handler.count == 5);
+        mem_handler.check(1, 1);
 
         test += "..";
         assert(!std::wcscmp(test.data(), L"string...."));
-        assert(mem_handler.count == 5);
+        mem_handler.check(1, 1);
 
-        mem_handler.make_fail(1);  swap(test1, test5);
+        swap(test1, test5);
         assert(!std::wcscmp(test1.data(), L"str"));
         assert(!std::wcscmp(test5.data(), L"string"));
-        assert(mem_handler.count == 5);
+        mem_handler.check(0, 0);
 
         std::printf("OK\n  back conversion... ");
 
-        mem_handler.make_reliable();
         NTL::String str = "...." + test.utf8();
         assert(!std::strcmp(str.data(), "....string...."));
-        assert(mem_handler.count == 6);
+        mem_handler.check(1, 0);
     }
-    assert(!mem_handler.count);
-    mem_handler.make_fail(1);
+    mem_handler.check(0, 6);
 
     std::printf("OK\n");
 }

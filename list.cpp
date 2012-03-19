@@ -44,29 +44,27 @@ void test_stack_container()
 {
     std::printf("\nTesting Stack container:\n  constructors... ");
 
-    mem_handler.count = 0;
+    mem_handler.reset();
     {
         NTL::EmptyAllocator<NodeL1> alloc;  NTL::Stack<NodeL1> list(alloc);
         assert(!list.not_empty() && !list && list == false);
         NodeL1 *node = list.first();
         const NodeL1 *cnode = static_cast<const NTL::Stack<NodeL1> &>(list).first();
         assert(!node && cnode == node);
-        assert(!mem_handler.count);
+        mem_handler.check(0, 0);
 
         NTL::OwningStack<NodeL1> copy;
         node = copy.first();
         cnode = static_cast<const NTL::OwningStack<NodeL1> &>(copy).first();
         assert(!node && !cnode);
-        assert(!mem_handler.count);
+        mem_handler.check(0, 0);
 
         std::printf("OK\n  prepend(), take_first()... ");
 
-        mem_handler.make_reliable();
         for(int i = 0; i < 10; i++)list.prepend(new_nt NodeL1(9 - i));
         assert(list.not_empty() && !!list && list == true);
-        assert(mem_handler.count == 10);
+        mem_handler.check(10, 0);
 
-        mem_handler.make_fail(1);
         node = list.first();
         for(int i = 0; i < 10; i++)
         {
@@ -76,7 +74,7 @@ void test_stack_container()
             assert(cnode == node);
         }
         assert(!node);
-        assert(mem_handler.count == 10);
+        mem_handler.check(0, 0);
 
         for(int i = 0; i < 10; i++)
         {
@@ -86,44 +84,40 @@ void test_stack_container()
         }
         node = list.take_first();
         assert(!node);
-        assert(!mem_handler.count);
+        mem_handler.check(0, 10);
 
-        mem_handler.make_reliable();
         for(int i = 0; i < 10; i++)list.prepend(new_nt NodeL1(9 - i));
-        assert(mem_handler.count == 10);
+        mem_handler.check(10, 0);
 
         std::printf("OK\n  copy(), swap()... ");
 
         mem_handler.make_fail(10);
         bool res = copy.copy(list);
         assert(!res && !copy.first());
-        assert(mem_handler.count == 10);
-
         mem_handler.make_reliable();
+        mem_handler.check(9, 9);
+
         res = copy.copy(list);
         assert(res && copy.first());
-        assert(mem_handler.count == 20);
+        mem_handler.check(10, 0);
 
-        mem_handler.make_fail(1);
         node = list.first();
         for(int i = 0; i < 10; i++, node = node->next())
             assert(node->num == i);  assert(!node);
         node = copy.first();
         for(int i = 0; i < 10; i++, node = node->next())
             assert(node->num == i + 100);  assert(!node);
-        assert(mem_handler.count == 20);
+        mem_handler.check(0, 0);
 
-        mem_handler.make_reliable();
         NTL::OwningStack<NodeL1> copy1;
         res = copy1.copy(copy);
         assert(res && copy1.first());
-        assert(mem_handler.count == 30);
+        mem_handler.check(10, 0);
 
-        mem_handler.make_fail(1);
         node = copy1.first();
         for(int i = 0; i < 10; i++, node = node->next())
             assert(node->num == i + 200);  assert(!node);
-        assert(mem_handler.count == 30);
+        mem_handler.check(0, 0);
 
         swap(copy, copy1);
         node = copy.first();
@@ -132,7 +126,7 @@ void test_stack_container()
         node = copy1.first();
         for(int i = 0; i < 10; i++, node = node->next())
             assert(node->num == i + 100);  assert(!node);
-        assert(mem_handler.count == 30);
+        mem_handler.check(0, 0);
 
         std::printf("OK\n  insert_next(), take_next()... ");
 
@@ -148,23 +142,23 @@ void test_stack_container()
             else assert(!next);
         }
         assert(!node);
-        assert(mem_handler.count == 30);
+        mem_handler.check(0, 0);
 
         node = list.first();
         for(int i = 0; i < 10; i++, node = node->next())
             assert(node->num == i);  assert(!node);
-        assert(mem_handler.count == 30);
+        mem_handler.check(0, 0);
 
         std::printf("OK\n  clear(), destructors... ");
 
         copy1.clear();
         assert(!copy1.not_empty());
-        assert(mem_handler.count == 20);
+        mem_handler.check(0, 10);
 
         while((node = list.take_first()))delete node;
-        assert(mem_handler.count == 10);
+        mem_handler.check(0, 10);
     }
-    assert(!mem_handler.count);
+    mem_handler.check(0, 10);
 
     std::printf("OK\n");
 }
@@ -187,29 +181,27 @@ void test_simple_list_container()
 {
     std::printf("\nTesting SimpleList container:\n  constructors... ");
 
-    mem_handler.count = 0;
+    mem_handler.reset();
     {
         NTL::EmptyAllocator<NodeL2> alloc;  NTL::SimpleList<NodeL2> list(alloc);
         assert(!list.not_empty() && !list && list == false);
         NodeL2 *node = list.first();
         const NodeL2 *cnode = static_cast<const NTL::SimpleList<NodeL2> &>(list).first();
         assert(!node && cnode == node);
-        assert(!mem_handler.count);
+        mem_handler.check(0, 0);
 
         NTL::OwningSimpleList<NodeL2> copy;
         node = copy.first();
         cnode = static_cast<const NTL::OwningSimpleList<NodeL2> &>(copy).first();
         assert(!node && !cnode);
-        assert(!mem_handler.count);
+        mem_handler.check(0, 0);
 
         std::printf("OK\n  prepend(node), take_first(), append(node)... ");
 
-        mem_handler.make_reliable();
         for(int i = 0; i < 10; i++)list.prepend(new_nt NodeL2(9 - i));
         assert(list.not_empty() && !!list && list == true);
-        assert(mem_handler.count == 10);
+        mem_handler.check(10, 0);
 
-        mem_handler.make_fail(1);
         node = list.first();
         for(int i = 0; i < 10; i++)
         {
@@ -219,7 +211,7 @@ void test_simple_list_container()
             assert(cnode == node);
         }
         assert(!node);
-        assert(mem_handler.count == 10);
+        mem_handler.check(0, 0);
 
         for(int i = 0; i < 10; i++)
         {
@@ -229,50 +221,45 @@ void test_simple_list_container()
         }
         node = list.take_first();
         assert(!node);
-        assert(!mem_handler.count);
+        mem_handler.check(0, 10);
 
-        mem_handler.make_reliable();
         for(int i = 0; i < 10; i++)list.append(new_nt NodeL2(i));
-        assert(mem_handler.count == 10);
+        mem_handler.check(10, 0);
 
-        mem_handler.make_fail(1);
         node = list.first();
         for(int i = 0; i < 10; i++, node = node->next())
             assert(node->num == i);  assert(!node);
-        assert(mem_handler.count == 10);
+        mem_handler.check(0, 0);
 
         std::printf("OK\n  copy(), swap()... ");
 
         mem_handler.make_fail(10);
         bool res = copy.copy(list);
         assert(!res && !copy.first());
-        assert(mem_handler.count == 10);
-
         mem_handler.make_reliable();
+        mem_handler.check(9, 9);
+
         res = copy.copy(list);
         assert(res && copy.first());
-        assert(mem_handler.count == 20);
+        mem_handler.check(10, 0);
 
-        mem_handler.make_fail(1);
         node = list.first();
         for(int i = 0; i < 10; i++, node = node->next())
             assert(node->num == i);  assert(!node);
         node = copy.first();
         for(int i = 0; i < 10; i++, node = node->next())
             assert(node->num == i + 100);  assert(!node);
-        assert(mem_handler.count == 20);
+        mem_handler.check(0, 0);
 
-        mem_handler.make_reliable();
         NTL::OwningSimpleList<NodeL2> copy1;
         res = copy1.copy(copy);
         assert(res && copy1.first());
-        assert(mem_handler.count == 30);
+        mem_handler.check(10, 0);
 
-        mem_handler.make_fail(1);
         node = copy1.first();
         for(int i = 0; i < 10; i++, node = node->next())
             assert(node->num == i + 200);  assert(!node);
-        assert(mem_handler.count == 30);
+        mem_handler.check(0, 0);
 
         swap(copy, copy1);
         node = copy.first();
@@ -281,75 +268,73 @@ void test_simple_list_container()
         node = copy1.first();
         for(int i = 0; i < 10; i++, node = node->next())
             assert(node->num == i + 100);  assert(!node);
-        assert(mem_handler.count == 30);
+        mem_handler.check(0, 0);
 
         std::printf("OK\n  prepend(list), append(list)... ");
 
         NTL::OwningSimpleList<NodeL2> copy2;
         assert(!copy2.not_empty() && !copy2.first());
-        assert(mem_handler.count == 30);
+        mem_handler.check(0, 0);
 
         copy.prepend(copy2);
         assert(!copy2.not_empty() && !copy2.first());
-        assert(mem_handler.count == 30);
+        mem_handler.check(0, 0);
 
         node = copy.first();
         for(int i = 0; i < 10; i++, node = node->next())
             assert(node->num == i + 200);  assert(!node);
-        assert(mem_handler.count == 30);
+        mem_handler.check(0, 0);
 
         copy.append(copy2);
         assert(!copy2.not_empty() && !copy2.first());
-        assert(mem_handler.count == 30);
+        mem_handler.check(0, 0);
 
         node = copy.first();
         for(int i = 0; i < 10; i++, node = node->next())
             assert(node->num == i + 200);  assert(!node);
-        assert(mem_handler.count == 30);
+        mem_handler.check(0, 0);
 
         copy2.prepend(copy1);
         assert(!copy1.not_empty() && !copy1.first());
-        assert(mem_handler.count == 30);
+        mem_handler.check(0, 0);
 
         node = copy2.first();
         for(int i = 0; i < 10; i++, node = node->next())
             assert(node->num == i + 100);  assert(!node);
-        assert(mem_handler.count == 30);
+        mem_handler.check(0, 0);
 
         copy1.append(copy2);
         assert(!copy2.not_empty() && !copy2.first());
-        assert(mem_handler.count == 30);
+        mem_handler.check(0, 0);
 
         node = copy1.first();
         for(int i = 0; i < 10; i++, node = node->next())
             assert(node->num == i + 100);  assert(!node);
-        assert(mem_handler.count == 30);
+        mem_handler.check(0, 0);
 
-        mem_handler.make_reliable();
         res = copy2.copy(copy);
         assert(res && copy2.not_empty());
-        assert(mem_handler.count == 40);
+        mem_handler.check(10, 0);
 
-        mem_handler.make_fail(1);
         node = copy2.first();
         for(int i = 0; i < 10; i++, node = node->next())
             assert(node->num == i + 300);
-        assert(mem_handler.count == 40);
+        mem_handler.check(0, 0);
 
         copy.prepend(copy1);
         assert(!copy1.not_empty() && !copy1.first());
-        assert(mem_handler.count == 40);
+        mem_handler.check(0, 0);
 
         node = copy.first();
         for(int i = 0; i < 10; i++, node = node->next())
             assert(node->num == i + 100);
         for(int i = 0; i < 10; i++, node = node->next())
             assert(node->num == i + 200);  assert(!node);
-        assert(mem_handler.count == 40);
+        mem_handler.check(0, 0);
 
         copy.append(copy2);
         assert(!copy2.not_empty() && !copy2.first());
-        assert(mem_handler.count == 40);
+        mem_handler.check(0, 0);
 
         node = copy.first();
         for(int i = 0; i < 10; i++, node = node->next())
@@ -358,57 +343,53 @@ void test_simple_list_container()
             assert(node->num == i + 200);
         for(int i = 0; i < 10; i++, node = node->next())
             assert(node->num == i + 300);  assert(!node);
-        assert(mem_handler.count == 40);
+        mem_handler.check(0, 0);
 
         std::printf("OK\n  prepend_copy(), append_copy()... ");
 
-        mem_handler.make_reliable();
         res = copy1.prepend_copy(list);
         assert(res && copy1.not_empty());
-        assert(mem_handler.count == 50);
+        mem_handler.check(10, 0);
 
-        mem_handler.make_fail(1);
         node = list.first();
         for(int i = 0; i < 10; i++, node = node->next())
             assert(node->num == i);  assert(!node);
         node = copy1.first();
         for(int i = 0; i < 10; i++, node = node->next())
             assert(node->num == i + 100);  assert(!node);
-        assert(mem_handler.count == 50);
+        mem_handler.check(0, 0);
 
         mem_handler.make_fail(10);
         res = copy1.prepend_copy(list);
         assert(!res && copy1.not_empty());
-        assert(mem_handler.count == 50);
+        mem_handler.make_reliable();
+        mem_handler.check(9, 9);
 
-        mem_handler.make_fail(1);
         node = list.first();
         for(int i = 0; i < 10; i++, node = node->next())
             assert(node->num == i);  assert(!node);
         node = copy1.first();
         for(int i = 0; i < 10; i++, node = node->next())
             assert(node->num == i + 100);  assert(!node);
-        assert(mem_handler.count == 50);
+        mem_handler.check(0, 0);
 
-        mem_handler.make_reliable();
         res = copy1.append_copy(copy1);
         assert(res && copy1.not_empty());
-        assert(mem_handler.count == 60);
+        mem_handler.check(10, 0);
 
-        mem_handler.make_fail(1);
         node = copy1.first();
         for(int i = 0; i < 10; i++, node = node->next())
             assert(node->num == i + 100);
         for(int i = 0; i < 10; i++, node = node->next())
             assert(node->num == i + 200);  assert(!node);
-        assert(mem_handler.count == 60);
+        mem_handler.check(0, 0);
 
         mem_handler.make_fail(10);
         res = copy1.append_copy(list);
         assert(!res && copy1.not_empty());
-        assert(mem_handler.count == 60);
+        mem_handler.make_reliable();
+        mem_handler.check(9, 9);
 
-        mem_handler.make_fail(1);
         node = list.first();
         for(int i = 0; i < 10; i++, node = node->next())
             assert(node->num == i);  assert(!node);
@@ -417,7 +398,7 @@ void test_simple_list_container()
             assert(node->num == i + 100);
         for(int i = 0; i < 10; i++, node = node->next())
             assert(node->num == i + 200);  assert(!node);
-        assert(mem_handler.count == 60);
+        mem_handler.check(0, 0);
 
         std::printf("OK\n  insert(), take()... ");
 
@@ -433,23 +414,23 @@ void test_simple_list_container()
             else assert(!next);
         }
         assert(!node);
-        assert(mem_handler.count == 60);
+        mem_handler.check(0, 0);
 
         node = list.first();
         for(int i = 0; i < 10; i++, node = node->next())
             assert(node->num == i);  assert(!node);
-        assert(mem_handler.count == 60);
+        mem_handler.check(0, 0);
 
         std::printf("OK\n  clear(), destructors... ");
 
         copy1.clear();
         assert(!copy1.not_empty());
-        assert(mem_handler.count == 40);
+        mem_handler.check(0, 20);
 
         while((node = list.take_first()))delete node;
-        assert(mem_handler.count == 30);
+        mem_handler.check(0, 10);
     }
-    assert(!mem_handler.count);
+    mem_handler.check(0, 30);
 
     std::printf("OK\n");
 }
@@ -472,24 +453,23 @@ void test_list_container()
 {
     std::printf("\nTesting List container:\n  constructors... ");
 
-    mem_handler.count = 0;
+    mem_handler.reset();
     {
         NTL::EmptyAllocator<NodeL3> alloc;  NTL::List<NodeL3> list(alloc);
         assert(!list.not_empty() && !list && list == false);
         NodeL3 *node = list.first();
         const NodeL3 *cnode = static_cast<const NTL::List<NodeL3> &>(list).first();
         assert(!node && cnode == node);
-        assert(!mem_handler.count);
+        mem_handler.check(0, 0);
 
         NTL::OwningList<NodeL3> copy;
         node = copy.first();
         cnode = static_cast<const NTL::OwningList<NodeL3> &>(copy).first();
         assert(!node && !cnode);
-        assert(!mem_handler.count);
+        mem_handler.check(0, 0);
 
         std::printf("OK\n  prepend(), take_first()... ");
 
-        mem_handler.make_reliable();
         for(int i = 0; i < 10; i++)
         {
             node = new_nt NodeL3(9 - i);
@@ -497,9 +477,8 @@ void test_list_container()
             list.prepend(node);
         }
         assert(list.not_empty() && !!list && list == true);
-        assert(mem_handler.count == 10);
+        mem_handler.check(10, 0);
 
-        mem_handler.make_fail(1);
         node = list.first();
         for(int i = 0; i < 10; i++)
         {
@@ -509,7 +488,7 @@ void test_list_container()
             assert(cnode == node);
         }
         assert(!node);
-        assert(mem_handler.count == 10);
+        mem_handler.check(0, 0);
 
         for(int i = 0; i < 10; i++)
         {
@@ -519,44 +498,40 @@ void test_list_container()
         }
         node = list.take_first();
         assert(!node);
-        assert(!mem_handler.count);
+        mem_handler.check(0, 10);
 
-        mem_handler.make_reliable();
         for(int i = 0; i < 10; i++)list.prepend(new_nt NodeL3(9 - i));
-        assert(mem_handler.count == 10);
+        mem_handler.check(10, 0);
 
         std::printf("OK\n  copy(), swap()... ");
 
         mem_handler.make_fail(10);
         bool res = copy.copy(list);
         assert(!res && !copy.first());
-        assert(mem_handler.count == 10);
-
         mem_handler.make_reliable();
+        mem_handler.check(9, 9);
+
         res = copy.copy(list);
         assert(res && copy.first());
-        assert(mem_handler.count == 20);
+        mem_handler.check(10, 0);
 
-        mem_handler.make_fail(1);
         node = list.first();
         for(int i = 0; i < 10; i++, node = node->next())
             assert(node->num == i);  assert(!node);
         node = copy.first();
         for(int i = 0; i < 10; i++, node = node->next())
             assert(node->num == i + 100);  assert(!node);
-        assert(mem_handler.count == 20);
+        mem_handler.check(0, 0);
 
-        mem_handler.make_reliable();
         NTL::OwningList<NodeL3> copy1;
         res = copy1.copy(copy);
         assert(res && copy1.first());
-        assert(mem_handler.count == 30);
+        mem_handler.check(10, 0);
 
-        mem_handler.make_fail(1);
         node = copy1.first();
         for(int i = 0; i < 10; i++, node = node->next())
             assert(node->num == i + 200);  assert(!node);
-        assert(mem_handler.count == 30);
+        mem_handler.check(0, 0);
 
         swap(copy, copy1);
         node = copy.first();
@@ -565,7 +540,7 @@ void test_list_container()
         node = copy1.first();
         for(int i = 0; i < 10; i++, node = node->next())
             assert(node->num == i + 100);  assert(!node);
-        assert(mem_handler.count == 30);
+        mem_handler.check(0, 0);
 
         std::printf("OK\n  insert_next(), take_next()... ");
 
@@ -582,12 +557,12 @@ void test_list_container()
             else assert(!next);
         }
         assert(!node);
-        assert(mem_handler.count == 30);
+        mem_handler.check(0, 0);
 
         node = list.first();
         for(int i = 0; i < 10; i++, node = node->next())
             assert(node->num == i);  assert(!node);
-        assert(mem_handler.count == 30);
+        mem_handler.check(0, 0);
 
         std::printf("OK\n  insert_prev(), remove()... ");
 
@@ -600,23 +575,23 @@ void test_list_container()
             assert(node->assigned() && node->next() == next);
         }
         assert(!node->next());
-        assert(mem_handler.count == 30);
+        mem_handler.check(0, 0);
 
         node = list.first();
         for(int i = 0; i < 10; i++, node = node->next())
             assert(node->num == i);  assert(!node);
-        assert(mem_handler.count == 30);
+        mem_handler.check(0, 0);
 
         std::printf("OK\n  clear(), destructors... ");
 
         copy1.clear();
         assert(!copy1.not_empty());
-        assert(mem_handler.count == 20);
+        mem_handler.check(0, 10);
 
         while((node = list.first()))delete node;
-        assert(mem_handler.count == 10);
+        mem_handler.check(0, 10);
     }
-    assert(!mem_handler.count);
+    mem_handler.check(0, 10);
 
     std::printf("OK\n");
 }

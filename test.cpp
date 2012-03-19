@@ -242,7 +242,6 @@ void time_tree();
 int main(int n, char **arg)
 {
     std::setbuf(stdout, 0);
-    mem_handler.make_fail(1);
 
     test_literal();
     test_format();

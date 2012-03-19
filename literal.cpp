@@ -70,7 +70,7 @@ void test_literal_class()
     assert(find.scan('z') == size_t(-1) && find.scan('z', 3) == size_t(-1));
     assert(find.rscan('z') == size_t(-1) && find.rscan('z', 9) == size_t(-1));
 
-    std::printf("OK\n  cmp(), operators<=>... ");
+    std::printf("OK\n  comparisons... ");
 
     assert(NTL::Literal("").cmp(null) > 0 && null == NTL::Literal());
     assert(!part.cmp("str") && part.cmp("sts") < 0 && part.cmp("stq") > 0);
@@ -128,45 +128,42 @@ void test_string_class()
     const char *str = "string";  size_t len = std::strlen(str);
     std::printf("\nTesting String class:\n  constructors... ");
 
-    mem_handler.count = 0;
+    mem_handler.reset();
     {
         NTL::String null;
         assert(!null.valid() && !null.length() && !null.data());
-        assert(!mem_handler.count);
+        mem_handler.check(0, 0);
 
         DerivedString dnull(0);
         assert(!dnull.valid() && !dnull.length() && !dnull.data());
-        assert(!mem_handler.count);
+        mem_handler.check(0, 0);
 
-        mem_handler.make_reliable();
         NTL::Literal ltr("str~~~", 3);  NTL::String test(ltr);
         assert(test.valid() && test.length() == 3);
         assert(!std::memcmp(test.data(), ltr.data(), 3) && !test.data()[3]);
-        assert(mem_handler.count == 1);
+        mem_handler.check(1, 0);
 
         NTL::String test1(str);
         assert(test1.valid() && test1.length() == len);
         assert(!std::memcmp(test1.data(), str, len + 1));
-        assert(mem_handler.count == 2);
+        mem_handler.check(1, 0);
 
         NTL::String test2(str, 3);
         assert(test2.valid() && test2.length() == 3);
         assert(!std::memcmp(test2.data(), str, 3) && !test2.data()[3]);
-        assert(mem_handler.count == 3);
+        mem_handler.check(1, 0);
 
-        mem_handler.make_fail(1);
         NTL::String copy(test1);
         assert(copy.valid() && copy.length() == len);
         assert(!std::memcmp(copy.data(), str, len + 1));
-        assert(mem_handler.count == 3);
+        mem_handler.check(0, 0);
 
-        mem_handler.make_reliable();
         DerivedString dtest(len + 1);
         assert(dtest.buffer() == dtest.data());
         assert(dtest.valid() && dtest.length() == len);
         std::memcpy(dtest.buffer(), str, len + 1);
         assert(!std::memcmp(dtest.data(), str, len + 1));
-        assert(mem_handler.count == 4);
+        mem_handler.check(1, 0);
 
         std::printf("OK\n  general strlen... ");
 
@@ -174,145 +171,144 @@ void test_string_class()
         NTL::StringBase<int> intstr = data;  len = sizeof(data) / sizeof(int);
         assert(intstr.valid() && intstr.length() == len - 1);
         assert(!std::memcmp(intstr.data(), data, len * sizeof(int)));
-        assert(mem_handler.count == 5);
+        mem_handler.check(1, 0);
 
         std::printf("OK\n  copy, resize, swap... ");
 
-        mem_handler.make_fail(1);  test2 = test;
+        test2 = test;
         assert(test2.valid() && test2.length() == 3);
         assert(!std::memcmp(test2.data(), str, 3) && !test2.data()[3]);
-        assert(mem_handler.count == 4);
+        mem_handler.check(0, 1);
 
-        mem_handler.make_reliable();  dtest.resize(4);
+        dtest.resize(4);
         assert(dtest.valid() && dtest.length() == 3);
         std::memcpy(dtest.buffer(), str, 3);  dtest.buffer()[3] = '\0';
         assert(!std::memcmp(dtest.data(), str, 3) && !dtest.data()[3]);
-        assert(mem_handler.count == 4);
+        mem_handler.check(1, 1);
 
         test = str;
         assert(test.valid() && test.length() == len);
         assert(!std::memcmp(test.data(), str, len + 1));
-        assert(mem_handler.count == 5);
+        mem_handler.check(1, 0);
 
-        mem_handler.make_fail(1);  swap(test, test2);
+        swap(test, test2);
         assert(test.valid() && test.length() == 3);
         assert(!std::memcmp(test.data(), str, 3) && !test.data()[3]);
         assert(test2.valid() && test2.length() == len);
         assert(!std::memcmp(test2.data(), str, len + 1));
-        assert(mem_handler.count == 5);
+        mem_handler.check(0, 0);
 
         std::printf("OK\n  destructors... ");
     }
-    assert(!mem_handler.count);
+    mem_handler.check(0, 5);
 
     std::printf("OK\n  concatenation, substr()... ");
     {
         NTL::Literal null, ltr("st~~~", 2);
         NTL::String inv1 = null + ltr;
         assert(!inv1.valid() && !inv1.length() && !inv1.data());
-        assert(!mem_handler.count);
+        mem_handler.check(0, 0);
 
         NTL::String inv2 = ltr + null;
         assert(!inv2.valid() && !inv2.length() && !inv2.data());
-        assert(!mem_handler.count);
+        mem_handler.check(0, 0);
 
-        mem_handler.make_reliable();
         NTL::String test1 = ltr + NTL::Literal("ring~~~", 4);
         assert(test1.valid() && test1.length() == len);
         assert(!std::memcmp(test1.data(), str, len + 1));
-        assert(mem_handler.count == 1);
+        mem_handler.check(1, 0);
 
         NTL::String test2 = ltr + "ring";
         assert(test2.valid() && test2.length() == len);
         assert(!std::memcmp(test2.data(), str, len + 1));
-        assert(mem_handler.count == 2);
+        mem_handler.check(1, 0);
 
         NTL::String test3 = "str" + NTL::Literal("ing~~~", 3);
         assert(test3.valid() && test3.length() == len);
         assert(!std::memcmp(test3.data(), str, len + 1));
-        assert(mem_handler.count == 3);
+        mem_handler.check(1, 0);
 
         NTL::String test4 = NTL::Literal("strin~~~", 5) + 'g';
         assert(test4.valid() && test4.length() == len);
         assert(!std::memcmp(test4.data(), str, len + 1));
-        assert(mem_handler.count == 4);
+        mem_handler.check(1, 0);
 
         NTL::String test5 = 's' + NTL::Literal("tring~~~", 5);
         assert(test5.valid() && test5.length() == len);
         assert(!std::memcmp(test5.data(), str, len + 1));
-        assert(mem_handler.count == 5);
+        mem_handler.check(1, 0);
 
-        mem_handler.make_fail(1);  test1 = inv1 + test1;
+        test1 = inv1 + test1;
         assert(!test1.valid() && !test1.length() && !test1.data());
-        assert(mem_handler.count == 4);
+        mem_handler.check(0, 1);
 
-        mem_handler.make_reliable();
         test2 = test2.substr(0, 4) + "ng";
         assert(test2.valid() && test2.length() == len);
         assert(!std::memcmp(test2.data(), str, len + 1));
-        assert(mem_handler.count == 4);
+        mem_handler.check(1, 1);
 
         test3 = "st" + test3.substr(2);
         assert(test3.valid() && test3.length() == len);
         assert(!std::memcmp(test3.data(), str, len + 1));
-        assert(mem_handler.count == 4);
+        mem_handler.check(1, 1);
 
         test4 = 's' + test4.substr(1);
         assert(test4.valid() && test4.length() == len);
         assert(!std::memcmp(test4.data(), str, len + 1));
-        assert(mem_handler.count == 4);
+        mem_handler.check(1, 1);
 
         test5 = test5.substr(0, 5) + 'g';
         assert(test5.valid() && test5.length() == len);
         assert(!std::memcmp(test5.data(), str, len + 1));
-        assert(mem_handler.count == 4);
+        mem_handler.check(1, 1);
 
         test1 = ltr;
         assert(test1.valid() && test1.length() == 2);
         assert(!std::memcmp(test1.data(), str, 2) && !test1.data()[2]);
-        assert(mem_handler.count == 5);
+        mem_handler.check(1, 0);
 
         test1 += NTL::Literal("rin~~~", 3);
         assert(test1.valid() && test1.length() == 5);
         assert(!std::memcmp(test1.data(), str, 5) && !test1.data()[5]);
-        assert(mem_handler.count == 5);
+        mem_handler.check(1, 1);
 
         test1 += 'g';
         assert(test1.valid() && test1.length() == len);
         assert(!std::memcmp(test1.data(), str, len + 1));
-        assert(mem_handler.count == 5);
+        mem_handler.check(1, 1);
 
         test1 = test2.substr(0, 2) + test1.substr(2, 2) + test3.substr(4);
         assert(test1.valid() && test1.length() == len);
         assert(!std::memcmp(test1.data(), str, len + 1));
-        assert(mem_handler.count == 5);
+        mem_handler.check(1, 1);
 
         std::printf("OK\n  operator[], at(), scan(), rscan()... ");
-        mem_handler.make_fail(1);
 
         for(size_t i = 0; i <= len; i++)
             assert(test1[i] == str[i] && test1.at(i) == str[i]);
 
         assert(test1.scan('i') == 3 && test1.rscan('t') == 1 && test1.scan('z') == size_t(-1));
 
-        std::printf("OK\n  cmp(), operators<=>... ");
+        std::printf("OK\n  comparisons... ");
 
         assert(!test1.cmp(test2) && test1.cmp(ltr) > 0 && test1.cmp("sts") < 0);
         assert(test1 != test2.substr(3) && test1 < NTL::Literal("sts") && test1 > "str");
 
         std::printf("OK\n  memory problems... ");
 
+        mem_handler.make_fail(1);
         test1 += test2;
         assert(!test1.valid() && !test1.length() && !test1.data());
-        assert(mem_handler.count == 4);
+        mem_handler.check(0, 1);
 
         test1 = test2 + test3 + test4;
         assert(!test1.valid() && !test1.length() && !test1.data());
-        assert(mem_handler.count == 4);
+        mem_handler.make_reliable();
+        mem_handler.check(0, 0);
     }
-    assert(!mem_handler.count);
+    mem_handler.check(0, 4);
 
-    std::printf("OK\n");
+std::printf("OK\n");
 }
 
 
