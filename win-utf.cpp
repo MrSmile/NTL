@@ -183,11 +183,11 @@ void test_wide()
     mem_handler.reset();
     {
         typedef NTL::StringBase<wchar_t> WStr;
-        WStr test1 = NTL::utf8to16(NTL::Literal("test") + ' ') + NTL::utf8to16("string~~~", 6) + NTL::utf8to16(" here");
+        WStr test1(NTL::utf8to16(NTL::Literal("test") + ' ') + NTL::utf8to16("string~~~", 6) + NTL::utf8to16(" here"));
         assert(!std::wcscmp(test1.data(), L"test string here"));
         mem_handler.check(1, 0);
 
-        NTL::String test2 = NTL::utf16to8(NTL::WLiteral(L"test") + L' ') + NTL::utf16to8(L"string~~~", 6) + NTL::utf16to8(L" here");
+        NTL::String test2(NTL::utf16to8(NTL::WLiteral(L"test") + L' ') + NTL::utf16to8(L"string~~~", 6) + NTL::utf16to8(L" here"));
         assert(!std::strcmp(test2.data(), "test string here"));
         mem_handler.check(1, 0);
 
@@ -300,7 +300,7 @@ void test_wstring_class()
 
         std::printf("OK\n  back conversion... ");
 
-        NTL::String str = "...." + test.utf8();
+        NTL::String str("...." + test.utf8());
         assert(!std::strcmp(str.data(), "....string...."));
         mem_handler.check(1, 0);
     }

@@ -424,6 +424,11 @@ public:
     }
 
 
+    friend void swap(WString &str1, WString &str2)
+    {
+        swap(static_cast<StringBase<wchar_t> &>(str1), static_cast<StringBase<wchar_t> &>(str2));
+    }
+
     WString &operator = (const WString &str)
     {
         StringBase<wchar_t>::operator = (str);  return *this;

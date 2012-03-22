@@ -168,7 +168,7 @@ void test_string_class()
         std::printf("OK\n  general strlen... ");
 
         const int data[] = {5, 4, 3, 2, 1, 0};
-        NTL::StringBase<int> intstr = data;  len = sizeof(data) / sizeof(int);
+        NTL::StringBase<int> intstr(data);  len = sizeof(data) / sizeof(int);
         assert(intstr.valid() && intstr.length() == len - 1);
         assert(!std::memcmp(intstr.data(), data, len * sizeof(int)));
         mem_handler.check(1, 0);
@@ -205,35 +205,35 @@ void test_string_class()
     std::printf("OK\n  concatenation, substr()... ");
     {
         NTL::Literal null, ltr("st~~~", 2);
-        NTL::String inv1 = null + ltr;
+        NTL::String inv1(null + ltr);
         assert(!inv1.valid() && !inv1.length() && !inv1.data());
         mem_handler.check(0, 0);
 
-        NTL::String inv2 = ltr + null;
+        NTL::String inv2(ltr + null);
         assert(!inv2.valid() && !inv2.length() && !inv2.data());
         mem_handler.check(0, 0);
 
-        NTL::String test1 = ltr + NTL::Literal("ring~~~", 4);
+        NTL::String test1(ltr + NTL::Literal("ring~~~", 4));
         assert(test1.valid() && test1.length() == len);
         assert(!std::memcmp(test1.data(), str, len + 1));
         mem_handler.check(1, 0);
 
-        NTL::String test2 = ltr + "ring";
+        NTL::String test2(ltr + "ring");
         assert(test2.valid() && test2.length() == len);
         assert(!std::memcmp(test2.data(), str, len + 1));
         mem_handler.check(1, 0);
 
-        NTL::String test3 = "str" + NTL::Literal("ing~~~", 3);
+        NTL::String test3("str" + NTL::Literal("ing~~~", 3));
         assert(test3.valid() && test3.length() == len);
         assert(!std::memcmp(test3.data(), str, len + 1));
         mem_handler.check(1, 0);
 
-        NTL::String test4 = NTL::Literal("strin~~~", 5) + 'g';
+        NTL::String test4(NTL::Literal("strin~~~", 5) + 'g');
         assert(test4.valid() && test4.length() == len);
         assert(!std::memcmp(test4.data(), str, len + 1));
         mem_handler.check(1, 0);
 
-        NTL::String test5 = 's' + NTL::Literal("tring~~~", 5);
+        NTL::String test5('s' + NTL::Literal("tring~~~", 5));
         assert(test5.valid() && test5.length() == len);
         assert(!std::memcmp(test5.data(), str, len + 1));
         mem_handler.check(1, 0);

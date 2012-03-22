@@ -80,3 +80,9 @@ void time_tree()
 
     cout << "OwningTree<TestNode> = " << tm1 - tm0 << "; map<int, Data> = " << tm2 - tm1 << ";\n";
 }
+
+
+int main()
+{
+    time_tree();  return 0;
+}
