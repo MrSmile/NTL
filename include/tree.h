@@ -475,6 +475,12 @@ public:
             if(!PlaceBase_::node)return 0;
             return cast_(PlaceBase_::dir <= 0 ? PlaceBase_::node : PlaceBase_::node->next());
         }
+
+        size_t index() const
+        {
+            if(!PlaceBase_::node)return 0;
+            return PlaceBase_::dir > 0 ? PlaceBase_::node->index() + 1 : PlaceBase_::node->index();
+        }
     };
 
     class ConstPlace : protected PlaceBase_
@@ -526,6 +532,12 @@ public:
             if(!PlaceBase_::node)return 0;
             return const_cast_(PlaceBase_::dir <= 0 ? PlaceBase_::node : PlaceBase_::node->next());
         }
+
+        size_t index() const
+        {
+            if(!PlaceBase_::node)return 0;
+            return PlaceBase_::dir > 0 ? PlaceBase_::node->index() + 1 : PlaceBase_::node->index();
+        }
     };
 
 
@@ -556,12 +568,12 @@ public:
                 else if(ptr->type_ == Node_::t_right)node->right_ = 0;
                 else
                 {
-                    ptr->parent_ = 0;  remove(cast_(ptr));  Tree_::root_ = 0;  return;
+                    ptr->parent_ = 0;  remove(cast_(ptr));
+                    Tree_::root_ = 0;  Tree_::clear_size_();  return;
                 }
                 ptr->parent_ = 0;  remove(cast_(ptr));
             }
         }
-        Tree_::clear_size_();
     }
 
     template<typename A1> bool copy(const GeneralTree<N, H, A1> &tree)
@@ -766,6 +778,15 @@ template<typename T, typename A = EmptyAllocator<T> > class Tree : public Genera
 {
     typedef GeneralTree<TreeNode<T>, TreeTypes, A> Base_;
 
+public:
+    Tree()
+    {
+    }
+
+    explicit Tree(const A &alloc) : Base_(alloc)
+    {
+    }
+
     friend void swap(Tree<T, A> &tree1, Tree<T, A> &tree2)
     {
         swap(static_cast<Base_ &>(tree1), static_cast<Base_ &>(tree2));
@@ -846,7 +867,7 @@ class IndexerNodeBase
 public:
     size_t index() const
     {
-        size_t index = index_;
+        assert(static_cast<const Node_ *>(this)->parent_);  size_t index = index_;
         for(const Node_ *node = static_cast<const Node_ *>(this); node->type_ != Node_::t_root; node = node->parent_)
             if(node->type_ == Node_::t_right)index += node->parent_->index_ + 1;  return index;
     }
@@ -992,37 +1013,13 @@ template<typename T, typename A = EmptyAllocator<T> > class Indexer : public Gen
 
 
 public:
-    class Place : public Base_::Place
+    Indexer()
     {
-        template<typename, typename> friend class Indexer;
+    }
 
-        Place(const PlaceBase_ &place) : Base_::Place(place)
-        {
-        }
-
-    public:
-        size_t index() const
-        {
-            if(!PlaceBase_::node)return 0;
-            return PlaceBase_::dir > 0 ? PlaceBase_::node->index() + 1 : PlaceBase_::node->index();
-        }
-    };
-
-    class ConstPlace : public Base_::ConstPlace
+    explicit Indexer(const A &alloc) : Base_(alloc)
     {
-        template<typename, typename> friend class Indexer;
-
-        ConstPlace(const PlaceBase_ &place) : Base_::ConstPlace(place)
-        {
-        }
-
-    public:
-        size_t index() const
-        {
-            if(!PlaceBase_::node)return 0;
-            return PlaceBase_::dir > 0 ? PlaceBase_::node->index() + 1 : PlaceBase_::node->index();
-        }
-    };
+    }
 
 
     friend void swap(Indexer<T, A> &tree1, Indexer<T, A> &tree2)
@@ -1039,16 +1036,6 @@ public:
 #endif
     }
 
-
-    template<typename K> ConstPlace find_place(const K &key) const
-    {
-        return Base_::find_place_(key);
-    }
-
-    template<typename K> Place find_place(const K &key)
-    {
-        return Base_::find_place_(key);
-    }
 
     const T *at(size_t index) const
     {
@@ -1070,12 +1057,12 @@ public:
         return at(index);
     }
 
-    ConstPlace place_at(size_t index) const
+    typename Base_::ConstPlace place_at(size_t index) const
     {
         return IndexerBase::place_at_(index);
     }
 
-    Place place_at(size_t index)
+    typename Base_::Place place_at(size_t index)
     {
         return IndexerBase::place_at_(index);
     }
@@ -1085,9 +1072,9 @@ public:
         T *node = at(index);  static_cast<IndexerNode<T> *>(node)->remove();  return node;
     }
 
-    void insert(IndexerNode<T> *node, size_t index)
+    void insert_at(T *node, size_t index)
     {
-        Base_::insert(node, IndexerBase::place_at_(index));
+        insert_(node, IndexerBase::place_at_(index));
     }
 };
 
