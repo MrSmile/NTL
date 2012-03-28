@@ -22,15 +22,84 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ***************************************************************************************************/
 
 #include "alloc.h"
-#include "format.h"
+#include "fmt-int.h"
 #include <cstdio>
 
+
+
+
+template<typename T, typename Tf> void test_dec(T num, const char *fmt)
+{
+    char buf[256];
+    std::sprintf(buf, fmt, Tf(num));
+    size_t len = std::strlen(buf);
+    {
+        NTL::String test = NTL::dec(num);
+        assert(test.length() == len && !std::memcmp(test.data(), buf, len + 1));
+        mem_handler.check(1, 0);
+
+        test = NTL::dec<'Z'>(num);
+        assert(test.length() == len && !std::memcmp(test.data(), buf, len + 1));
+        mem_handler.check(1, 1);
+    }
+    mem_handler.check(0, 1);
+}
+
+template<typename T> void test_udec(T num)
+{
+    test_dec<T, unsigned long>(num, "%lu");
+}
+
+template<typename T, typename Tf> void test_sdec(T num,
+    const char *fmt, const char *fmtp, const char *fmts)
+{
+    char buf[256];  size_t len;
+    {
+        std::sprintf(buf, fmt, Tf(num));  len = std::strlen(buf);
+
+        NTL::String test = NTL::dec(num);
+        assert(test.length() == len && !std::memcmp(test.data(), buf, len + 1));
+        mem_handler.check(1, 0);
+
+        if(*buf == '-')*buf = '=';
+
+        test = NTL::dec<'Z'>(num, "=");
+        assert(test.length() == len && !std::memcmp(test.data(), buf, len + 1));
+        mem_handler.check(1, 1);
+
+        std::sprintf(buf, fmtp, Tf(num));  len = std::strlen(buf);
+
+        test = NTL::dec(num, "-", "+");
+        assert(test.length() == len && !std::memcmp(test.data(), buf, len + 1));
+        mem_handler.check(1, 1);
+
+        std::sprintf(buf, fmts, Tf(num));  len = std::strlen(buf);
+        if(*buf == '-')*buf = '_';
+
+        test = NTL::dec<'8'>(num, "_", " ");
+        assert(test.length() == len && !std::memcmp(test.data(), buf, len + 1));
+        mem_handler.check(1, 1);
+
+        std::sprintf(buf + 2, fmtp, Tf(num));
+        buf[0] = buf[1] = buf[2];  len = std::strlen(buf);
+
+        NTL::String test1 = NTL::dec<'*'>(num, "---", "+++");
+        assert(test1.length() == len && !std::memcmp(test1.data(), buf, len + 1));
+        mem_handler.check(1, 0);
+    }
+    mem_handler.check(0, 2);
+}
+
+template<typename T> void test_sdec(T num)
+{
+    test_sdec<T, long>(num, "%ld", "%+ld", "% ld");
+}
 
 
 void test_arg_func()
 {
     const char *str = "string";  size_t len = std::strlen(str);
-    std::printf("\nTesting arg() functions:\n  basic... ");
+    std::printf("\nTesting argument functions:\n  arg()... ");
 
     mem_handler.reset();
     {
@@ -58,7 +127,62 @@ void test_arg_func()
         assert(!std::memcmp(test.data(), str, len + 1));
         mem_handler.check(1, 1);
 
-        // TODO: numeric args
+        std::printf("OK\n  unsigned dec()... ");
+
+        test_udec<unsigned char>(0);
+        test_udec<unsigned char>(123);
+        test_udec<unsigned char>(UCHAR_MAX);
+
+        test_udec<unsigned short>(0);
+        test_udec<unsigned short>(54321);
+        test_udec<unsigned short>(USHRT_MAX);
+
+        test_udec<unsigned>(0);
+        test_udec<unsigned>(54321);
+        test_udec<unsigned>(UINT_MAX);
+
+        test_udec<unsigned long>(0);
+        test_udec<unsigned long>(987654321);
+        test_udec<unsigned long>(ULONG_MAX);
+
+#ifdef ULLONG_MAX
+        test_dec<unsigned long long, unsigned long long>(0, "%llu");
+        test_dec<unsigned long long, unsigned long long>(9876543210987654321llu, "%llu");
+        test_dec<unsigned long long, unsigned long long>(ULLONG_MAX, "%llu");
+#endif
+
+        std::printf("OK\n  signed dec()... ");
+
+        test_dec<char, int>(CHAR_MIN, "%d");
+        test_dec<char, int>(123, "%d");
+        test_dec<char, int>(CHAR_MAX, "%d");
+
+        test_sdec<signed char>(SCHAR_MIN);
+        test_sdec<signed char>(-123);
+        test_sdec<signed char>(123);
+        test_sdec<signed char>(SCHAR_MAX);
+
+        test_sdec<signed short>(SHRT_MIN);
+        test_sdec<signed short>(-4321);
+        test_sdec<signed short>(4321);
+        test_sdec<signed short>(SHRT_MAX);
+
+        test_sdec<int>(INT_MIN);
+        test_sdec<int>(-4321);
+        test_sdec<int>(4321);
+        test_sdec<int>(INT_MAX);
+
+        test_sdec<signed long>(LONG_MIN);
+        test_sdec<signed long>(-987654321);
+        test_sdec<signed long>(987654321);
+        test_sdec<signed long>(LONG_MAX);
+
+#ifdef ULLONG_MAX
+        test_sdec<long long, long long>(LLONG_MIN, "%lld", "%+lld", "% lld");
+        test_sdec<long long, long long>(-987654321987654321ll, "%lld", "%+lld", "% lld");
+        test_sdec<long long, long long>(987654321987654321ll, "%lld", "%+lld", "% lld");
+        test_sdec<long long, long long>(LLONG_MAX, "%lld", "%+lld", "% lld");
+#endif
     }
     mem_handler.check(0, 1);
 
