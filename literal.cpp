@@ -51,7 +51,7 @@ void test_literal_class()
 
     std::printf("OK\n  substr()... ");
 
-    NTL::Literal empty = test.substr(100);
+    NTL::Literal empty = test.substr(test.length());
     assert(empty.valid() && !empty.length());
 
     NTL::Literal end = test.substr(3);

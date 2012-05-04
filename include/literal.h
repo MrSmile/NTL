@@ -197,10 +197,16 @@ public:
         assert(index < len_);  return ptr_[index];
     }
 
-    LiteralBase<C> substr(size_t beg, size_t n = size_t(-1)) const
+    LiteralBase<C> substr(size_t beg, size_t n) const
     {
-        if(beg > len_)beg = len_;  if(n > len_ - beg)n = len_ - beg;
+        assert(beg <= len_ && n <= len_ - beg);
         return LiteralBase<C>(ptr_ + beg, n);
+    }
+
+    LiteralBase<C> substr(size_t beg) const
+    {
+        assert(beg <= len_);
+        return LiteralBase<C>(ptr_ + beg, len_ - beg);
     }
 
     size_t scan(C ch, size_t pos = 0) const
@@ -452,11 +458,16 @@ public:
         assert(ptr_ && index <= ptr_[1]);  return buffer()[index];
     }
 
-    LiteralBase<C> substr(size_t beg, size_t n = size_t(-1)) const
+    LiteralBase<C> substr(size_t beg, size_t n) const
     {
-        if(!ptr_)return LiteralBase<C>();
-        if(beg > ptr_[1])beg = ptr_[1];  if(n > ptr_[1] - beg)n = ptr_[1] - beg;
+        assert(ptr_ && beg <= ptr_[1] && n <= ptr_[1] - beg);
         return LiteralBase<C>(buffer() + beg, n);
+    }
+
+    LiteralBase<C> substr(size_t beg) const
+    {
+        assert(ptr_ && beg <= ptr_[1]);
+        return LiteralBase<C>(buffer() + beg, ptr_[1] - beg);
     }
 
     size_t scan(C ch, size_t pos = 0) const
