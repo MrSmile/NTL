@@ -223,8 +223,14 @@ void test_wstring_class()
         assert(!std::wcscmp(test.data(), L"string"));
         mem_handler.check(1, 0);
 
-        NTL::WString test1(L"string");
-        assert(!std::wcscmp(test1.data(), L"string"));
+        NTL::WString zero(L"ze\0ro");
+        assert(zero.valid() && zero.length() == 5);
+        assert(!std::memcmp(zero.data(), L"ze\0ro", 6 * sizeof(wchar_t)));
+        mem_handler.check(1, 0);
+
+        const wchar_t *data = L"string\0\0\0";
+        NTL::WString test1(data);
+        assert(!std::wcscmp(test1.data(), data));
         mem_handler.check(1, 0);
 
         NTL::WString test2(L"str~~~", 3);
@@ -251,7 +257,7 @@ void test_wstring_class()
         assert(!std::wcscmp(test5.data(), L"str"));
         mem_handler.check(1, 0);
 
-        std::printf("OK\n  copy, concatenation, swap... ");
+        std::printf("OK\n  copy, concatenation, swap... ");  // TODO: not ZT
 
         test = test1.substr(0, 3) + L"ing";
         assert(!std::wcscmp(test.data(), L"string"));
@@ -304,7 +310,7 @@ void test_wstring_class()
         assert(!std::strcmp(str.data(), "....string...."));
         mem_handler.check(1, 0);
     }
-    mem_handler.check(0, 6);
+    mem_handler.check(0, 7);
 
     std::printf("OK\n");
 }

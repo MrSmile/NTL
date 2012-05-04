@@ -75,7 +75,17 @@ template<long ch, typename C> Argument<LiteralBase<C>, C, C(ch)> arg(const C *st
     return Argument<LiteralBase<C>, C, C(ch)>(LiteralBase<C>(str, n));
 }
 
-template<long ch, typename C> Argument<LiteralBase<C>, C, C(ch)> arg(const C *str)
+/*template<long ch, typename C, size_t N> Argument<LiteralBase<C>, C, C(ch)> arg(const C (&str)[N])
+{
+    return Argument<LiteralBase<C>, C, C(ch)>(str);
+}
+
+template<long ch, typename C> Argument<LiteralBase<C>, C, C(ch)> arg(const StringProxy<C> &str)
+{
+    return Argument<LiteralBase<C>, C, C(ch)>(str);
+}*/
+
+template<long ch, typename C> Argument<LiteralBase<C>, C, C(ch)> arg(const C *str)  // suboptimal
 {
     return Argument<LiteralBase<C>, C, C(ch)>(str);
 }
@@ -90,7 +100,17 @@ template<typename C> Argument<LiteralBase<C>, C, C(0)> arg(const C *str, size_t 
     return Argument<LiteralBase<C>, C, C(0)>(LiteralBase<C>(str, n));
 }
 
-template<typename C> Argument<LiteralBase<C>, C, C(0)> arg(const C *str)
+/*template<typename C, size_t N> Argument<LiteralBase<C>, C, C(0)> arg(const C (&str)[N])
+{
+    return Argument<LiteralBase<C>, C, C(0)>(str);
+}
+
+template<typename C> Argument<LiteralBase<C>, C, C(0)> arg(const StringProxy<C> &str)
+{
+    return Argument<LiteralBase<C>, C, C(0)>(str);
+}*/
+
+template<typename C> Argument<LiteralBase<C>, C, C(0)> arg(const C *str)  // suboptimal
 {
     return Argument<LiteralBase<C>, C, C(0)>(str);
 }
@@ -126,7 +146,12 @@ public:
         return Composite<T, const StringLike<S, C> &, C, def, next_>(*static_cast<const T *>(this), str);
     }
 
-    Composite<T, LiteralBase<C>, C, def, next_> operator % (const C *str) const
+    template<size_t N> Composite<T, LiteralBase<C>, C, def, next_> operator % (const C (&str)[N]) const
+    {
+        return Composite<T, LiteralBase<C>, C, def, next_>(*static_cast<const T *>(this), str);
+    }
+
+    Composite<T, LiteralBase<C>, C, def, next_> operator % (const StringProxy<C> &str) const
     {
         return Composite<T, LiteralBase<C>, C, def, next_>(*static_cast<const T *>(this), str);
     }
@@ -201,7 +226,12 @@ template<long ch, typename C> Format<C, C(ch)> format(const C *str, size_t n)
     return Format<C, C(ch)>(LiteralBase<C>(str, n));
 }
 
-template<long ch, typename C> Format<C, C(ch)> format(const C *str)
+template<long ch, typename C, size_t N> Format<C, C(ch)> format(const C (&str)[N])
+{
+    return Format<C, C(ch)>(LiteralBase<C>(str));
+}
+
+template<long ch, typename C> Format<C, C(ch)> format(const StringProxy<C> &str)
 {
     return Format<C, C(ch)>(LiteralBase<C>(str));
 }
@@ -216,7 +246,12 @@ template<typename C> Format<C, C('%')> format(const C *str, size_t n)
     return Format<C, C('%')>(LiteralBase<C>(str, n));
 }
 
-template<typename C> Format<C, C('%')> format(const C *str)
+template<typename C, size_t N> Format<C, C('%')> format(const C (&str)[N])
+{
+    return Format<C, C('%')>(LiteralBase<C>(str));
+}
+
+template<typename C> Format<C, C('%')> format(const StringProxy<C> &str)
 {
     return Format<C, C('%')>(LiteralBase<C>(str));
 }

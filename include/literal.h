@@ -36,6 +36,23 @@ using std::memcpy;
 using std::memcmp;
 
 
+template<typename C> struct StringProxy
+{
+    const C *ptr;
+    size_t len;
+
+    StringProxy(const C *str) : ptr(str), len(0)
+    {
+        if(str)while(str[len])len++;
+    }
+};
+
+template<> inline StringProxy<char>::StringProxy(const char *str) :
+    ptr(str), len(str ? strlen(str) : 0)
+{
+}
+
+
 template<typename C> class Character;
 template<typename C> class StringBase;
 template<typename C> class LiteralBase;
@@ -66,7 +83,8 @@ template<class S, typename C> struct StringLike
     }
 
     template<typename S1> Concatenation<const S &, const S1 &, C> operator + (const StringLike<S1, C> &str) const;
-    Concatenation<const S &, LiteralBase<C>, C> operator + (const C *str) const;
+    template<size_t N> Concatenation<const S &, LiteralBase<C>, C> operator + (const C (&str)[N]) const;
+    Concatenation<const S &, LiteralBase<C>, C> operator + (const StringProxy<C> &str) const;
     Concatenation<const S &, Character<C>, C> operator + (C ch) const;
 };
 
@@ -103,14 +121,26 @@ template<typename S, typename C> template<typename S1> inline Concatenation<cons
     return Concatenation<const S &, const S1 &, C>(*static_cast<const S *>(this), static_cast<const S1 &>(str));
 }
 
-template<typename S, typename C> inline Concatenation<const S &, LiteralBase<C>, C>
-    StringLike<S, C>::operator + (const C *str) const
+template<typename S, typename C> template<size_t N> inline Concatenation<const S &, LiteralBase<C>, C>
+    StringLike<S, C>::operator + (const C (&str)[N]) const
 {
     return Concatenation<const S &, LiteralBase<C>, C>(*static_cast<const S *>(this), str);
 }
 
+template<typename S, typename C> inline Concatenation<const S &, LiteralBase<C>, C>
+    StringLike<S, C>::operator + (const StringProxy<C> &str) const
+{
+    return Concatenation<const S &, LiteralBase<C>, C>(*static_cast<const S *>(this), str);
+}
+
+template<typename S, typename C, size_t N> inline Concatenation<LiteralBase<C>, const S &, C>
+    operator + (const C (&str1)[N], const StringLike<S, C> &str2)
+{
+    return Concatenation<LiteralBase<C>, const S &, C>(str1, static_cast<const S &>(str2));
+}
+
 template<typename S, typename C> inline Concatenation<LiteralBase<C>, const S &, C>
-    operator + (const C *str1, const StringLike<S, C> &str2)
+    operator + (const StringProxy<C> &str1, const StringLike<S, C> &str2)
 {
     return Concatenation<LiteralBase<C>, const S &, C>(str1, static_cast<const S &>(str2));
 }
@@ -161,8 +191,7 @@ public:
 };
 
 
-template<typename C> class LiteralBase : public StringLike<LiteralBase<C>, C>,
-    public Comparable<LiteralBase<C>, LiteralBase<C> >, public Comparable<LiteralBase<C>, const C *>
+template<typename C> class LiteralBase : public StringLike<LiteralBase<C>, C>, public Comparable<LiteralBase<C> >
 {
     const C *ptr_;
     size_t len_;
@@ -181,9 +210,12 @@ public:
     {
     }
 
-    LiteralBase(const C *str) : ptr_(str), len_(0)
+    template<size_t N> LiteralBase(const C (&str)[N]) : ptr_(str), len_(N - 1)
     {
-        if(str)while(str[len_])len_++;
+    }
+
+    LiteralBase(const StringProxy<C> &str) : ptr_(str.ptr), len_(str.len)
+    {
     }
 
 
@@ -233,32 +265,46 @@ public:
         }
     }
 
-    int cmp(const LiteralBase &str) const
+    int cmp(const C *str, size_t n) const
     {
-        if(!ptr_)return str.ptr_ ? -1 : 0;  if(!str.ptr_)return 1;
-        if(len_ < str.len_)
+        if(!ptr_)return str ? -1 : 0;  if(!str)return 1;
+        if(len_ < n)
         {
             for(size_t i = 0; i < len_; i++)
             {
-                if(ptr_[i] < str.ptr_[i])return -1;  if(ptr_[i] > str.ptr_[i])return 1;
+                if(ptr_[i] < str[i])return -1;  if(ptr_[i] > str[i])return 1;
             }
             return -1;
         }
-        if(len_ > str.len_)
+        if(len_ > n)
         {
-            for(size_t i = 0; i < str.len_; i++)
+            for(size_t i = 0; i < n; i++)
             {
-                if(ptr_[i] < str.ptr_[i])return -1;  if(ptr_[i] > str.ptr_[i])return 1;
+                if(ptr_[i] < str[i])return -1;  if(ptr_[i] > str[i])return 1;
             }
             return 1;
         }
         for(size_t i = 0; i < len_; i++)
         {
-            if(ptr_[i] < str.ptr_[i])return -1;  if(ptr_[i] > str.ptr_[i])return 1;
+            if(ptr_[i] < str[i])return -1;  if(ptr_[i] > str[i])return 1;
         }
         return 0;
     }
 
+    int cmp(const LiteralBase &str) const
+    {
+        return cmp(str.ptr_, str.len_);
+    }
+
+    template<size_t N> int cmp(const C (&str)[N]) const
+    {
+        return cmp(str, N - 1);
+    }
+
+    int cmp(const StringProxy<C> &str) const
+    {
+        return cmp(str.ptr, str.len);
+    }
 
     bool valid() const
     {
@@ -281,25 +327,18 @@ public:
     }
 };
 
-template<> inline LiteralBase<char>::LiteralBase(const char *str) :
-    ptr_(str), len_(str ? strlen(str) : 0)
+template<> inline int LiteralBase<char>::cmp(const char *str, size_t n) const
 {
-}
-
-template<> inline int LiteralBase<char>::cmp(const LiteralBase &str) const
-{
-    if(!ptr_)return str.ptr_ ? -1 : 0;  if(!str.ptr_)return 1;
-    if(len_ < str.len_)return memcmp(ptr_, str.ptr_, len_) > 0 ? 1 : -1;
-    if(len_ > str.len_)return memcmp(ptr_, str.ptr_, str.len_) < 0 ? -1 : 1;
-    return memcmp(ptr_, str.ptr_, len_);
+    if(!ptr_)return str ? -1 : 0;  if(!str)return 1;
+    if(len_ < n)return memcmp(ptr_, str, len_) > 0 ? 1 : -1;
+    if(len_ > n)return memcmp(ptr_, str, n) < 0 ? -1 : 1;
+    return memcmp(ptr_, str, len_);
 }
 
 typedef LiteralBase<char> Literal;
 
 
-template<typename C> class StringBase : public StringLike<StringBase<C>, C>,
-    public Comparable<StringBase<C>, LiteralBase<C> >,
-    public Comparable<StringBase<C>, const C *>
+template<typename C> class StringBase : public StringLike<StringBase<C>, C>, public Comparable<StringBase<C> >
 {
     size_t *volatile ptr_;  // refcount, length, data
 
@@ -396,7 +435,12 @@ public:
         ptr_ = copy_(LiteralBase<C>(str, n));
     }
 
-    StringBase(const C *str)
+    template<size_t N> StringBase(const C (&str)[N])
+    {
+        ptr_ = copy_(LiteralBase<C>(str));
+    }
+
+    StringBase(const StringProxy<C> &str)
     {
         ptr_ = copy_(LiteralBase<C>(str));
     }
@@ -432,7 +476,12 @@ public:
         return *this = static_cast<const StringBase<C> &>(str);
     }
 
-    StringBase<C> &operator = (const C *str)
+    template<size_t N> StringBase<C> &operator = (const C (&str)[N])
+    {
+        return *this = LiteralBase<C>(str);
+    }
+
+    StringBase<C> &operator = (const StringProxy<C> &str)
     {
         return *this = LiteralBase<C>(str);
     }
@@ -485,11 +534,25 @@ public:
         return LiteralBase<C>(*this).scan(ch);
     }
 
+    int cmp(const C *str, size_t n) const
+    {
+        return LiteralBase<C>(*this).cmp(str, n);
+    }
+
     int cmp(const LiteralBase<C> &str) const
     {
         return LiteralBase<C>(*this).cmp(str);
     }
 
+    template<size_t N> int cmp(const C (&str)[N]) const
+    {
+        return LiteralBase<C>(*this).cmp(str);
+    }
+
+    int cmp(const StringProxy<C> &str) const
+    {
+        return LiteralBase<C>(*this).cmp(str);
+    }
 
     bool valid() const
     {

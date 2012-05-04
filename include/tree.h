@@ -1091,7 +1091,7 @@ template<typename T> class OwningIndexer : public Indexer<T, DefaultAllocator<T>
 
 
 
-template<typename T> class SimpleKey : public Comparable<SimpleKey<T>, T>, public Comparable<SimpleKey<T> >
+template<typename T> class SimpleKey : public Comparable<SimpleKey<T> >
 {
     T id_;
 
@@ -1104,7 +1104,7 @@ public:
     {
     }
 
-    SimpleKey(const T &key) : id_(key)
+    explicit SimpleKey(const T &key) : id_(key)
     {
     }
 
