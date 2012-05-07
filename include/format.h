@@ -31,7 +31,7 @@ namespace NTL_ {
 
 
 
-template<typename S, typename C, C ch> class Argument : public StringLike<Argument<S, C, ch>, C>
+template<typename S, typename C, C ch = C(0)> class Argument : public StringLike<Argument<S, C, ch>, C>
 {
     S arg_;
 
@@ -65,54 +65,44 @@ public:
     }
 };
 
-template<long ch, typename S, typename C> Argument<const S &, C, C(ch)> arg(const StringLike<S, C> &str)
+template<char ch, typename S> Argument<const S &, char, ch> arg(const StringLike<S, char> &str)
 {
-    return Argument<const S &, C, C(ch)>(static_cast<const S &>(str));
+    return Argument<const S &, char, ch>(static_cast<const S &>(str));
 }
 
-template<long ch, typename C> Argument<LiteralBase<C>, C, C(ch)> arg(const C *str, size_t n)
+template<char ch> Argument<Literal, char, ch> arg(const char *str, size_t n)
 {
-    return Argument<LiteralBase<C>, C, C(ch)>(LiteralBase<C>(str, n));
+    return Argument<Literal, char, ch>(str, n);
 }
 
-/*template<long ch, typename C, size_t N> Argument<LiteralBase<C>, C, C(ch)> arg(const C (&str)[N])
+template<char ch, size_t N> Argument<Literal, char, ch> arg(const char (&str)[N])
 {
-    return Argument<LiteralBase<C>, C, C(ch)>(str);
+    return Argument<Literal, char, ch>(str);
 }
 
-template<long ch, typename C> Argument<LiteralBase<C>, C, C(ch)> arg(const StringProxy<C> &str)
+template<char ch> Argument<Literal, char, ch> arg(const StringProxy<char> &str)
 {
-    return Argument<LiteralBase<C>, C, C(ch)>(str);
-}*/
-
-template<long ch, typename C> Argument<LiteralBase<C>, C, C(ch)> arg(const C *str)  // suboptimal
-{
-    return Argument<LiteralBase<C>, C, C(ch)>(str);
+    return Argument<Literal, char, ch>(str);
 }
 
-template<typename S, typename C> Argument<const S &, C, C(0)> arg(const StringLike<S, C> &str)
+template<typename S> Argument<const S &, char> arg(const StringLike<S, char> &str)
 {
-    return Argument<const S &, C, C(0)>(static_cast<const S &>(str));
+    return Argument<const S &, char>(static_cast<const S &>(str));
 }
 
-template<typename C> Argument<LiteralBase<C>, C, C(0)> arg(const C *str, size_t n)
+inline Argument<Literal, char> arg(const char *str, size_t n)
 {
-    return Argument<LiteralBase<C>, C, C(0)>(LiteralBase<C>(str, n));
+    return Argument<Literal, char>(str, n);
 }
 
-/*template<typename C, size_t N> Argument<LiteralBase<C>, C, C(0)> arg(const C (&str)[N])
+template<size_t N> Argument<Literal, char> arg(const char (&str)[N])
 {
-    return Argument<LiteralBase<C>, C, C(0)>(str);
+    return Argument<Literal, char>(str);
 }
 
-template<typename C> Argument<LiteralBase<C>, C, C(0)> arg(const StringProxy<C> &str)
+inline Argument<Literal, char> arg(const StringProxy<char> &str)
 {
-    return Argument<LiteralBase<C>, C, C(0)>(str);
-}*/
-
-template<typename C> Argument<LiteralBase<C>, C, C(0)> arg(const C *str)  // suboptimal
-{
-    return Argument<LiteralBase<C>, C, C(0)>(str);
+    return Argument<Literal, char>(str);
 }
 
 
@@ -161,6 +151,8 @@ public:
 };
 
 
+template<typename T, typename C> struct FormatMaker;
+
 template<typename T, typename S, typename C, C ch, C def> class Composite :
     public ArgBase<Composite<T, S, C, ch, def>, C, def>
 {
@@ -190,7 +182,7 @@ public:
 };
 
 
-template<typename C, C ch> class Format : public ArgBase<Format<C, ch>, C, C('1')>
+template<typename C, C ch = C('%')> class Format : public ArgBase<Format<C, ch>, C, C('1')>
 {
     template<typename, typename C1, C1> friend class ArgBase;
     template<typename, typename, typename C1, C1, C1> friend class Composite;
@@ -216,44 +208,44 @@ public:
     }
 };
 
-template<long ch, typename C> Format<C, C(ch)> format(const LiteralBase<C> &str)
+template<char ch> Format<char, ch> format(const Literal &str)
 {
-    return Format<C, C(ch)>(str);
+    return Format<char, ch>(str);
 }
 
-template<long ch, typename C> Format<C, C(ch)> format(const C *str, size_t n)
+template<char ch> Format<char, ch> format(const char *str, size_t n)
 {
-    return Format<C, C(ch)>(LiteralBase<C>(str, n));
+    return Format<char, ch>(Literal(str, n));
 }
 
-template<long ch, typename C, size_t N> Format<C, C(ch)> format(const C (&str)[N])
+template<char ch, size_t N> Format<char, ch> format(const char (&str)[N])
 {
-    return Format<C, C(ch)>(LiteralBase<C>(str));
+    return Format<char, ch>(Literal(str));
 }
 
-template<long ch, typename C> Format<C, C(ch)> format(const StringProxy<C> &str)
+template<char ch> Format<char, ch> format(const StringProxy<char> &str)
 {
-    return Format<C, C(ch)>(LiteralBase<C>(str));
+    return Format<char, ch>(Literal(str));
 }
 
-template<typename C> Format<C, C('%')> format(const LiteralBase<C> &str)
+inline Format<char> format(const Literal &str)
 {
-    return Format<C, C('%')>(str);
+    return Format<char>(str);
 }
 
-template<typename C> Format<C, C('%')> format(const C *str, size_t n)
+inline Format<char> format(const char *str, size_t n)
 {
-    return Format<C, C('%')>(LiteralBase<C>(str, n));
+    return Format<char>(Literal(str, n));
 }
 
-template<typename C, size_t N> Format<C, C('%')> format(const C (&str)[N])
+template<size_t N> Format<char> format(const char (&str)[N])
 {
-    return Format<C, C('%')>(LiteralBase<C>(str));
+    return Format<char>(Literal(str));
 }
 
-template<typename C> Format<C, C('%')> format(const StringProxy<C> &str)
+inline Format<char> format(const StringProxy<char> &str)
 {
-    return Format<C, C('%')>(LiteralBase<C>(str));
+    return Format<char>(Literal(str));
 }
 
 
