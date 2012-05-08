@@ -84,6 +84,7 @@ template<class S, typename C> struct StringLike
 
     template<typename S1> Concatenation<const S &, const S1 &, C> operator + (const StringLike<S1, C> &str) const;
     template<size_t N> Concatenation<const S &, LiteralBase<C>, C> operator + (const C (&str)[N]) const;
+    template<size_t N> Concatenation<const S &, LiteralBase<C>, C> operator + (C (&str)[N]) const;
     Concatenation<const S &, LiteralBase<C>, C> operator + (const StringProxy<C> &str) const;
     Concatenation<const S &, Character<C>, C> operator + (C ch) const;
 };
@@ -127,6 +128,12 @@ template<typename S, typename C> template<size_t N> inline Concatenation<const S
     return Concatenation<const S &, LiteralBase<C>, C>(*static_cast<const S *>(this), str);
 }
 
+template<typename S, typename C> template<size_t N> inline Concatenation<const S &, LiteralBase<C>, C>
+    StringLike<S, C>::operator + (C (&str)[N]) const
+{
+    return Concatenation<const S &, LiteralBase<C>, C>(*static_cast<const S *>(this), str);
+}
+
 template<typename S, typename C> inline Concatenation<const S &, LiteralBase<C>, C>
     StringLike<S, C>::operator + (const StringProxy<C> &str) const
 {
@@ -135,6 +142,12 @@ template<typename S, typename C> inline Concatenation<const S &, LiteralBase<C>,
 
 template<typename S, typename C, size_t N> inline Concatenation<LiteralBase<C>, const S &, C>
     operator + (const C (&str1)[N], const StringLike<S, C> &str2)
+{
+    return Concatenation<LiteralBase<C>, const S &, C>(str1, static_cast<const S &>(str2));
+}
+
+template<typename S, typename C, size_t N> inline Concatenation<LiteralBase<C>, const S &, C>
+    operator + (C (&str1)[N], const StringLike<S, C> &str2)
 {
     return Concatenation<LiteralBase<C>, const S &, C>(str1, static_cast<const S &>(str2));
 }
@@ -211,6 +224,10 @@ public:
     }
 
     template<size_t N> LiteralBase(const C (&str)[N]) : ptr_(str), len_(N - 1)
+    {
+    }
+
+    template<size_t N> LiteralBase(C (&str)[N]) : ptr_(str), len_(StringProxy<C>(str).len)
     {
     }
 
@@ -299,6 +316,11 @@ public:
     template<size_t N> int cmp(const C (&str)[N]) const
     {
         return cmp(str, N - 1);
+    }
+
+    template<size_t N> int cmp(C (&str)[N]) const
+    {
+        return cmp(str, StringProxy<C>(str).len);
     }
 
     int cmp(const StringProxy<C> &str) const
@@ -440,6 +462,11 @@ public:
         ptr_ = copy_(LiteralBase<C>(str));
     }
 
+    template<size_t N> StringBase(C (&str)[N])
+    {
+        ptr_ = copy_(LiteralBase<C>(str));
+    }
+
     StringBase(const StringProxy<C> &str)
     {
         ptr_ = copy_(LiteralBase<C>(str));
@@ -477,6 +504,11 @@ public:
     }
 
     template<size_t N> StringBase<C> &operator = (const C (&str)[N])
+    {
+        return *this = LiteralBase<C>(str);
+    }
+
+    template<size_t N> StringBase<C> &operator = (C (&str)[N])
     {
         return *this = LiteralBase<C>(str);
     }
@@ -545,6 +577,11 @@ public:
     }
 
     template<size_t N> int cmp(const C (&str)[N]) const
+    {
+        return LiteralBase<C>(*this).cmp(str);
+    }
+
+    template<size_t N> int cmp(C (&str)[N]) const
     {
         return LiteralBase<C>(*this).cmp(str);
     }

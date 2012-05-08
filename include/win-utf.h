@@ -338,7 +338,12 @@ inline Utf8to16<Literal> utf8to16(const char *str, size_t n)
 
 template<size_t N> Utf8to16<Literal> utf8to16(const char (&str)[N])
 {
-    return Utf8to16<Literal>(str, N - 1);
+    return Utf8to16<Literal>(str);
+}
+
+template<size_t N> Utf8to16<Literal> utf8to16(char (&str)[N])
+{
+    return Utf8to16<Literal>(str);
 }
 
 inline Utf8to16<Literal> utf8to16(const StringProxy<char> &str)
@@ -388,7 +393,12 @@ inline Utf16to8<WLiteral> utf16to8(const wchar_t *str, size_t n)
 
 template<size_t N> Utf16to8<WLiteral> utf16to8(const wchar_t (&str)[N])
 {
-    return Utf16to8<WLiteral>(str, N - 1);
+    return Utf16to8<WLiteral>(str);
+}
+
+template<size_t N> Utf16to8<WLiteral> utf16to8(wchar_t (&str)[N])
+{
+    return Utf16to8<WLiteral>(str);
 }
 
 inline Utf16to8<WLiteral> utf16to8(const StringProxy<wchar_t> &str)
@@ -421,6 +431,10 @@ public:
     {
     }
 
+    template<size_t N> WString(wchar_t (&str)[N]) : StringBase<wchar_t>(str)
+    {
+    }
+
     WString(const StringProxy<wchar_t> &str) : StringBase<wchar_t>(str)
     {
     }
@@ -434,6 +448,10 @@ public:
     }
 
     template<size_t N> WString(const char (&str)[N]) : StringBase<wchar_t>(utf8to16(str))
+    {
+    }
+
+    template<size_t N> WString(char (&str)[N]) : StringBase<wchar_t>(utf8to16(str))
     {
     }
 
@@ -462,6 +480,11 @@ public:
         return *this = LiteralBase<wchar_t>(str);
     }
 
+    template<size_t N> WString &operator = (wchar_t (&str)[N])
+    {
+        return *this = LiteralBase<wchar_t>(str);
+    }
+
     WString &operator = (const StringProxy<wchar_t> &str)
     {
         return *this = LiteralBase<wchar_t>(str);
@@ -473,6 +496,11 @@ public:
     }
 
     template<size_t N> WString &operator += (const wchar_t (&str)[N])
+    {
+        return *this = *this + str;
+    }
+
+    template<size_t N> WString &operator += (wchar_t (&str)[N])
     {
         return *this = *this + str;
     }
@@ -492,6 +520,11 @@ public:
         return *this = utf8to16(str);  return *this;
     }
 
+    template<size_t N> WString &operator = (char (&str)[N])
+    {
+        return *this = utf8to16(str);  return *this;
+    }
+
     WString &operator = (const StringProxy<char> &str)
     {
         return *this = utf8to16(str);  return *this;
@@ -503,6 +536,11 @@ public:
     }
 
     template<size_t N> WString &operator += (const char (&str)[N])
+    {
+        return *this = *this + utf8to16(str);
+    }
+
+    template<size_t N> WString &operator += (char (&str)[N])
     {
         return *this = *this + utf8to16(str);
     }

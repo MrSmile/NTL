@@ -212,31 +212,30 @@ public:
 
 
 
-template<bool F, typename T> struct Enable
+template<bool F, typename T> struct EnableIf
 {
     typedef T type;
 };
 
-template<typename T> struct Enable<false, T>
+template<typename T> struct EnableIf<false, T>
 {
 };
 
 
-template<typename T, typename T1> struct HasCmp
+template<typename T> struct Comparable;
+
+template<typename T> struct IsComparable
 {
     typedef char true_type[1];
     typedef char false_type[2];
 
-    template<typename TT, int (TT::*)(const T1 &) const> struct Test
-    {
-    };
-
-    template<typename TT> static true_type &check(Test<TT, &TT::cmp> *);
-    template<typename TT> static false_type &check(...);
+    static true_type &check(const Comparable<T> *);
+    static false_type &check(...);
+    static const T *ptr;
 
     enum
     {
-        value = (sizeof(check<T>(0)) == sizeof(true_type))
+        value = (sizeof(check(ptr)) == sizeof(true_type))
     };
 };
 
@@ -250,62 +249,62 @@ template<typename T> struct Comparable
         return static_cast<const T *>(this)->cmp(obj);
     }
 
-    template<typename T1> friend typename Enable<HasCmp<T, T1>::value, bool>::type operator == (const T &obj1, const T1 &obj2)
+    template<typename T1> friend bool operator == (const T &obj1, const T1 &obj2)
     {
         return obj1.cmp(obj2) == 0;
     }
 
-    template<typename T1> friend typename Enable<HasCmp<T, T1>::value, bool>::type operator != (const T &obj1, const T1 &obj2)
+    template<typename T1> friend bool operator != (const T &obj1, const T1 &obj2)
     {
         return obj1.cmp(obj2) != 0;
     }
 
-    template<typename T1> friend typename Enable<HasCmp<T, T1>::value, bool>::type operator >= (const T &obj1, const T1 &obj2)
+    template<typename T1> friend bool operator >= (const T &obj1, const T1 &obj2)
     {
         return obj1.cmp(obj2) >= 0;
     }
 
-    template<typename T1> friend typename Enable<HasCmp<T, T1>::value, bool>::type operator <= (const T &obj1, const T1 &obj2)
+    template<typename T1> friend bool operator <= (const T &obj1, const T1 &obj2)
     {
         return obj1.cmp(obj2) <= 0;
     }
 
-    template<typename T1> friend typename Enable<HasCmp<T, T1>::value, bool>::type operator > (const T &obj1, const T1 &obj2)
+    template<typename T1> friend bool operator > (const T &obj1, const T1 &obj2)
     {
         return obj1.cmp(obj2) > 0;
     }
 
-    template<typename T1> friend typename Enable<HasCmp<T, T1>::value, bool>::type operator < (const T &obj1, const T1 &obj2)
+    template<typename T1> friend bool operator < (const T &obj1, const T1 &obj2)
     {
         return obj1.cmp(obj2) < 0;
     }
 
-    template<typename T1> friend typename Enable<HasCmp<T, T1>::value && !HasCmp<T1, T>::value, bool>::type operator == (const T1 &obj1, const T &obj2)
+    template<typename T1> friend typename EnableIf<!IsComparable<T1>::value, bool>::type operator == (const T1 &obj1, const T &obj2)
     {
         return 0 == obj2.cmp(obj1);
     }
 
-    template<typename T1> friend typename Enable<HasCmp<T, T1>::value && !HasCmp<T1, T>::value, bool>::type operator != (const T1 &obj1, const T &obj2)
+    template<typename T1> friend typename EnableIf<!IsComparable<T1>::value, bool>::type operator != (const T1 &obj1, const T &obj2)
     {
         return 0 != obj2.cmp(obj1);
     }
 
-    template<typename T1> friend typename Enable<HasCmp<T, T1>::value && !HasCmp<T1, T>::value, bool>::type operator >= (const T1 &obj1, const T &obj2)
+    template<typename T1> friend typename EnableIf<!IsComparable<T1>::value, bool>::type operator >= (const T1 &obj1, const T &obj2)
     {
         return 0 >= obj2.cmp(obj1);
     }
 
-    template<typename T1> friend typename Enable<HasCmp<T, T1>::value && !HasCmp<T1, T>::value, bool>::type operator <= (const T1 &obj1, const T &obj2)
+    template<typename T1> friend typename EnableIf<!IsComparable<T1>::value, bool>::type operator <= (const T1 &obj1, const T &obj2)
     {
         return 0 <= obj2.cmp(obj1);
     }
 
-    template<typename T1> friend typename Enable<HasCmp<T, T1>::value && !HasCmp<T1, T>::value, bool>::type operator > (const T1 &obj1, const T &obj2)
+    template<typename T1> friend typename EnableIf<!IsComparable<T1>::value, bool>::type operator > (const T1 &obj1, const T &obj2)
     {
         return 0 > obj2.cmp(obj1);
     }
 
-    template<typename T1> friend typename Enable<HasCmp<T, T1>::value && !HasCmp<T1, T>::value, bool>::type operator < (const T1 &obj1, const T &obj2)
+    template<typename T1> friend typename EnableIf<!IsComparable<T1>::value, bool>::type operator < (const T1 &obj1, const T &obj2)
     {
         return 0 < obj2.cmp(obj1);
     }
@@ -331,7 +330,7 @@ namespace NTL
     using NTL_::Invalid;
     using NTL_::Heavy;
 
-    using NTL_::Enable;
+    using NTL_::EnableIf;
     using NTL_::Comparable;
 
     using NTL_::debug_break;

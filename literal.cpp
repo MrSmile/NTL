@@ -38,6 +38,9 @@ void test_literal_class()
     NTL::Literal zero("ze\0ro");
     assert(zero.valid() && zero.length() == 5 && !std::memcmp(zero.data(), "ze\0ro", 6));
 
+    char buf[8] = "123";  NTL::Literal nonzero(buf);
+    assert(nonzero.valid() && nonzero.length() == 3 && !std::memcmp(nonzero.data(), buf, 3));
+
     NTL::Literal test(str);
     assert(test.valid() && test.length() == len && !std::memcmp(test.data(), str, len));
 
@@ -80,7 +83,7 @@ void test_literal_class()
     assert(part.cmp(NTL::Literal("str", 4)) < 0 && part.cmp("stq ") > 0);
     assert(NTL::Literal("str", 4).cmp(part) > 0 && part.cmp("su") < 0);
     assert(part == "str" && part < NTL::Literal("str", 4) && part > "r");
-    assert(part <= "str" && part >= "str" && !(part != "str"));
+    assert(part <= "str" && part >= static_cast<const char *>("str") && !(part != "str"));
 
     std::printf("OK\n  general strlen/cmp... ");
 
@@ -126,7 +129,7 @@ struct DerivedString : public NTL::String
 };
 
 
-void test_string_class()
+void test_string_class()  // TODO: non ZT
 {
     const char *str = "string";  size_t len = std::strlen(str);
     std::printf("\nTesting String class:\n  constructors... ");

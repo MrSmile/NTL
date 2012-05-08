@@ -80,6 +80,11 @@ template<char ch, size_t N> Argument<Literal, char, ch> arg(const char (&str)[N]
     return Argument<Literal, char, ch>(str);
 }
 
+template<char ch, size_t N> Argument<Literal, char, ch> arg(char (&str)[N])
+{
+    return Argument<Literal, char, ch>(str);
+}
+
 template<char ch> Argument<Literal, char, ch> arg(const StringProxy<char> &str)
 {
     return Argument<Literal, char, ch>(str);
@@ -96,6 +101,11 @@ inline Argument<Literal, char> arg(const char *str, size_t n)
 }
 
 template<size_t N> Argument<Literal, char> arg(const char (&str)[N])
+{
+    return Argument<Literal, char>(str);
+}
+
+template<size_t N> Argument<Literal, char> arg(char (&str)[N])
 {
     return Argument<Literal, char>(str);
 }
@@ -137,6 +147,11 @@ public:
     }
 
     template<size_t N> Composite<T, LiteralBase<C>, C, def, next_> operator % (const C (&str)[N]) const
+    {
+        return Composite<T, LiteralBase<C>, C, def, next_>(*static_cast<const T *>(this), str);
+    }
+
+    template<size_t N> Composite<T, LiteralBase<C>, C, def, next_> operator % (C (&str)[N]) const
     {
         return Composite<T, LiteralBase<C>, C, def, next_>(*static_cast<const T *>(this), str);
     }
@@ -223,6 +238,11 @@ template<char ch, size_t N> Format<char, ch> format(const char (&str)[N])
     return Format<char, ch>(Literal(str));
 }
 
+template<char ch, size_t N> Format<char, ch> format(char (&str)[N])
+{
+    return Format<char, ch>(Literal(str));
+}
+
 template<char ch> Format<char, ch> format(const StringProxy<char> &str)
 {
     return Format<char, ch>(Literal(str));
@@ -239,6 +259,11 @@ inline Format<char> format(const char *str, size_t n)
 }
 
 template<size_t N> Format<char> format(const char (&str)[N])
+{
+    return Format<char>(Literal(str));
+}
+
+template<size_t N> Format<char> format(char (&str)[N])
 {
     return Format<char>(Literal(str));
 }
