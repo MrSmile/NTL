@@ -21,13 +21,54 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ***************************************************************************************************/
 
+#include "fmt-int.h"
 #include "tree.h"
-#include <iostream>
+#include <cstdio>
 #include <ctime>
 #include <map>
 
 using namespace std;
 using namespace NTL;
+
+
+
+const double c2s = 1.0 / CLOCKS_PER_SEC;
+
+
+
+void time_string()
+{
+    const int N = 10000000;
+
+    printf("String benchmark: ");  fflush(stdout);
+
+    clock_t tm0 = clock();
+
+    srand(12345);
+    size_t len1 = 0;
+    for(int i = 0; i < N; i++)
+    {
+        String str = format("x = %1; y = %2") % dec(rand()) % dec(rand());
+        len1 += str.length();
+    }
+
+    clock_t tm1 = clock();
+
+    srand(12345);
+    size_t len2 = 0;
+    static char buf[256];
+    for(int i = 0; i < N; i++)
+    {
+        len2 += sprintf(buf, "x = %d; y = %d", rand(), rand());
+    }
+
+    clock_t tm2 = clock();
+
+    if(len1 != len2)debug_break();
+
+    printf("NTL::format ~ %.3fs; sprintf ~ %.3fs;\n", (tm1 - tm0) * c2s, (tm2 - tm1) * c2s);
+}
+
 
 
 struct Data
@@ -48,7 +89,7 @@ void time_tree()
 {
     const int N = 1000000;
 
-    cout << "Tree benchmark: " << flush;
+    printf("Tree benchmark: ");  fflush(stdout);
 
     clock_t tm0 = clock();
 
@@ -78,11 +119,13 @@ void time_tree()
         if(ptr == tree2.end() || ptr->first != node->id())debug_break();
     if(ptr != tree2.end())debug_break();
 
-    cout << "OwningTree<TestNode> = " << tm1 - tm0 << "; map<int, Data> = " << tm2 - tm1 << ";\n";
+    printf("OwningTree<TestNode> ~ %.3fs; map<int, Data> ~ %.3fs;\n", (tm1 - tm0) * c2s, (tm2 - tm1) * c2s);
 }
 
 
 int main()
 {
-    time_tree();  return 0;
+    time_string();
+    time_tree();
+    return 0;
 }
