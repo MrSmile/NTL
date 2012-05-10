@@ -35,12 +35,6 @@ void test_literal_class()
     NTL::Literal null;
     assert(!null.valid() && !null.length() && !null.data());
 
-    NTL::Literal zero("ze\0ro");
-    assert(zero.valid() && zero.length() == 5 && !std::memcmp(zero.data(), "ze\0ro", 6));
-
-    char buf[8] = "123";  NTL::Literal nonzero(buf);
-    assert(nonzero.valid() && nonzero.length() == 3 && !std::memcmp(nonzero.data(), buf, 3));
-
     NTL::Literal test(str);
     assert(test.valid() && test.length() == len && !std::memcmp(test.data(), str, len));
 
@@ -129,7 +123,7 @@ struct DerivedString : public NTL::String
 };
 
 
-void test_string_class()  // TODO: non ZT
+void test_string_class()
 {
     const char *str = "string";  size_t len = std::strlen(str);
     std::printf("\nTesting String class:\n  constructors... ");
@@ -143,11 +137,6 @@ void test_string_class()  // TODO: non ZT
         DerivedString dnull(0);
         assert(!dnull.valid() && !dnull.length() && !dnull.data());
         mem_handler.check(0, 0);
-
-        NTL::String zero("ze\0ro");
-        assert(zero.valid() && zero.length() == 5);
-        assert(!std::memcmp(zero.data(), "ze\0ro", 6));
-        mem_handler.check(1, 0);
 
         NTL::Literal ltr("str~~~", 3);  NTL::String test(ltr);
         assert(test.valid() && test.length() == 3);
@@ -216,7 +205,7 @@ void test_string_class()  // TODO: non ZT
 
         std::printf("OK\n  destructors... ");
     }
-    mem_handler.check(0, 6);
+    mem_handler.check(0, 5);
 
     std::printf("OK\n  concatenation, substr()... ");
     {
@@ -228,11 +217,6 @@ void test_string_class()  // TODO: non ZT
         NTL::String inv2(ltr + null);
         assert(!inv2.valid() && !inv2.length() && !inv2.data());
         mem_handler.check(0, 0);
-
-        NTL::String zero(NTL::Literal("ze") + "\0ro");
-        assert(zero.valid() && zero.length() == 5);
-        assert(!std::memcmp(zero.data(), "ze\0ro", 6));
-        mem_handler.check(1, 0);
 
         NTL::String test1(ltr + NTL::Literal("ring~~~", 4));
         assert(test1.valid() && test1.length() == len);
@@ -258,11 +242,6 @@ void test_string_class()  // TODO: non ZT
         assert(test5.valid() && test5.length() == len);
         assert(!std::memcmp(test5.data(), str, len + 1));
         mem_handler.check(1, 0);
-
-        zero = "ze\0" + NTL::Literal("ro");
-        assert(zero.valid() && zero.length() == 5);
-        assert(!std::memcmp(zero.data(), "ze\0ro", 6));
-        mem_handler.check(1, 1);
 
         test1 = inv1 + test1;
         assert(!test1.valid() && !test1.length() && !test1.data());
@@ -332,7 +311,7 @@ void test_string_class()  // TODO: non ZT
         mem_handler.make_reliable();
         mem_handler.check(0, 0);
     }
-    mem_handler.check(0, 5);
+    mem_handler.check(0, 4);
 
 std::printf("OK\n");
 }

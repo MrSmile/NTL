@@ -223,11 +223,6 @@ void test_wstring_class()
         assert(!std::wcscmp(test.data(), L"string"));
         mem_handler.check(1, 0);
 
-        NTL::WString zero(L"ze\0ro");
-        assert(zero.valid() && zero.length() == 5);
-        assert(!std::memcmp(zero.data(), L"ze\0ro", 6 * sizeof(wchar_t)));
-        mem_handler.check(1, 0);
-
         const wchar_t *data = L"string\0\0\0";
         NTL::WString test1(data);
         assert(!std::wcscmp(test1.data(), data));
@@ -310,7 +305,7 @@ void test_wstring_class()
         assert(!std::strcmp(str.data(), "....string...."));
         mem_handler.check(1, 0);
     }
-    mem_handler.check(0, 7);
+    mem_handler.check(0, 6);
 
     std::printf("OK\n");
 }
