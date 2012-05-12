@@ -112,7 +112,7 @@ public:
 #ifdef NTL_DEBUG
             ptr->next_ = invalid_ptr;
 #endif
-            remove(static_cast<T *>(ptr));
+            A::remove(static_cast<T *>(ptr));
         }
         first_ = 0;
     }
@@ -122,7 +122,7 @@ public:
         assert(!first_);  StackNode<T> **last = &first_;
         for(StackNode<T> *node = stack.first_; node; node = node->next_)
         {
-            StackNode<T> *ptr = create(*static_cast<T *>(node));
+            StackNode<T> *ptr = A::create(*static_cast<T *>(node));
             if(!ptr)
             {
                 *last = 0;  clear();  return false;
@@ -259,7 +259,7 @@ public:
 #ifdef NTL_DEBUG
             ptr->next_ = invalid_ptr;
 #endif
-            remove(static_cast<T *>(ptr));
+            A::remove(static_cast<T *>(ptr));
         }
         first_ = 0;  last_ = &first_;
     }
@@ -269,7 +269,7 @@ public:
         assert(!first_);
         for(SimpleListNode<T> *node = list.first_; node; node = node->next_)
         {
-            SimpleListNode<T> *ptr = create(*static_cast<T *>(node));
+            SimpleListNode<T> *ptr = A::create(*static_cast<T *>(node));
             if(!ptr)
             {
                 *last_ = 0;  clear();  return false;
@@ -508,7 +508,7 @@ public:
         for(ListNode<T> *node = first_; node;)
         {
             node->prev_ = 0;  T *ptr = static_cast<T *>(node);
-            node = node->next_;  remove(ptr);
+            node = node->next_;  A::remove(ptr);
         }
         first_ = 0;
     }
@@ -518,7 +518,7 @@ public:
         assert(!first_);  ListNode<T> **last = &first_;
         for(ListNode<T> *node = list.first_; node; node = node->next_)
         {
-            ListNode<T> *ptr = create(*static_cast<T *>(node));
+            ListNode<T> *ptr = A::create(*static_cast<T *>(node));
             if(!ptr)
             {
                 *last = 0;  clear();  return false;

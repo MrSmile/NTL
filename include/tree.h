@@ -402,7 +402,7 @@ template<typename N, typename H, typename A> class GeneralTree : private A, publ
 
     Node_ *copy_node_(Node_ *parent, const Node_ *old)
     {
-        N *node = create(*const_cast_(old));  if(!node)return 0;
+        N *node = A::create(*const_cast_(old));  if(!node)return 0;
         node->parent_ = parent;  node->left_ = node->right_ = 0;
         node->type_ = old->type_;  node->copy_index_(old);  return node;
     }
@@ -568,10 +568,10 @@ public:
                 else if(ptr->type_ == Node_::t_right)node->right_ = 0;
                 else
                 {
-                    ptr->parent_ = 0;  remove(cast_(ptr));
+                    ptr->parent_ = 0;  A::remove(cast_(ptr));
                     Tree_::root_ = 0;  Tree_::clear_size_();  return;
                 }
-                ptr->parent_ = 0;  remove(cast_(ptr));
+                ptr->parent_ = 0;  A::remove(cast_(ptr));
             }
         }
     }
@@ -673,7 +673,7 @@ public:
     {
         PlaceBase_ place = find_place_(key);
         if(!place.dir)return cast_(place.node);
-        Type_ *node = create(key);  if(node)insert_(node, place);  return node;
+        Type_ *node = A::create(key);  if(node)insert_(node, place);  return node;
     }
 };
 
