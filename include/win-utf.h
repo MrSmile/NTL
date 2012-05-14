@@ -336,7 +336,7 @@ inline Utf8to16<Literal> utf8to16(const char *str, size_t n)
     return Utf8to16<Literal>(str, n);
 }
 
-Utf8to16<Literal> utf8to16(const char *str)
+inline Utf8to16<Literal> utf8to16(const char *str)
 {
     return Utf8to16<Literal>(str);
 }
@@ -381,7 +381,7 @@ inline Utf16to8<WLiteral> utf16to8(const wchar_t *str, size_t n)
     return Utf16to8<WLiteral>(str, n);
 }
 
-Utf16to8<WLiteral> utf16to8(const wchar_t *str)
+inline Utf16to8<WLiteral> utf16to8(const wchar_t *str)
 {
     return Utf16to8<WLiteral>(str);
 }
