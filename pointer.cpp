@@ -74,10 +74,6 @@ void test_pointer_class()
         assert(ptr.ptr() == data && res == data);
         mem_handler.check(0, 0);
 
-        res = ptr.set(data);
-        assert(ptr.ptr() == data && *ptr.ptr() == 555 && res == data);
-        mem_handler.check(0, 0);
-
         data = new_nt int(666);
         mem_handler.check(1, 0);
 
@@ -175,12 +171,17 @@ void test_array_class()
         assert(!arr1.ptr() && res == data);
         mem_handler.check(0, 0);
 
-        std::printf("OK\n  alloc(), clear()... ");
+        std::printf("OK\n  alloc(), set(), clear()... ");
 
         NTL::Array<int> arr2;
         arr2.alloc(100);
         assert(arr2.ptr());
         mem_handler.check(1, 0);
+
+        int *data1 = new_nt int[100];
+        res = arr2.set(data1);
+        assert(arr2.ptr() == data1 && res == data1);
+        mem_handler.check(1, 1);
 
         arr2.clear();
         assert(!arr2.ptr());

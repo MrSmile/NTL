@@ -45,6 +45,11 @@ public:
     {
     }
 
+    template<typename P> explicit Pointer(P &ptr)
+    {
+        int invalid_argument[IsConvertable<T *, T *>::value ? -1 : 1];  // must detach first
+    }
+
     void clear()
     {
         delete target_;  target_ = 0;
@@ -61,14 +66,29 @@ public:
         assert(target_ == 0);  target_ = ptr;  return ptr;
     }
 
+    template<typename P> typename EnableIf<IsConvertable<P &, T *>::value, void>::type attach(P &ptr)
+    {
+        int invalid_argument[IsConvertable<T *, T *>::value ? -1 : 1];  // must detach first
+    }
+
     T *set(T *ptr)
     {
-        if(target_ == ptr)return ptr;  delete target_;  target_ = ptr;  return ptr;
+        assert(target_ != ptr);  delete target_;  target_ = ptr;  return ptr;
+    }
+
+    template<typename P> typename EnableIf<IsConvertable<P &, T *>::value, void>::type set(P &ptr)
+    {
+        int invalid_argument[IsConvertable<T *, T *>::value ? -1 : 1];  // must detach first
     }
 
     Pointer<T> &operator = (T *ptr)
     {
         set(ptr);  return *this;
+    }
+
+    template<typename P> typename EnableIf<IsConvertable<P &, T *>::value, void>::type operator = (P &ptr)
+    {
+        int invalid_argument[IsConvertable<T *, T *>::value ? -1 : 1];  // must detach first
     }
 
     T *detach()
@@ -123,6 +143,11 @@ public:
     {
     }
 
+    template<typename P> explicit Array(P &ptr)
+    {
+        int invalid_argument[IsConvertable<T *, T *>::value ? -1 : 1];  // must detach first
+    }
+
     explicit Array(size_t n) : target_(n ? new_nt T[n] : 0)
     {
     }
@@ -148,9 +173,29 @@ public:
         assert(target_ == 0);  target_ = ptr;  return ptr;
     }
 
+    template<typename P> typename EnableIf<IsConvertable<P &, T *>::value, void>::type attach(P &ptr)
+    {
+        int invalid_argument[IsConvertable<T *, T *>::value ? -1 : 1];  // must detach first
+    }
+
+    T *set(T *ptr)
+    {
+        assert(target_ != ptr);  delete [] target_;  target_ = ptr;  return ptr;
+    }
+
+    template<typename P> typename EnableIf<IsConvertable<P &, T *>::value, void>::type set(P &ptr)
+    {
+        int invalid_argument[IsConvertable<T *, T *>::value ? -1 : 1];  // must detach first
+    }
+
     Array<T> &operator = (T *ptr)
     {
         attach(ptr);  return *this;
+    }
+
+    template<typename P> typename EnableIf<IsConvertable<P &, T *>::value, void>::type operator = (P &ptr)
+    {
+        int invalid_argument[IsConvertable<T *, T *>::value ? -1 : 1];  // must detach first
     }
 
     T *detach()

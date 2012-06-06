@@ -221,21 +221,29 @@ template<typename T> struct EnableIf<false, T>
 {
 };
 
+template<typename S, typename D> struct IsConvertable
+{
+    typedef char true_type[1];
+    typedef char false_type[2];
+
+    static true_type &check(D);
+    static false_type &check(...);
+    static S src;
+
+    enum
+    {
+        value = (sizeof(check(src)) == sizeof(true_type))
+    };
+};
+
 
 template<typename T> struct Comparable;
 
 template<typename T> struct IsComparable
 {
-    typedef char true_type[1];
-    typedef char false_type[2];
-
-    static true_type &check(const Comparable<T> *);
-    static false_type &check(...);
-    static const T *ptr;
-
     enum
     {
-        value = (sizeof(check(ptr)) == sizeof(true_type))
+        value = IsConvertable<const T *, const Comparable<T> *>::value
     };
 };
 
@@ -331,6 +339,7 @@ namespace NTL
     using NTL_::Heavy;
 
     using NTL_::EnableIf;
+    using NTL_::IsConvertable;
     using NTL_::Comparable;
 
     using NTL_::debug_break;
