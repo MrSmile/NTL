@@ -45,7 +45,7 @@ void test_tree_container()
     mem_handler.reset();
     {
         NTL::EmptyAllocator<NodeT1> alloc;  NTL::Tree<NodeT1> tree(alloc);
-        assert(!tree.not_empty() && !tree && tree == false);
+        assert(tree.empty() && !tree && tree == false);
         NodeT1 *node = tree.first();
         const NodeT1 *cnode = static_cast<const NTL::Tree<NodeT1> &>(tree).first();
         assert(!node && cnode == node);
@@ -72,7 +72,7 @@ void test_tree_container()
             assert(!place.node());
             tree.insert(new_nt NodeT1(k), place);
         }
-        assert(tree.not_empty() && !!tree && tree == true);
+        assert(!tree.empty() && !!tree && tree == true);
         mem_handler.check(10, 0);
 
         for(int i = 0; i <= 20; i++)
@@ -130,12 +130,12 @@ void test_tree_container()
             else assert(!node);
         }
         tree.check_();
-        assert(!tree.not_empty());
+        assert(tree.empty());
         mem_handler.check(0, 10);
 
         for(int i = 0; i < 10; i++)
             tree.insert(new_nt NodeT1(2 * ((7 * i + 5) % 10) + 1));
-        assert(tree.not_empty() && !!tree && tree == true);
+        assert(!tree.empty() && !!tree && tree == true);
         mem_handler.check(10, 0);
 
         tree.check_();
@@ -162,12 +162,12 @@ void test_tree_container()
         mem_handler.make_fail(10);
         bool res = copy.copy(tree);
         copy.check_();
-        assert(!res && !copy.not_empty());
+        assert(!res && copy.empty());
         mem_handler.make_reliable();
         mem_handler.check(9, 9);
 
         res = copy.copy(tree);
-        assert(res && copy.not_empty());
+        assert(res && !copy.empty());
         mem_handler.check(10, 0);
 
         copy.check_();
@@ -178,7 +178,7 @@ void test_tree_container()
 
         NTL::OwningTree<NodeT1> copy1;
         res = copy1.copy(copy);
-        assert(res && copy1.not_empty());
+        assert(res && !copy1.empty());
         mem_handler.check(10, 0);
 
         copy1.check_();
@@ -212,7 +212,7 @@ void test_tree_container()
         mem_handler.check(0, 0);
 
         for(int i = 0; i < 10; i++)delete tree.find(2 * ((3 * i + 7) % 10) + 1);
-        assert(!tree.not_empty() && !tree.first() && !tree.last());
+        assert(tree.empty() && !tree.first() && !tree.last());
         mem_handler.check(0, 10);
 
         for(int i = 0; i <= 20; i += 2)
@@ -235,7 +235,7 @@ void test_tree_container()
 
         copy1.clear();
         copy1.check_();
-        assert(!copy1.not_empty());
+        assert(copy1.empty());
         mem_handler.check(0, 10);
     }
     mem_handler.check(0, 10);
@@ -262,7 +262,7 @@ void test_indexer_container()
     mem_handler.reset();
     {
         NTL::EmptyAllocator<NodeT2> alloc;  NTL::Indexer<NodeT2> tree(alloc);
-        assert(!tree.not_empty() && !tree && tree == false && !tree.size());
+        assert(tree.empty() && !tree && tree == false && !tree.size());
         NodeT2 *node = tree.first();
         const NodeT2 *cnode = static_cast<const NTL::Indexer<NodeT2> &>(tree).first();
         assert(!node && cnode == node);
@@ -289,7 +289,7 @@ void test_indexer_container()
             assert(!place.node());
             tree.insert(new_nt NodeT2(k), place);
         }
-        assert(tree.not_empty() && !!tree && tree == true && tree.size() == 10);
+        assert(!tree.empty() && !!tree && tree == true && tree.size() == 10);
         mem_handler.check(10, 0);
 
         for(int i = 0; i <= 20; i++)
@@ -348,12 +348,12 @@ void test_indexer_container()
             else assert(!node);
         }
         tree.check_();
-        assert(!tree.not_empty() && !tree.size());
+        assert(tree.empty() && !tree.size());
         mem_handler.check(0, 10);
 
         for(int i = 0; i < 10; i++)
             tree.insert(new_nt NodeT2(2 * ((7 * i + 5) % 10) + 1));
-        assert(tree.not_empty() && !!tree && tree == true);
+        assert(!tree.empty() && !!tree && tree == true);
         mem_handler.check(10, 0);
 
         tree.check_();
@@ -425,12 +425,12 @@ void test_indexer_container()
         mem_handler.make_fail(10);
         bool res = copy.copy(tree);
         copy.check_();
-        assert(!res && !copy.not_empty() && !copy.size());
+        assert(!res && copy.empty() && !copy.size());
         mem_handler.make_reliable();
         mem_handler.check(9, 9);
 
         res = copy.copy(tree);
-        assert(res && copy.not_empty());
+        assert(res && !copy.empty());
         mem_handler.check(10, 0);
 
         copy.check_();
@@ -442,7 +442,7 @@ void test_indexer_container()
 
         NTL::OwningIndexer<NodeT2> copy1;
         res = copy1.copy(copy);
-        assert(res && copy1.not_empty());
+        assert(res && !copy1.empty());
         mem_handler.check(10, 0);
 
         copy1.check_();
@@ -480,7 +480,7 @@ void test_indexer_container()
         mem_handler.check(0, 0);
 
         for(int i = 0; i < 10; i++)delete tree.find(2 * ((3 * i + 7) % 10) + 1);
-        assert(!tree.not_empty() && !tree.first() && !tree.last() && !tree.size());
+        assert(tree.empty() && !tree.first() && !tree.last() && !tree.size());
         mem_handler.check(0, 10);
 
         for(int i = 0; i <= 20; i += 2)
@@ -504,7 +504,7 @@ void test_indexer_container()
 
         copy1.clear();
         copy1.check_();
-        assert(!copy1.not_empty() && !copy1.size());
+        assert(copy1.empty() && !copy1.size());
         mem_handler.check(0, 10);
     }
     mem_handler.check(0, 10);

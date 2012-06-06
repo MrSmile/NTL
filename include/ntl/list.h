@@ -167,14 +167,14 @@ public:
     }
 
 
-    bool operator ! () const
+    bool empty() const
     {
         return first_ == 0;
     }
 
-    bool not_empty() const
+    bool operator ! () const
     {
-        return first_ != 0;
+        return first_ == 0;
     }
 
     operator bool() const
@@ -379,14 +379,14 @@ public:
     }
 
 
-    bool operator ! () const
+    bool empty() const
     {
         return first_ == 0;
     }
 
-    bool not_empty() const
+    bool operator ! () const
     {
-        return first_ != 0;
+        return first_ == 0;
     }
 
     operator bool() const
@@ -559,14 +559,14 @@ public:
     }
 
 
-    bool operator ! () const
+    bool empty() const
     {
         return first_ == 0;
     }
 
-    bool not_empty() const
+    bool operator ! () const
     {
-        return first_ != 0;
+        return first_ == 0;
     }
 
     operator bool() const

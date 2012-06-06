@@ -47,7 +47,7 @@ void test_stack_container()
     mem_handler.reset();
     {
         NTL::EmptyAllocator<NodeL1> alloc;  NTL::Stack<NodeL1> list(alloc);
-        assert(!list.not_empty() && !list && list == false);
+        assert(list.empty() && !list && list == false);
         NodeL1 *node = list.first();
         const NodeL1 *cnode = static_cast<const NTL::Stack<NodeL1> &>(list).first();
         assert(!node && cnode == node);
@@ -62,7 +62,7 @@ void test_stack_container()
         std::printf("OK\n  prepend(), take_first()... ");
 
         for(int i = 0; i < 10; i++)list.prepend(new_nt NodeL1(9 - i));
-        assert(list.not_empty() && !!list && list == true);
+        assert(!list.empty() && !!list && list == true);
         mem_handler.check(10, 0);
 
         node = list.first();
@@ -152,7 +152,7 @@ void test_stack_container()
         std::printf("OK\n  clear(), destructors... ");
 
         copy1.clear();
-        assert(!copy1.not_empty());
+        assert(copy1.empty());
         mem_handler.check(0, 10);
 
         while((node = list.take_first()))delete node;
@@ -184,7 +184,7 @@ void test_simple_list_container()
     mem_handler.reset();
     {
         NTL::EmptyAllocator<NodeL2> alloc;  NTL::SimpleList<NodeL2> list(alloc);
-        assert(!list.not_empty() && !list && list == false);
+        assert(list.empty() && !list && list == false);
         NodeL2 *node = list.first();
         const NodeL2 *cnode = static_cast<const NTL::SimpleList<NodeL2> &>(list).first();
         assert(!node && cnode == node);
@@ -199,7 +199,7 @@ void test_simple_list_container()
         std::printf("OK\n  prepend(node), take_first(), append(node)... ");
 
         for(int i = 0; i < 10; i++)list.prepend(new_nt NodeL2(9 - i));
-        assert(list.not_empty() && !!list && list == true);
+        assert(!list.empty() && !!list && list == true);
         mem_handler.check(10, 0);
 
         node = list.first();
@@ -273,11 +273,11 @@ void test_simple_list_container()
         std::printf("OK\n  prepend(list), append(list)... ");
 
         NTL::OwningSimpleList<NodeL2> copy2;
-        assert(!copy2.not_empty() && !copy2.first());
+        assert(copy2.empty() && !copy2.first());
         mem_handler.check(0, 0);
 
         copy.prepend(copy2);
-        assert(!copy2.not_empty() && !copy2.first());
+        assert(copy2.empty() && !copy2.first());
         mem_handler.check(0, 0);
 
         node = copy.first();
@@ -286,7 +286,7 @@ void test_simple_list_container()
         mem_handler.check(0, 0);
 
         copy.append(copy2);
-        assert(!copy2.not_empty() && !copy2.first());
+        assert(copy2.empty() && !copy2.first());
         mem_handler.check(0, 0);
 
         node = copy.first();
@@ -295,7 +295,7 @@ void test_simple_list_container()
         mem_handler.check(0, 0);
 
         copy2.prepend(copy1);
-        assert(!copy1.not_empty() && !copy1.first());
+        assert(copy1.empty() && !copy1.first());
         mem_handler.check(0, 0);
 
         node = copy2.first();
@@ -304,7 +304,7 @@ void test_simple_list_container()
         mem_handler.check(0, 0);
 
         copy1.append(copy2);
-        assert(!copy2.not_empty() && !copy2.first());
+        assert(copy2.empty() && !copy2.first());
         mem_handler.check(0, 0);
 
         node = copy1.first();
@@ -313,7 +313,7 @@ void test_simple_list_container()
         mem_handler.check(0, 0);
 
         res = copy2.copy(copy);
-        assert(res && copy2.not_empty());
+        assert(res && !copy2.empty());
         mem_handler.check(10, 0);
 
         node = copy2.first();
@@ -322,7 +322,7 @@ void test_simple_list_container()
         mem_handler.check(0, 0);
 
         copy.prepend(copy1);
-        assert(!copy1.not_empty() && !copy1.first());
+        assert(copy1.empty() && !copy1.first());
         mem_handler.check(0, 0);
 
         node = copy.first();
@@ -333,7 +333,7 @@ void test_simple_list_container()
         mem_handler.check(0, 0);
 
         copy.append(copy2);
-        assert(!copy2.not_empty() && !copy2.first());
+        assert(copy2.empty() && !copy2.first());
         mem_handler.check(0, 0);
 
         node = copy.first();
@@ -348,7 +348,7 @@ void test_simple_list_container()
         std::printf("OK\n  prepend_copy(), append_copy()... ");
 
         res = copy1.prepend_copy(list);
-        assert(res && copy1.not_empty());
+        assert(res && !copy1.empty());
         mem_handler.check(10, 0);
 
         node = list.first();
@@ -361,7 +361,7 @@ void test_simple_list_container()
 
         mem_handler.make_fail(10);
         res = copy1.prepend_copy(list);
-        assert(!res && copy1.not_empty());
+        assert(!res && !copy1.empty());
         mem_handler.make_reliable();
         mem_handler.check(9, 9);
 
@@ -374,7 +374,7 @@ void test_simple_list_container()
         mem_handler.check(0, 0);
 
         res = copy1.append_copy(copy1);
-        assert(res && copy1.not_empty());
+        assert(res && !copy1.empty());
         mem_handler.check(10, 0);
 
         node = copy1.first();
@@ -386,7 +386,7 @@ void test_simple_list_container()
 
         mem_handler.make_fail(10);
         res = copy1.append_copy(list);
-        assert(!res && copy1.not_empty());
+        assert(!res && !copy1.empty());
         mem_handler.make_reliable();
         mem_handler.check(9, 9);
 
@@ -424,7 +424,7 @@ void test_simple_list_container()
         std::printf("OK\n  clear(), destructors... ");
 
         copy1.clear();
-        assert(!copy1.not_empty());
+        assert(copy1.empty());
         mem_handler.check(0, 20);
 
         while((node = list.take_first()))delete node;
@@ -456,7 +456,7 @@ void test_list_container()
     mem_handler.reset();
     {
         NTL::EmptyAllocator<NodeL3> alloc;  NTL::List<NodeL3> list(alloc);
-        assert(!list.not_empty() && !list && list == false);
+        assert(list.empty() && !list && list == false);
         NodeL3 *node = list.first();
         const NodeL3 *cnode = static_cast<const NTL::List<NodeL3> &>(list).first();
         assert(!node && cnode == node);
@@ -476,7 +476,7 @@ void test_list_container()
             assert(!node->assigned());
             list.prepend(node);
         }
-        assert(list.not_empty() && !!list && list == true);
+        assert(!list.empty() && !!list && list == true);
         mem_handler.check(10, 0);
 
         node = list.first();
@@ -585,7 +585,7 @@ void test_list_container()
         std::printf("OK\n  clear(), destructors... ");
 
         copy1.clear();
-        assert(!copy1.not_empty());
+        assert(copy1.empty());
         mem_handler.check(0, 10);
 
         while((node = list.first()))delete node;

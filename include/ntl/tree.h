@@ -356,14 +356,14 @@ public:
     }
 
 
-    bool operator ! () const
+    bool empty() const
     {
         return root_ == 0;
     }
 
-    bool not_empty() const
+    bool operator ! () const
     {
-        return root_ != 0;
+        return root_ == 0;
     }
 
     operator bool() const
