@@ -112,7 +112,17 @@ public:
         return target_;
     }
 
+    operator const T *() const
+    {
+        return target_;
+    }
+
     operator T *()
+    {
+        return target_;
+    }
+
+    const T *operator -> () const
     {
         return target_;
     }
@@ -120,6 +130,11 @@ public:
     T *operator -> ()
     {
         return target_;
+    }
+
+    const T &operator * () const
+    {
+        return *target_;
     }
 
     T &operator * ()
@@ -215,6 +230,11 @@ public:
     }
 
     T *ptr()
+    {
+        return target_;
+    }
+
+    operator const T *() const
     {
         return target_;
     }
