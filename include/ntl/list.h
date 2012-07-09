@@ -24,6 +24,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #pragma once
 
 #include "allocator.h"
+#include <limits>
 
 
 
@@ -31,8 +32,73 @@ namespace NTL_ {
 
 
 
+template<typename N, typename C, typename T> struct MergeSort
+{
+    C cmp;
+
+    MergeSort()
+    {
+    }
+
+    MergeSort(C cmp_) : cmp(cmp_)
+    {
+    }
+
+    N **merge(N **result, N *first1, N **last1, N *first2, N **last2)
+    {
+        N *end1 = *last1, *end2 = *last2;
+        for(;;)
+        {
+            if(first1 == end1)
+            {
+                *result = first2;  return last2;
+            }
+            if(first2 == end2)
+            {
+                *result = first1;  return last1;
+            }
+            if(cmp(*static_cast<T *>(first1), *static_cast<T *>(first2)))  // right order
+            {
+                *result = first1;  result = &first1->next_;  first1 = first1->next_;
+            }
+            else  // wrong order
+            {
+                *result = first2;  result = &first2->next_;  first2 = first2->next_;
+            }
+        }
+    }
+
+    N **sort(N **first, int order)
+    {
+        N **last = &(*first)->next_;
+        for(int i = 0; i < order && *last; i++)
+        {
+            N **end = sort(last, i), *next = *end;
+            last = merge(first, *first, last, *last, end);  *last = next;
+        }
+        return last;
+    }
+
+    N **sort(N **first)
+    {
+        return *first ? sort(first, std::numeric_limits<int>::max()) : first;
+    }
+};
+
+
+template<typename T> struct DefaultOrder
+{
+    bool operator () (const T &arg1, const T &arg2) const
+    {
+        return arg1.cmp(arg2) < 0;
+    }
+};
+
+
+
 template<typename T> class StackNode : public Heavy
 {
+    template<typename, typename, typename> friend class MergeSort;
     template<typename, typename> friend class Stack;
 
 
@@ -83,6 +149,7 @@ public:
 
 template<typename T, typename A = EmptyAllocator<T> > class Stack : private A, public Heavy
 {
+    template<typename, typename, typename> friend class MergeSort;
     template<typename, typename> friend class Stack;
 
 
@@ -135,6 +202,16 @@ public:
     friend void swap(Stack<T, A> &stack1, Stack<T, A> &stack2)
     {
         swap(stack1.first_, stack2.first_);
+    }
+
+    template<typename C> void sort(C cmp)
+    {
+        MergeSort<StackNode<T>, C, T>(cmp).sort(&first_);
+    }
+
+    void sort()
+    {
+        MergeSort<StackNode<T>, DefaultOrder<T>, T>().sort(&first_);
     }
 
 

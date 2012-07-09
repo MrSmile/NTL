@@ -38,7 +38,37 @@ struct NodeL1 : public NTL::StackNode<NodeL1>
     NodeL1(const NodeL1 &node) : num(node.num + 100)
     {
     }
+
+    int cmp(const NodeL1 &node) const
+    {
+        return num - node.num;
+    }
 };
+
+void check_stack_sort(int n, int m, int k)
+{
+    mem_handler.reset();
+    {
+        NTL::OwningStack<NodeL1> list;
+        for(int i = 0; i < n; i++)
+        {
+            list.prepend(new_nt NodeL1((i * m + k) % n));
+        }
+        mem_handler.check(n, 0);
+
+        list.sort();
+        mem_handler.check(0, 0);
+
+        NodeL1 *node = list.first();
+        for(int i = 0; i < n; i++)
+        {
+            assert(node->num == i);  node = node->next();
+        }
+        assert(!node);
+        mem_handler.check(0, 0);
+    }
+    mem_handler.check(0, n);
+}
 
 void test_stack_container()
 {
@@ -159,6 +189,25 @@ void test_stack_container()
         mem_handler.check(0, 10);
     }
     mem_handler.check(0, 10);
+
+    std::printf("OK\n  sort()... ");
+
+    check_stack_sort(0, 0, 0);
+    check_stack_sort(1, 0, 0);
+    check_stack_sort(2, 1, 0);
+    check_stack_sort(2, 1, 1);
+    check_stack_sort(3, 1, 0);
+    check_stack_sort(3, 1, 1);
+    check_stack_sort(3, 1, 2);
+    check_stack_sort(3, 2, 2);
+    check_stack_sort(3, 2, 1);
+    check_stack_sort(3, 2, 0);
+    check_stack_sort(4, 3, 3);
+    check_stack_sort(27, 8, 11);
+    check_stack_sort(64, 17, 47);
+    check_stack_sort(65, 48, 20);
+    check_stack_sort(100, 37, 83);
+    check_stack_sort(1001, 372, 854);
 
     std::printf("OK\n");
 }
