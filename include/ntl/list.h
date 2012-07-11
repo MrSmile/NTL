@@ -275,6 +275,7 @@ template<typename T> class OwningStack : public Stack<T, DefaultAllocator<T> >  
 
 template<typename T> class SimpleListNode : public Heavy
 {
+    template<typename, typename, typename> friend class MergeSort;
     template<typename, typename> friend class SimpleList;
 
 
@@ -307,6 +308,7 @@ public:
 
 template<typename T, typename A = EmptyAllocator<T> > class SimpleList : private A, public Heavy
 {
+    template<typename, typename, typename> friend class MergeSort;
     template<typename, typename> friend class SimpleList;
 
 
@@ -387,6 +389,16 @@ public:
         swap(list1.first_, list2.first_);  swap(list1.last_, list2.last_);
         if(!list1.first_)list1.last_ = &list1.first_;
         if(!list2.first_)list2.last_ = &list2.first_;
+    }
+
+    template<typename C> void sort(C cmp)
+    {
+        last_ = MergeSort<SimpleListNode<T>, C, T>(cmp).sort(&first_);
+    }
+
+    void sort()
+    {
+        last_ = MergeSort<SimpleListNode<T>, DefaultOrder<T>, T>().sort(&first_);
     }
 
 
@@ -487,6 +499,7 @@ template<typename T> class OwningSimpleList : public SimpleList<T, DefaultAlloca
 
 template<typename T> class ListNode : public Heavy
 {
+    template<typename, typename, typename> friend class MergeSort;
     template<typename, typename> friend class List;
 
 
@@ -552,6 +565,7 @@ public:
 
 template<typename T, typename A = EmptyAllocator<T> > class List : private A, public Heavy
 {
+    template<typename, typename, typename> friend class MergeSort;
     template<typename, typename> friend class List;
 
 
@@ -608,6 +622,24 @@ public:
     friend void swap(List<T, A> &list1, List<T, A> &list2)
     {
         list1.swap_(list2);
+    }
+
+    template<typename C> void sort(C cmp)
+    {
+        MergeSort<ListNode<T>, C, T>(cmp).sort(&first_);
+        for(ListNode<T> *node = first_, **prev = &first_; node; node = node->next_)
+        {
+            node->prev_ = prev;  prev = &node->next_;
+        }
+    }
+
+    void sort()
+    {
+        MergeSort<ListNode<T>, DefaultOrder<T>, T>().sort(&first_);
+        for(ListNode<T> *node = first_, **prev = &first_; node; node = node->next_)
+        {
+            node->prev_ = prev;  prev = &node->next_;
+        }
     }
 
 
