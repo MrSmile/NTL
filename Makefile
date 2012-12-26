@@ -12,7 +12,7 @@ test: $(SOURCE) $(HEADER)
 	g++ -g -O0 -DDEBUG $(FLAGS) $(SOURCE) -o test
 
 bench: benchmark.cpp $(HEADER)
-	g++ -O3 -fwhole-program -mtune=native $(FLAGS) benchmark.cpp -o bench
+	g++ -Ofast -fwhole-program -mtune=native $(FLAGS) benchmark.cpp -o bench
 
 clean:
 	rm test bench

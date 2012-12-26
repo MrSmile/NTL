@@ -92,7 +92,8 @@ template<typename H> class GeneralTreeNode : public H::NodeBase, public Heavy
         {
             left_->parent_ = this;  left_->type_ = t_left;
         }
-        next->right_ = this;  parent_ = next;  type_ = t_right;  sub_index_(next);
+        next->right_ = this;  parent_ = next;  type_ = t_right;
+        H::NodeBase::sub_index_(next);
     }
 
     Node_ *make_red_()
@@ -271,7 +272,8 @@ public:
                 node->left_ = this;
             }
             if((node->right_ = right_))right_->parent_ = node;
-            node->set_parent_(np, nt);  left_ = right_ = 0;  swap_index_(node);
+            node->set_parent_(np, nt);  left_ = right_ = 0;
+            H::NodeBase::swap_index_(node);
         }
 
         Node_ *node = this;
@@ -338,7 +340,7 @@ template<typename H> class GeneralTreeBase : public H::Base
     {
         if(root_)root_->parent_ = tree.root_cast_();
         if(tree.root_)tree.root_->parent_ = root_cast_();
-        swap(root_, tree.root_);  swap_size_(tree);
+        swap(root_, tree.root_);  H::Base::swap_size_(tree);
     }
 
 public:
@@ -580,7 +582,7 @@ public:
     {
         assert(!Tree_::root_);  if(!tree.Tree_::root_)return true;
         Node_ *node = copy_node_(Tree_::root_cast_(), tree.Tree_::root_);
-        if(!node)return false;  Tree_::root_ = node;  copy_size_(tree);
+        if(!node)return false;  Tree_::root_ = node;  H::Base::copy_size_(tree);
 
         for(const Node_ *old = tree.Tree_::root_;;)
             if(!node->left_ && old->left_)
@@ -1074,7 +1076,7 @@ public:
 
     void insert_at(T *node, size_t index)
     {
-        insert_(node, IndexerBase::place_at_(index));
+        Base_::insert_(node, IndexerBase::place_at_(index));
     }
 };
 
