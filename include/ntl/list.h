@@ -98,7 +98,7 @@ template<typename T> struct DefaultOrder
 
 template<typename T> class StackNode : public Heavy
 {
-    template<typename, typename, typename> friend class MergeSort;
+    template<typename, typename, typename> friend struct MergeSort;
     template<typename, typename> friend class Stack;
 
 
@@ -149,7 +149,7 @@ public:
 
 template<typename T, typename A = EmptyAllocator<T> > class Stack : private A, public Heavy
 {
-    template<typename, typename, typename> friend class MergeSort;
+    template<typename, typename, typename> friend struct MergeSort;
     template<typename, typename> friend class Stack;
 
 
@@ -275,7 +275,7 @@ template<typename T> class OwningStack : public Stack<T, DefaultAllocator<T> >  
 
 template<typename T> class SimpleListNode : public Heavy
 {
-    template<typename, typename, typename> friend class MergeSort;
+    template<typename, typename, typename> friend struct MergeSort;
     template<typename, typename> friend class SimpleList;
 
 
@@ -308,7 +308,7 @@ public:
 
 template<typename T, typename A = EmptyAllocator<T> > class SimpleList : private A, public Heavy
 {
-    template<typename, typename, typename> friend class MergeSort;
+    template<typename, typename, typename> friend struct MergeSort;
     template<typename, typename> friend class SimpleList;
 
 
@@ -499,7 +499,7 @@ template<typename T> class OwningSimpleList : public SimpleList<T, DefaultAlloca
 
 template<typename T> class ListNode : public Heavy
 {
-    template<typename, typename, typename> friend class MergeSort;
+    template<typename, typename, typename> friend struct MergeSort;
     template<typename, typename> friend class List;
 
 
@@ -565,7 +565,7 @@ public:
 
 template<typename T, typename A = EmptyAllocator<T> > class List : private A, public Heavy
 {
-    template<typename, typename, typename> friend class MergeSort;
+    template<typename, typename, typename> friend struct MergeSort;
     template<typename, typename> friend class List;
 
 
