@@ -377,6 +377,7 @@ public:
 
 template<typename N, typename H, typename A> class GeneralTree : private A, public H::Tree, public Heavy
 {
+    template<typename, typename, typename> friend class GeneralTree;
     template<typename, typename> friend class Indexer;
 
     typedef typename H::Tree Tree_;
